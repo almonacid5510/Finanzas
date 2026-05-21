@@ -1,0 +1,33 @@
+﻿using Microsoft.EntityFrameworkCore;
+using System;
+using System.IO;
+
+namespace MisFinanzas.Modulos
+{
+    public class AppDbContext : DbContext
+    {
+        public DbSet<MetaAhorro> Metas { get; set; }
+        public DbSet<Movimiento> Movimientos { get; set; }
+        public DbSet<Vehiculo> Vehiculos { get; set; }
+        public DbSet<GastoVehiculo> GastosVehiculo { get; set; }
+        public DbSet<Credito> Creditos { get; set; }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            // La ruta en Documentos es correcta y persistente
+            string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "MisFinanzas_Real.db");
+            optionsBuilder.UseSqlite($"Data Source={path}");
+        }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            // Configuración simplificada y sin duplicados
+            // Solo es necesario si NO usas el atributo [Key] en tus clases de modelo
+            modelBuilder.Entity<MetaAhorro>().HasKey(m => m.Id);
+            modelBuilder.Entity<Movimiento>().HasKey(m => m.Id);
+            modelBuilder.Entity<Vehiculo>().HasKey(v => v.Id);
+            modelBuilder.Entity<GastoVehiculo>().HasKey(g => g.Id);
+            modelBuilder.Entity<Credito>().HasKey(c => c.Id);
+        }
+    }
+}

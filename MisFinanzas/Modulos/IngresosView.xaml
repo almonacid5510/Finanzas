@@ -1,0 +1,144 @@
+<UserControl x:Class="MisFinanzas.Modulos.IngresosView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d"
+             d:DesignHeight="600" d:DesignWidth="800"
+             Background="#F0F2F5">
+	<Grid Margin="25">
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="*"/>
+		</Grid.RowDefinitions>
+
+		<StackPanel Grid.Row="0" Margin="0,0,0,20">
+			<TextBlock Text="Mi Plan de Ahorro e Ingresos" FontSize="26" FontWeight="ExtraBold" Foreground="#2D3748"/>
+			<Rectangle Height="4" Width="60" Fill="#27AE60" HorizontalAlignment="Left" Margin="2,5,0,0" RadiusX="2" RadiusY="2"/>
+		</StackPanel>
+
+		<UniformGrid Grid.Row="1" Columns="2" Margin="0,0,0,25">
+			<Border Background="#2D3748" CornerRadius="12" Padding="20" Margin="0,0,10,0">
+				<StackPanel>
+					<TextBlock Text="INGRESOS TOTALES" FontSize="11" FontWeight="Bold" Foreground="#A0AEC0"/>
+					<Grid Margin="0,5,0,0">
+						<StackPanel x:Name="pnlLecturaSalario" Orientation="Horizontal">
+							<TextBlock x:Name="lblIngresoTotal" Text="$ 0" FontSize="28" FontWeight="Black" Foreground="White"/>
+							<Button Background="Transparent" BorderThickness="0" Cursor="Hand" Click="BtnActivarEdicion_Click" Margin="10,0,0,0">
+								<TextBlock Text="✏️" FontSize="14" Foreground="#A0AEC0"/>
+							</Button>
+						</StackPanel>
+						<StackPanel x:Name="pnlEdicionSalario" Orientation="Horizontal" Visibility="Collapsed">
+							<TextBox x:Name="txtEditarSalario" FontSize="22" Width="150" Background="#3D495D" Foreground="White" BorderThickness="1" BorderBrush="#27AE60" VerticalContentAlignment="Center"/>
+							<Button Content="✔️" Click="BtnConfirmarSalario_Click" Background="Transparent" Foreground="#27AE60" BorderThickness="0" FontSize="18" Margin="5,0,0,0" Cursor="Hand"/>
+							<Button Content="❌" Click="BtnCancelarEdicion_Click" Background="Transparent" Foreground="#E53E3E" BorderThickness="0" FontSize="18" Margin="5,0,0,0" Cursor="Hand"/>
+						</StackPanel>
+					</Grid>
+				</StackPanel>
+			</Border>
+
+			<Border Background="White" CornerRadius="12" Padding="20" Margin="10,0,0,0">
+				<Border.Effect>
+					<DropShadowEffect BlurRadius="15" Opacity="0.05" ShadowDepth="2"/>
+				</Border.Effect>
+				<StackPanel>
+					<TextBlock Text="AHORRO TOTAL ACUMULADO" FontSize="11" FontWeight="Bold" Foreground="#718096"/>
+					<TextBlock x:Name="lblAhorroAcumulado" Text="$ 0" FontSize="28" FontWeight="Black" Foreground="#27AE60"/>
+				</StackPanel>
+			</Border>
+		</UniformGrid>
+
+		<Border Grid.Row="2" Background="White" CornerRadius="12" Padding="20" Margin="0,0,0,20">
+			<StackPanel>
+				<TextBlock Text="CONFIGURAR NUEVA META" FontSize="14" FontWeight="Bold" Foreground="#4A5568" Margin="0,0,0,15"/>
+				<Grid>
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition Width="*"/>
+						<ColumnDefinition Width="*"/>
+						<ColumnDefinition Width="80"/>
+						<ColumnDefinition Width="Auto"/>
+					</Grid.ColumnDefinitions>
+
+					<StackPanel Grid.Column="0" Margin="5">
+						<TextBlock Text="Nombre de la meta" FontSize="10" Foreground="#718096" Margin="5,0,0,3"/>
+						<TextBox x:Name="txtNombreMeta" Padding="8" BorderBrush="#CBD5E0"/>
+					</StackPanel>
+
+					<StackPanel Grid.Column="1" Margin="5">
+						<TextBlock Text="Valor Objetivo ($)" FontSize="10" Foreground="#718096" Margin="5,0,0,3"/>
+						<TextBox x:Name="txtValorMeta" Padding="8" BorderBrush="#CBD5E0"/>
+					</StackPanel>
+
+					<StackPanel Grid.Column="2" Margin="5">
+						<TextBlock Text="Meses" FontSize="10" Foreground="#718096" Margin="5,0,0,3"/>
+						<TextBox x:Name="txtMesesMeta" Padding="8" BorderBrush="#CBD5E0"/>
+					</StackPanel>
+
+					<Button Grid.Column="3" Content="AGREGAR" Click="BtnNuevaMeta_Click"
+                            Background="#27AE60" Foreground="White" FontWeight="Bold"
+                            Width="100" Height="38" VerticalAlignment="Bottom" Margin="10,0,5,5"/>
+				</Grid>
+			</StackPanel>
+		</Border>
+
+		<ScrollViewer Grid.Row="3" VerticalScrollBarVisibility="Auto">
+			<ItemsControl x:Name="icMetas">
+				<ItemsControl.ItemsPanel>
+					<ItemsPanelTemplate>
+						<UniformGrid Columns="2"/>
+					</ItemsPanelTemplate>
+				</ItemsControl.ItemsPanel>
+				<ItemsControl.ItemTemplate>
+					<DataTemplate>
+						<Border Background="White" CornerRadius="12" Padding="15" Margin="5" Height="165">
+							<Border.Effect>
+								<DropShadowEffect BlurRadius="10" Opacity="0.05" ShadowDepth="1"/>
+							</Border.Effect>
+							<Grid>
+								<Button Content="✕" Click="BtnEliminarMeta_Click" CommandParameter="{Binding}"
+										HorizontalAlignment="Right" VerticalAlignment="Top"
+										Background="Transparent" BorderThickness="0" Foreground="#E53E3E" Margin="0,-5,-5,0"/>
+
+								<StackPanel VerticalAlignment="Top">
+									<TextBlock Text="{Binding Nombre}" FontWeight="Bold" Foreground="#2D3748" FontSize="14"/>
+
+									<Grid Margin="0,8">
+										<StackPanel>
+											<TextBlock Text="Cuota mensual:" FontSize="10" Foreground="#A0AEC0"/>
+											<TextBlock Text="{Binding CuotaMensual, StringFormat='{}{0:C0}'}"
+													   FontWeight="Bold" Foreground="#27AE60" FontSize="15"/>
+										</StackPanel>
+										<TextBlock Text="{Binding Progreso, Mode=OneWay, StringFormat={}{0:F0}%}"
+												   HorizontalAlignment="Right" VerticalAlignment="Bottom"
+												   FontWeight="Bold" Foreground="#2ECC71"/>
+									</Grid>
+									<ProgressBar Value="{Binding Progreso, Mode=OneWay}" Height="6" Foreground="#2ECC71"
+												 Background="#EDF2F7" BorderThickness="0"/>
+
+									<TextBlock Text="{Binding MontoActual, StringFormat='Ahorrado: {0:C0}'}"
+											   FontSize="10" Foreground="#4A5568" Margin="0,5,0,10"/>
+
+									<Grid>
+										<Grid.ColumnDefinitions>
+											<ColumnDefinition Width="*"/>
+											<ColumnDefinition Width="Auto"/>
+										</Grid.ColumnDefinitions>
+										<TextBox x:Name="txtAbonoLocal" Tag="{Binding}"
+												 Text="" Padding="5" Height="30" VerticalContentAlignment="Center"
+												 BorderBrush="#CBD5E0" Margin="0,0,5,0"/>
+										<Button Grid.Column="1" Content="ABONAR" Click="BtnAbonarMeta_Click"
+												CommandParameter="{Binding}"
+												Background="#EBF8FF" Foreground="#3182CE" FontWeight="Bold"
+												Padding="10,0" Height="30" FontSize="10" Cursor="Hand"/>
+									</Grid>
+								</StackPanel>
+							</Grid>
+						</Border>
+					</DataTemplate>
+				</ItemsControl.ItemTemplate>
+			</ItemsControl>
+		</ScrollViewer>
+	</Grid>
+</UserControl>

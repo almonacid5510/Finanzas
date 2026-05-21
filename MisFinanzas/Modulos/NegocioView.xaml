@@ -1,0 +1,94 @@
+﻿<UserControl x:Class="MisFinanzas.Modulos.NegocioView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="#F0F2F5">
+	<Grid Margin="25">
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="*"/>
+		</Grid.RowDefinitions>
+
+		<StackPanel Grid.Row="0" Margin="0,0,0,20">
+			<TextBlock Text="Control de Negocio" FontSize="26" FontWeight="ExtraBold" Foreground="#2D3748"/>
+			<Rectangle Height="4" Width="60" Fill="#2ECC71" HorizontalAlignment="Left" Margin="2,5,0,0" RadiusX="2" RadiusY="2"/>
+		</StackPanel>
+
+		<Border Grid.Row="1" Background="#2D3748" CornerRadius="12" Padding="20" Margin="0,0,0,25">
+			<StackPanel>
+				<TextBlock Text="GANANCIA TOTAL ACUMULADA" FontSize="12" FontWeight="Bold" Foreground="#A0AEC0"/>
+				<TextBlock x:Name="lblTotalNegocio" Text="$ 0" FontSize="32" FontWeight="Black" Foreground="#2ECC71"/>
+			</StackPanel>
+		</Border>
+
+		<Border Grid.Row="2" Background="White" CornerRadius="12" Padding="20" Margin="0,0,0,25">
+			<Grid>
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="2*"/>
+					<ColumnDefinition Width="1*"/>
+					<ColumnDefinition Width="1*"/>
+					<ColumnDefinition Width="Auto"/>
+				</Grid.ColumnDefinitions>
+
+				<StackPanel Grid.Column="0" Margin="5,0">
+					<TextBlock Text="Descripción" FontSize="11" FontWeight="Bold" Foreground="#718096" Margin="5,0,0,3"/>
+					<TextBox x:Name="txtDescNegocio" Padding="8" BorderBrush="#CBD5E0"/>
+				</StackPanel>
+
+				<StackPanel Grid.Column="1" Margin="5,0">
+					<TextBlock Text="Inversión / Costo" FontSize="11" FontWeight="Bold" Foreground="#718096" Margin="5,0,0,3"/>
+					<TextBox x:Name="txtInversionNegocio" Padding="8" BorderBrush="#CBD5E0"/>
+				</StackPanel>
+
+				<StackPanel Grid.Column="2" Margin="5,0">
+					<TextBlock Text="Venta / Cobro" FontSize="11" FontWeight="Bold" Foreground="#718096" Margin="5,0,0,3"/>
+					<TextBox x:Name="txtValorNegocio" Padding="8" BorderBrush="#CBD5E0"/>
+				</StackPanel>
+
+				<Button Grid.Column="3" Content="+ AGREGAR" Click="BtnAgregar_Click"
+                        Background="#2ECC71" Foreground="White" Width="100" Height="40"
+                        Margin="10,15,0,0" FontWeight="Bold" VerticalAlignment="Bottom"/>
+			</Grid>
+		</Border>
+
+		<ScrollViewer Grid.Row="3" VerticalScrollBarVisibility="Auto">
+			<ItemsControl x:Name="icListaNegocios">
+				<ItemsControl.ItemTemplate>
+					<DataTemplate>
+						<Border Background="White" Margin="0,0,0,12" Padding="15" CornerRadius="12">
+							<Grid>
+								<Grid.ColumnDefinitions>
+									<ColumnDefinition Width="*"/>
+									<ColumnDefinition Width="Auto"/>
+									<ColumnDefinition Width="Auto"/>
+								</Grid.ColumnDefinitions>
+
+								<StackPanel Grid.Column="0">
+									<TextBlock Text="{Binding Descripcion}" FontSize="16" FontWeight="Bold" Foreground="#2D3748"/>
+									<TextBlock Text="{Binding Fecha, StringFormat=d}" FontSize="12" Foreground="#718096"/>
+								</StackPanel>
+
+								<StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="20,0">
+									<TextBlock Text="GANANCIA" FontSize="9" FontWeight="Bold" Foreground="#A0AEC0" HorizontalAlignment="Right"/>
+									<TextBlock Text="{Binding Ganancia, StringFormat='{}{0:C0}'}"
+                                               FontSize="18" FontWeight="Bold" Foreground="#27AE60" HorizontalAlignment="Right"/>
+								</StackPanel>
+
+								<Button Grid.Column="2" Click="BtnEliminar_Click" Width="25" Height="25"
+                                        Background="#FDEDEC" Foreground="#E74C3C" BorderThickness="0">
+									<Button.Resources>
+										<Style TargetType="Border">
+											<Setter Property="CornerRadius" Value="13"/>
+										</Style>
+									</Button.Resources>
+									<TextBlock Text="✕" FontSize="10" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+								</Button>
+							</Grid>
+						</Border>
+					</DataTemplate>
+				</ItemsControl.ItemTemplate>
+			</ItemsControl>
+		</ScrollViewer>
+	</Grid>
+</UserControl>

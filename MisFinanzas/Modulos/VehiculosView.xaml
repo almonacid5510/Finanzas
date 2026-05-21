@@ -1,0 +1,108 @@
+﻿<UserControl x:Class="MisFinanzas.Modulos.VehiculosView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="#F0F2F5">
+	<Grid Margin="25">
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="*"/>
+		</Grid.RowDefinitions>
+
+		<StackPanel Grid.Row="0" Margin="0,0,0,20">
+			<TextBlock Text="Mis Vehículos" FontSize="26" FontWeight="ExtraBold" Foreground="#2D3748"/>
+			<Rectangle Height="4" Width="60" Fill="#3498DB" HorizontalAlignment="Left" Margin="2,5,0,0" RadiusX="2" RadiusY="2"/>
+		</StackPanel>
+
+		<Border Grid.Row="1" Background="White" CornerRadius="12" Padding="20" Margin="0,0,0,25">
+			<Border.Effect>
+				<DropShadowEffect BlurRadius="15" Opacity="0.05" ShadowDepth="2"/>
+			</Border.Effect>
+			<Grid>
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="1.5*"/>
+					<ColumnDefinition Width="1*"/>
+					<ColumnDefinition Width="1*"/>
+					<ColumnDefinition Width="Auto"/>
+				</Grid.ColumnDefinitions>
+
+				<StackPanel Grid.Column="0" Margin="5,0">
+					<TextBlock Text="Alias Vehículo" FontSize="11" FontWeight="Bold" Foreground="#718096" Margin="5,0,0,3"/>
+					<TextBox x:Name="txtNombreVehiculo" Padding="8" BorderBrush="#CBD5E0"/>
+				</StackPanel>
+
+				<StackPanel Grid.Column="1" Margin="5,0">
+					<TextBlock Text="Tipo" FontSize="11" FontWeight="Bold" Foreground="#718096" Margin="5,0,0,3"/>
+					<ComboBox x:Name="cbTipoVehiculo" Height="35" VerticalContentAlignment="Center">
+						<ComboBoxItem Content="Moto"/>
+						<ComboBoxItem Content="Carro"/>
+					</ComboBox>
+				</StackPanel>
+
+				<StackPanel Grid.Column="2" Margin="5,0">
+					<TextBlock Text="Placa" FontSize="11" FontWeight="Bold" Foreground="#718096" Margin="5,0,0,3"/>
+					<TextBox x:Name="txtPlaca" Padding="8" BorderBrush="#CBD5E0"/>
+				</StackPanel>
+
+				<Button Grid.Column="3" Content="+ REGISTRAR" Click="BtnAgregarVehiculo_Click"
+                        Background="#3498DB" Foreground="White" Width="120" Height="40"
+                        Margin="10,15,0,0" FontWeight="Bold" VerticalAlignment="Bottom"/>
+			</Grid>
+		</Border>
+
+		<ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
+			<ItemsControl x:Name="icListaVehiculos">
+				<ItemsControl.ItemTemplate>
+					<DataTemplate>
+						<Border Background="White" Margin="0,0,0,15" Padding="20" CornerRadius="12"
+                                MouseLeftButtonUp="TarjetaVehiculo_Click" Cursor="Hand">
+							<Border.Effect>
+								<DropShadowEffect BlurRadius="12" Opacity="0.06" ShadowDepth="1"/>
+							</Border.Effect>
+							<Grid>
+								<Grid.ColumnDefinitions>
+									<ColumnDefinition Width="Auto"/>
+									<ColumnDefinition Width="*"/>
+									<ColumnDefinition Width="Auto"/>
+									<ColumnDefinition Width="Auto"/>
+								</Grid.ColumnDefinitions>
+
+								<Border Grid.Column="0" Width="50" Height="50" Background="#F0F4F8" CornerRadius="25" Margin="0,0,15,0">
+									<TextBlock x:Name="txtIcono" Text="🚗" FontSize="24" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+								</Border>
+
+								<StackPanel Grid.Column="1" VerticalAlignment="Center">
+									<TextBlock Text="{Binding Nombre}" FontSize="18" FontWeight="Bold" Foreground="#2D3748"/>
+									<TextBlock Text="{Binding Placa}" FontSize="13" Foreground="#718096" FontWeight="SemiBold"/>
+								</StackPanel>
+
+								<StackPanel Grid.Column="2" VerticalAlignment="Center" Margin="15,0">
+									<TextBlock Text="INVERSIÓN TOTAL" FontSize="10" FontWeight="Bold" Foreground="#A0AEC0" HorizontalAlignment="Right"/>
+									<TextBlock Text="{Binding TotalInvertido, StringFormat='{}{0:C0}'}"
+                                               FontSize="22" FontWeight="Black" Foreground="#2980B9" HorizontalAlignment="Right"/>
+								</StackPanel>
+
+								<Button Grid.Column="3" Click="BtnEliminarVehiculo_Click"
+										Width="30" Height="30" VerticalAlignment="Center" Margin="10,0,0,0"
+										Background="#FDEDEC" Foreground="#E74C3C" BorderThickness="0" Cursor="Hand">
+									<Button.Resources>
+										<Style TargetType="{x:Type Border}">
+											<Setter Property="CornerRadius" Value="15"/>
+										</Style>
+									</Button.Resources>
+									<TextBlock Text="✕" FontSize="14" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+								</Button>
+							</Grid>
+						</Border>
+
+						<DataTemplate.Triggers>
+							<DataTrigger Binding="{Binding Tipo}" Value="Moto">
+								<Setter TargetName="txtIcono" Property="Text" Value="🏍️"/>
+							</DataTrigger>
+						</DataTemplate.Triggers>
+					</DataTemplate>
+				</ItemsControl.ItemTemplate>
+			</ItemsControl>
+		</ScrollViewer>
+	</Grid>
+</UserControl>
