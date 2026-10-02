@@ -32,10 +32,12 @@
                                            Fill="#4A90E2" RadiusX="2" RadiusY="2" Margin="0,10"
                                            Visibility="Collapsed"/>
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                    <!-- Icono emoji (viene del Tag). Ancho fijo para alinear en modo colapsado -->
-                                    <TextBlock Text="{TemplateBinding Tag}"
-                                               FontSize="20" Width="48" TextAlignment="Center"
-                                               VerticalAlignment="Center"/>
+                                    <!-- Icono (viene del Tag): un emoji o un dibujo vectorial.
+                                         Ancho fijo para alinear en modo colapsado -->
+                                    <Border Width="48" VerticalAlignment="Center">
+                                        <ContentPresenter Content="{TemplateBinding Tag}" TextElement.FontSize="20"
+                                                          HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
                                     <ContentPresenter VerticalAlignment="Center"
                                                       Opacity="{Binding Opacity, ElementName=txtLogo}"/>
                                 </StackPanel>
@@ -96,7 +98,17 @@
                 <Button x:Name="btnNavCuentas"   Content="Cuentas"   Tag="🏦" Click="NavCuentas_Click"   Style="{StaticResource NavButtonStyle}"/>
                 <Button x:Name="btnNavCreditos"  Content="Créditos"  Tag="💳" Click="NavCreditos_Click"  Style="{StaticResource NavButtonStyle}"/>
                 <Button x:Name="btnNavVehiculo"  Content="Vehiculos" Tag="🚗" Click="NavVehiculo_Click"  Style="{StaticResource NavButtonStyle}"/>
-                <Button x:Name="btnNavNegocio"   Content="Inversiones" Tag="📈" Click="NavNegocio_Click"  Style="{StaticResource NavButtonStyle}"/>
+                <Button x:Name="btnNavNegocio"   Content="Inversiones" Click="NavNegocio_Click"  Style="{StaticResource NavButtonStyle}">
+                    <!-- Caja fuerte dibujada (no existe emoji); toma el color del texto del menú -->
+                    <Button.Tag>
+                        <Viewbox Width="22" Height="22">
+                            <Path Width="24" Height="24" StrokeThickness="1.7"
+                                  StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                                  Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                  Data="M5,3 H19 A2,2 0 0 1 21,5 V17 A2,2 0 0 1 19,19 H5 A2,2 0 0 1 3,17 V5 A2,2 0 0 1 5,3 Z M8.5,11 A3.5,3.5 0 1 1 15.5,11 A3.5,3.5 0 1 1 8.5,11 Z M12,11 L14,9 M6,7 V9 M6,13 V15 M7,19 V21 M17,19 V21"/>
+                        </Viewbox>
+                    </Button.Tag>
+                </Button>
               </StackPanel>
             </DockPanel>
         </Border>

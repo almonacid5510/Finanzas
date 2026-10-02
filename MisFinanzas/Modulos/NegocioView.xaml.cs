@@ -53,16 +53,15 @@ namespace MisFinanzas.Modulos
         private void BtnAgregar_Click(object sender, RoutedEventArgs e)
         {
             if (!string.IsNullOrWhiteSpace(txtDescNegocio.Text) &&
-                NumeroHelper.TryParseMoneda(txtInversionNegocio.Text, out decimal costo) &&
-                NumeroHelper.TryParseMoneda(txtValorNegocio.Text, out decimal venta))
+                NumeroHelper.TryParseMoneda(txtInversionNegocio.Text, out decimal montoInicial))
             {
+                // Costo guarda el total invertido; los abonos se le van sumando (como las metas de ahorro)
                 var nuevoMovimiento = new Movimiento
                 {
                     Descripcion = txtDescNegocio.Text,
-                    Costo = costo,
-                    Venta = venta,
+                    Costo = montoInicial,
                     Fecha = DateTime.Now,
-                    Tipo = "Inversion" // <--- AGREGA ESTA LÍNEA AQUÍ
+                    Tipo = "Inversion"
                 };
 
                 try
@@ -81,7 +80,7 @@ namespace MisFinanzas.Modulos
                     // Limpieza de campos
                     txtDescNegocio.Clear();
                     txtInversionNegocio.Clear();
-                    txtValorNegocio.Clear();
+                    toast.Show("Inversión registrada");
                 }
                 catch (Exception ex)
                 {
@@ -91,7 +90,7 @@ namespace MisFinanzas.Modulos
             }
             else
             {
-                MessageBox.Show("Por favor, ingresa datos válidos en todos los campos.");
+                MessageBox.Show("Por favor, ingresa el nombre y un monto válido.");
             }
         }
 
@@ -133,7 +132,7 @@ namespace MisFinanzas.Modulos
                 }
                 ListaMovimientos.Remove(movimiento);
                 ActualizarTotal();
-                toast.Show("Movimiento eliminado");
+                toast.Show("Inversión eliminada");
             }
             catch (Exception ex)
             {
@@ -155,10 +154,41 @@ namespace MisFinanzas.Modulos
             }
         }
 
+        // Suma un abono al total invertido (mismo flujo que abonar a una meta de ahorro)
+        private void BtnAbonar_Click(object sender, RoutedEventArgs e)
+        {
+            var boton = (Button)sender;
+            if (boton.DataContext is not Movimiento inversion) return;
+
+            var textBox = (boton.Parent as Grid)?.Children.OfType<TextBox>().FirstOrDefault();
+            if (textBox == null || !NumeroHelper.TryParseMoneda(textBox.Text, out decimal abono) || abono <= 0) return;
+
+            try
+            {
+                using (var db = new AppDbContext())
+                {
+                    var inversionDb = db.Movimientos.Find(inversion.Id);
+                    if (inversionDb == null) return;
+                    inversionDb.Costo += abono;
+                    db.SaveChanges();
+                    inversion.Costo = inversionDb.Costo;
+                }
+
+                textBox.Clear();
+                icListaNegocios.Items.Refresh();
+                ActualizarTotal();
+                toast.Show($"Abono de {abono:C0} registrado");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error al registrar el abono: {ex.Message}");
+            }
+        }
+
         private void ActualizarTotal()
         {
-            // Sumamos las ganancias de la lista actual
-            decimal total = ListaMovimientos.Sum(m => m.Ganancia);
+            // Total invertido entre todas las inversiones
+            decimal total = ListaMovimientos.Sum(m => m.Costo);
             lblTotalNegocio.Text = total.ToString("C0");
         }
     }
