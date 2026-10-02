@@ -128,7 +128,7 @@ namespace MisFinanzas.Modulos
                 // --- 5. ASIGNACIÓN A LAS ETIQUETAS DEL XAML ---
                 this.lblDashIngresos.Text = totalIngresos.ToString("C0");
                 this.lblDashGastos.Text = totalGastosYCompromisos.ToString("C0");
-                this.lblDashPendiente.Text = $"Pendiente por pagar: {(pendienteCuentas + pendienteCreditos):C0}";
+                this.lblDashPendiente.Text = $"Pendiente: {(pendienteCuentas + pendienteCreditos):C0}";
                 this.lblPeriodo.Text = Periodo.Nombre(mesActual);
                 this.lblDashBalance.Text = balanceNeto.ToString("C0");
                 this.lblDashMoto.Text = totalV.ToString("C0");
@@ -150,7 +150,9 @@ namespace MisFinanzas.Modulos
                 lblProyeccionSiguiente.Text = $"Proyección {siguiente.Nombre}: gastos {siguiente.TotalGastos:C0} · balance {siguiente.Balance:C0}";
 
                 // Gastos del mes por categoría (incluye las cuotas de créditos)
-                icCategoriasMes.ItemsSource = Analisis.PorCategoria(cuentasDelMes, totalCreditosMes);
+                var categorias = Analisis.PorCategoria(cuentasDelMes, totalCreditosMes);
+                icCategoriasMes.ItemsSource = categorias;
+                lblSinCategorias.Visibility = categorias.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
 
                 // Próximos vencimientos e impuestos/gastos anuales
                 var proximas = Analisis.ProximasFechas(datos, DateTime.Today).Take(8).ToList();
@@ -168,7 +170,7 @@ namespace MisFinanzas.Modulos
                     cardSaludFinanciera.BorderBrush = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(254, 178, 178));
                     txtEmojiSalud.Text = "😟";
                     txtEmojiSalud.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(197, 48, 48));
-                    txtMensajeSalud.Text = "Atención: Estás gastando más de lo que ingresas.";
+                    txtMensajeSalud.Text = "Gastas más de lo que ingresas";
                     txtMensajeSalud.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(155, 44, 44));
                 }
                 else
@@ -181,13 +183,14 @@ namespace MisFinanzas.Modulos
                     cardSaludFinanciera.BorderBrush = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(154, 230, 180));
                     txtEmojiSalud.Text = "😊";
                     txtEmojiSalud.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(47, 133, 90));
-                    txtMensajeSalud.Text = "¡Tus finanzas están saludables!";
+                    txtMensajeSalud.Text = "Finanzas saludables";
                     txtMensajeSalud.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(39, 103, 73));
                 }
 
                 // --- 6. ASIGNACIÓN Y REFRESCO DE LAS METAS ---
                 icMetasCirculares.ItemsSource = null;
                 icMetasCirculares.ItemsSource = IngresosView.ListaMetas;
+                lblSinMetas.Visibility = IngresosView.ListaMetas.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
 
                 // --- 7. ESTADO DE CUENTAS DEL MES ---
                 var listaEstados = new System.Collections.Generic.List<CuentaEstadoViewModel>();
@@ -220,6 +223,7 @@ namespace MisFinanzas.Modulos
                 
                 icEstadoCuentas.ItemsSource = null;
                 icEstadoCuentas.ItemsSource = listaEstados.OrderBy(x => x.Pagada).ThenBy(x => x.Vence).ToList();
+                lblSinCuentas.Visibility = listaEstados.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
             }
             catch (Exception ex)
             {
