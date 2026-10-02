@@ -134,19 +134,14 @@
                     </StackPanel>
                 </DockPanel>
 
+                <!-- Fila 1: qué es el gasto. La descripción siempre conserva un ancho amplio -->
                 <Grid>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*" MinWidth="220"/>
                         <ColumnDefinition Width="12"/>
-                        <ColumnDefinition Width="150"/>
+                        <ColumnDefinition Width="200"/>
                         <ColumnDefinition Width="12"/>
-                        <ColumnDefinition Width="140"/>
-                        <ColumnDefinition Width="12"/>
-                        <ColumnDefinition Width="110"/>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="12"/>
-                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="180"/>
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -163,24 +158,39 @@
 
                     <TextBlock Grid.Row="0" Grid.Column="4" Text="VALOR ($)" Style="{StaticResource FieldLabel}"/>
                     <TextBox   Grid.Row="1" Grid.Column="4" x:Name="txtValorCuenta" Style="{StaticResource ModernInputNumeric}" local:NumeroHelper.EsMoneda="True"/>
+                </Grid>
 
-                    <TextBlock Grid.Row="0" Grid.Column="6" Text="FRECUENCIA" Style="{StaticResource FieldLabel}"/>
-                    <ComboBox  Grid.Row="1" Grid.Column="6" x:Name="cbFrecuencia" Style="{StaticResource ModernCombo}"
+                <!-- Fila 2: cuándo se paga, y el botón -->
+                <Grid Margin="0,12,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="140"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="FRECUENCIA" Style="{StaticResource FieldLabel}"/>
+                    <ComboBox  Grid.Row="1" Grid.Column="0" x:Name="cbFrecuencia" Style="{StaticResource ModernCombo}"
                                SelectionChanged="CbFrecuencia_SelectionChanged"/>
 
                     <!-- Mes del año: solo para gastos anuales (impuestos) -->
-                    <TextBlock Grid.Row="0" Grid.Column="7" x:Name="lblMesAnual" Text="MES" Style="{StaticResource FieldLabel}" Margin="14,0,0,5"/>
-                    <ComboBox  Grid.Row="1" Grid.Column="7" x:Name="cbMesAnual" Style="{StaticResource ModernCombo}" Width="130" Margin="12,0,0,0"
+                    <TextBlock Grid.Row="0" Grid.Column="1" x:Name="lblMesAnual" Text="MES" Style="{StaticResource FieldLabel}" Margin="14,0,0,5"/>
+                    <ComboBox  Grid.Row="1" Grid.Column="1" x:Name="cbMesAnual" Style="{StaticResource ModernCombo}" Width="140" Margin="12,0,0,0"
                                MaxDropDownHeight="260"/>
 
-                    <TextBlock Grid.Row="0" Grid.Column="8" Text="DÍA" Style="{StaticResource FieldLabel}" Margin="14,0,0,5"/>
-                    <ComboBox  Grid.Row="1" Grid.Column="8" x:Name="cbDiaPago" Style="{StaticResource ModernCombo}" Width="80" Margin="12,0,0,0"
+                    <TextBlock Grid.Row="0" Grid.Column="2" Text="DÍA" Style="{StaticResource FieldLabel}" Margin="14,0,0,5"/>
+                    <ComboBox  Grid.Row="1" Grid.Column="2" x:Name="cbDiaPago" Style="{StaticResource ModernCombo}" Width="90" Margin="12,0,0,0"
                                MaxDropDownHeight="260"/>
 
-                    <StackPanel Grid.Row="1" Grid.Column="10" Orientation="Horizontal">
-                        <Button x:Name="btnGuardarCuenta" Content="AGREGAR GASTO" Click="BtnAgregarCuenta_Click" Style="{StaticResource PrimaryButton}"/>
+                    <StackPanel Grid.Row="1" Grid.Column="4" Orientation="Horizontal">
                         <Button x:Name="btnCancelarEdicion" Content="Cancelar" Click="BtnCancelarEdicion_Click" Visibility="Collapsed"
-                                Background="Transparent" BorderThickness="0" Foreground="#718096" Cursor="Hand" Margin="10,0,0,0"/>
+                                Background="Transparent" BorderThickness="0" Foreground="#718096" Cursor="Hand" Margin="0,0,10,0"/>
+                        <Button x:Name="btnGuardarCuenta" Content="AGREGAR GASTO" Click="BtnAgregarCuenta_Click" Style="{StaticResource PrimaryButton}"/>
                     </StackPanel>
                 </Grid>
             </StackPanel>
