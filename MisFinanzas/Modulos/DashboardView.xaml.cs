@@ -94,24 +94,22 @@ namespace MisFinanzas.Modulos
             {
                 // Todo el resumen corresponde al mes en curso
                 var mesActual = DateTime.Today;
-                decimal totalIngresos;
-                System.Collections.Generic.List<CuentaMes> cuentasDelMes;
-
-                // --- 1. CONSULTAS A LA BASE DE DATOS (Entity Framework) ---
+                // --- 1. CONSULTAS A LA BASE DE DATOS (una sola carga para todo el resumen) ---
+                Analisis.Datos datos;
                 using (var db = new AppDbContext())
                 {
-                    // Ingreso mensual (salario) registrado como "Ingreso"
-                    totalIngresos = db.Movimientos
-                                      .Where(m => m.Tipo == "Ingreso")
-                                      .AsEnumerable()
-                                      .Sum(m => m.Venta);
-
-                    // Gastos recurrentes que se cobran este mes, con su estado de pago del mes
-                    cuentasDelMes = CuentasMensuales.DelMes(db, mesActual);
+                    datos = Analisis.Cargar(db);
                 }
 
-                // Los gastos del mes cuentan aunque ya estén pagados: pagar no cambia lo que se gastó.
-                decimal totalGastosCuentas = cuentasDelMes.Sum(m => m.Venta);
+                // Salario + ingresos extra que aplican este mes
+                decimal totalIngresos = Analisis.IngresosDelMes(datos, mesActual);
+
+                // Gastos que aplican este mes (mensuales, únicos y anuales), con su estado de pago
+                var cuentasDelMes = CuentasMensuales.DelMes(datos.Cuentas, datos.Pagos, mesActual);
+
+                // Los gastos del mes cuentan aunque ya estén pagados (por lo pagado realmente):
+                // pagar no cambia lo que se gastó.
+                decimal totalGastosCuentas = cuentasDelMes.Sum(m => m.Real);
                 decimal pendienteCuentas = cuentasDelMes.Where(m => !m.Pagada).Sum(m => m.Venta);
 
                 // --- 2. CONSULTA A LA LISTA PERSISTENTE DE CRÉDITOS ---
@@ -146,6 +144,18 @@ namespace MisFinanzas.Modulos
                         ? System.Windows.Media.Color.FromRgb(197, 48, 48)
                         : System.Windows.Media.Color.FromRgb(47, 133, 90));
                 ActualizarBarras();
+
+                // Proyección del próximo mes, con la predicción de cada gasto
+                var siguiente = Analisis.Proyeccion(datos, mesActual.AddMonths(1), 1)[0];
+                lblProyeccionSiguiente.Text = $"Proyección {siguiente.Nombre}: gastos {siguiente.TotalGastos:C0} · balance {siguiente.Balance:C0}";
+
+                // Gastos del mes por categoría (incluye las cuotas de créditos)
+                icCategoriasMes.ItemsSource = Analisis.PorCategoria(cuentasDelMes, totalCreditosMes);
+
+                // Próximos vencimientos e impuestos/gastos anuales
+                var proximas = Analisis.ProximasFechas(datos, DateTime.Today).Take(8).ToList();
+                icProximasFechas.ItemsSource = proximas;
+                lblSinProximas.Visibility = proximas.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
 
                 // Control dinámico del color para la tarjeta de Disponible/Neto
                 if (balanceNeto < 0)

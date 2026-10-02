@@ -30,6 +30,7 @@ namespace MisFinanzas.Modulos
                 icMetas.ItemsSource = ListaMetas;
                 CargarMetasDesdeBD();
                 CargarSalarioDesdeBD();
+                CargarIngresosExtra();
             };
         }
         private void CargarMetasDesdeBD()
@@ -126,6 +127,7 @@ namespace MisFinanzas.Modulos
                     SalarioGuardado = nuevoSalario.ToString("C0");
                     lblIngresoTotal.Text = SalarioGuardado;
                     FinalizarEdicion();
+                    CargarIngresosExtra(); // actualiza el total del mes
                 }
                 catch (Exception ex)
                 {
@@ -284,6 +286,101 @@ namespace MisFinanzas.Modulos
                 }
             }
         }
+        // --- OTROS INGRESOS (con etiqueta propia) ---
+
+        private void CargarIngresosExtra()
+        {
+            try
+            {
+                var mes = DateTime.Today;
+                using var db = new AppDbContext();
+
+                if (cbFrecuenciaIngreso.ItemsSource == null)
+                {
+                    cbFrecuenciaIngreso.ItemsSource = new[] { Frecuencias.Unica, Frecuencias.Mensual };
+                    cbFrecuenciaIngreso.SelectedItem = Frecuencias.Unica;
+                }
+                var texto = cbEtiquetaIngreso.Text;
+                cbEtiquetaIngreso.ItemsSource = Etiquetas.Lista(db, Etiquetas.Ingreso);
+                cbEtiquetaIngreso.Text = texto;
+
+                // CuentaMes da el formato común (etiqueta con color, frecuencia) también a los ingresos
+                var extras = CuentasMensuales.IngresosExtraDelMes(db, mes)
+                                             .Select(i => new CuentaMes(i, mes, null))
+                                             .ToList();
+                icIngresosExtra.ItemsSource = extras;
+                lblSinIngresosExtra.Visibility = extras.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+                lblTituloOtrosIngresos.Text = $"Otros ingresos · {Periodo.Nombre(mes)}";
+
+                var total = Analisis.IngresosDelMes(Analisis.Cargar(db), mes);
+                lblTotalIngresosMes.Text = extras.Count > 0
+                    ? $"Total del mes con otros ingresos: {total:C0}"
+                    : string.Empty;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error al cargar otros ingresos: {ex.Message}");
+            }
+        }
+
+        private void BtnAgregarIngreso_Click(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(txtDescIngreso.Text) ||
+                !NumeroHelper.TryParseMoneda(txtValorIngreso.Text, out decimal valor) ||
+                cbFrecuenciaIngreso.SelectedItem is not string frecuencia)
+            {
+                MessageBox.Show("Por favor, ingresa una descripción y un valor válido.");
+                return;
+            }
+
+            try
+            {
+                using (var db = new AppDbContext())
+                {
+                    db.Movimientos.Add(new Movimiento
+                    {
+                        Descripcion = txtDescIngreso.Text.Trim(),
+                        Categoria = Etiquetas.Asegurar(db, cbEtiquetaIngreso.Text, Etiquetas.Ingreso),
+                        Venta = valor,
+                        Tipo = CuentasMensuales.TipoIngresoExtra,
+                        Frecuencia = frecuencia,
+                        DiaPago = DateTime.Today.Day,
+                        Fecha = DateTime.Today
+                    });
+                    db.SaveChanges();
+                }
+
+                txtDescIngreso.Clear();
+                txtValorIngreso.Clear();
+                cbEtiquetaIngreso.Text = string.Empty;
+                CargarIngresosExtra();
+                toast.Show(frecuencia == Frecuencias.Mensual ? "Ingreso registrado: se repetirá cada mes" : "Ingreso registrado");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error al guardar el ingreso: {ex.Message}");
+            }
+        }
+
+        // Los mensuales dejan de contar desde este mes; los únicos de este mes se borran
+        private void BtnEliminarIngreso_Click(object sender, RoutedEventArgs e)
+        {
+            if (((Button)sender).DataContext is not CuentaMes ingreso) return;
+            try
+            {
+                using (var db = new AppDbContext())
+                {
+                    CuentasMensuales.EliminarDesde(db, ingreso.Cuenta.Id, DateTime.Today);
+                }
+                CargarIngresosExtra();
+                toast.Show("Ingreso eliminado");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error al eliminar el ingreso: {ex.Message}");
+            }
+        }
+
         public static void CargarMetasGlobal()
         {
             try

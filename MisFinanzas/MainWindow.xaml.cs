@@ -62,6 +62,7 @@ namespace MisFinanzas
                 {
                     // Crea la BD si no existe y agrega/retira tablas y columnas según el modelo
                     EsquemaBD.Actualizar(db);
+                    Etiquetas.Sembrar(db);
                 }
             }
             catch (Exception ex)

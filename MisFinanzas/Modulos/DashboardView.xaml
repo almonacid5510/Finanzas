@@ -72,7 +72,7 @@
                     </Viewbox>
                     <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
                         <TextBlock Text="&#xE74A;" FontFamily="Segoe MDL2 Assets" FontSize="10" Foreground="#2F855A" VerticalAlignment="Center" Margin="0,0,4,0"/>
-                        <TextBlock Text="Ingreso mensual" FontSize="10" Foreground="#A0AEC0" VerticalAlignment="Center"/>
+                        <TextBlock Text="Salario + otros ingresos del mes" FontSize="10" Foreground="#A0AEC0" VerticalAlignment="Center"/>
                     </StackPanel>
                 </StackPanel>
             </Border>
@@ -138,11 +138,13 @@
             </Border>
         </UniformGrid>
 
-        <!-- ===== GRID DE 2 COLUMNAS ===== -->
+        <!-- ===== GRID DE 3 COLUMNAS ===== -->
         <Grid Grid.Row="3" Margin="0,10,0,0">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="1.2*"/>
-                <ColumnDefinition Width="18"/>
+                <ColumnDefinition Width="1.15*"/>
+                <ColumnDefinition Width="16"/>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="16"/>
                 <ColumnDefinition Width="1*"/>
             </Grid.ColumnDefinitions>
 
@@ -194,7 +196,7 @@
                 </DockPanel>
             </Border>
 
-            <!-- ===== COLUMNA DERECHA: GRÁFICO + METAS ===== -->
+            <!-- ===== COLUMNA CENTRAL: GRÁFICO + CATEGORÍAS ===== -->
             <Grid Grid.Column="2">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -263,7 +265,100 @@
                                 <TextBlock x:Name="lblGraphDiferencia" Text="$ 0" FontSize="15" FontWeight="Black" Foreground="#2D3748" HorizontalAlignment="Right"/>
                             </DockPanel>
                         </Border>
+
+                        <!-- Proyección del próximo mes (gastos previstos según lo pagado realmente) -->
+                        <DockPanel Margin="2,10,0,0">
+                            <TextBlock Text="&#xE9D9;" FontFamily="Segoe MDL2 Assets" FontSize="11" Foreground="#3182CE" VerticalAlignment="Top" Margin="0,2,6,0" DockPanel.Dock="Left"/>
+                            <TextBlock x:Name="lblProyeccionSiguiente" FontSize="11" Foreground="#4A5568" TextWrapping="Wrap"/>
+                        </DockPanel>
                     </StackPanel>
+                </Border>
+
+                <!-- Gastos del mes por categoría -->
+                <Border Grid.Row="1" Background="White" CornerRadius="16" Padding="20" BorderBrush="#EDF2F7" BorderThickness="1">
+                    <Border.Effect>
+                        <DropShadowEffect BlurRadius="16" Direction="270" Opacity="0.06" ShadowDepth="2"/>
+                    </Border.Effect>
+                    <DockPanel>
+                        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,12">
+                            <TextBlock Text="&#xE8EC;" FontFamily="Segoe MDL2 Assets" FontSize="15" Foreground="#4A5568" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <TextBlock Text="Gastos por categoría" FontSize="15" FontWeight="Bold" Foreground="#2D3748" VerticalAlignment="Center"/>
+                        </StackPanel>
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <ItemsControl x:Name="icCategoriasMes">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Margin="0,4">
+                                            <DockPanel>
+                                                <TextBlock Text="{Binding Total, StringFormat='{}{0:C0}'}" DockPanel.Dock="Right" FontSize="12" FontWeight="Bold" Foreground="#2D3748"/>
+                                                <TextBlock Text="{Binding Nombre}" FontSize="12" FontWeight="SemiBold" Foreground="{Binding ColorTexto}" TextTrimming="CharacterEllipsis"/>
+                                            </DockPanel>
+                                            <Grid Height="6" Margin="0,4,0,0">
+                                                <Border Background="#EDF2F7" CornerRadius="3"/>
+                                                <Border Background="{Binding ColorTexto}" CornerRadius="3" Opacity="0.8" RenderTransformOrigin="0,0.5">
+                                                    <Border.RenderTransform>
+                                                        <ScaleTransform ScaleX="{Binding Proporcion}"/>
+                                                    </Border.RenderTransform>
+                                                </Border>
+                                            </Grid>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </DockPanel>
+                </Border>
+            </Grid>
+
+            <!-- ===== COLUMNA DERECHA: PRÓXIMAS FECHAS + METAS ===== -->
+            <Grid Grid.Column="4">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- Próximos vencimientos (30 días) y gastos anuales como impuestos -->
+                <Border Grid.Row="0" Background="White" CornerRadius="16" Padding="20" BorderBrush="#EDF2F7" BorderThickness="1" Margin="0,0,0,16">
+                    <Border.Effect>
+                        <DropShadowEffect BlurRadius="16" Direction="270" Opacity="0.06" ShadowDepth="2"/>
+                    </Border.Effect>
+                    <DockPanel>
+                        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,12">
+                            <TextBlock Text="&#xE787;" FontFamily="Segoe MDL2 Assets" FontSize="15" Foreground="#4A5568" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <TextBlock Text="Próximas fechas" FontSize="15" FontWeight="Bold" Foreground="#2D3748" VerticalAlignment="Center"/>
+                        </StackPanel>
+                        <TextBlock x:Name="lblSinProximas" DockPanel.Dock="Top" Text="Nada por pagar en los próximos 30 días."
+                                   FontSize="12" Foreground="#A0AEC0" Visibility="Collapsed"/>
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="230">
+                            <ItemsControl x:Name="icProximasFechas">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="0,4">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="46"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <!-- Fecha tipo calendario -->
+                                            <Border Background="{Binding FondoCategoria}" CornerRadius="8" Padding="0,4" Margin="0,0,10,0">
+                                                <StackPanel>
+                                                    <TextBlock Text="{Binding Vence, StringFormat='{}{0:dd}'}" FontSize="15" FontWeight="Black" Foreground="{Binding ColorCategoria}" HorizontalAlignment="Center"/>
+                                                    <TextBlock Text="{Binding Vence, StringFormat='{}{0:MMM}'}" FontSize="9" FontWeight="SemiBold" Foreground="{Binding ColorCategoria}" HorizontalAlignment="Center"/>
+                                                </StackPanel>
+                                            </Border>
+                                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding Descripcion}" FontSize="13" FontWeight="SemiBold" Foreground="#2D3748" TextTrimming="CharacterEllipsis"/>
+                                                <TextBlock FontSize="10" Foreground="#A0AEC0">
+                                                    <Run Text="{Binding Categoria, Mode=OneWay}"/><Run Text=" · "/><Run Text="{Binding Falta, Mode=OneWay}"/>
+                                                </TextBlock>
+                                            </StackPanel>
+                                            <TextBlock Grid.Column="2" Text="{Binding Venta, StringFormat='{}{0:C0}'}" FontSize="12" FontWeight="Bold" Foreground="#2D3748" VerticalAlignment="Center"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </DockPanel>
                 </Border>
 
                 <!-- Progreso de Metas -->

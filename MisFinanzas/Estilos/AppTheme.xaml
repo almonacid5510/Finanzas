@@ -159,9 +159,18 @@
                                           Margin="12,0,34,0"
                                           VerticalAlignment="Center" HorizontalAlignment="Left"/>
 
+                        <!-- Solo visible con IsEditable="True": permite escribir un valor nuevo -->
                         <TextBox x:Name="PART_EditableTextBox" Visibility="Hidden"
                                  IsReadOnly="{TemplateBinding IsReadOnly}"
-                                 Margin="12,0,34,0" VerticalContentAlignment="Center"/>
+                                 Background="Transparent" BorderThickness="0"
+                                 Foreground="{TemplateBinding Foreground}" FontSize="{TemplateBinding FontSize}"
+                                 Margin="10,0,30,0" VerticalAlignment="Center" VerticalContentAlignment="Center">
+                            <TextBox.Template>
+                                <ControlTemplate TargetType="TextBox">
+                                    <ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="Center"/>
+                                </ControlTemplate>
+                            </TextBox.Template>
+                        </TextBox>
 
                         <Popup x:Name="Popup" Placement="Bottom" AllowsTransparency="True"
                                IsOpen="{TemplateBinding IsDropDownOpen}" Focusable="False" PopupAnimation="Slide">
@@ -178,6 +187,12 @@
                             </Border>
                         </Popup>
                     </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsEditable" Value="True">
+                            <Setter TargetName="PART_EditableTextBox" Property="Visibility" Value="Visible"/>
+                            <Setter TargetName="ContentSite" Property="Visibility" Value="Hidden"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>

@@ -131,10 +131,20 @@ namespace MisFinanzas.Modulos
                 ("MovimientosV2", nameof(Movimiento.DiaPago)) =>
                     "UPDATE \"MovimientosV2\" SET \"DiaPago\" = CAST(strftime('%d', \"Fecha\") AS INTEGER) WHERE \"Tipo\" = 'Cuenta';",
 
-                // Las cuentas que estaban pagadas quedan pagadas en el mes de su fecha
+                // Las cuentas que estaban pagadas quedan pagadas en el mes de su fecha, por su valor
                 ("PagosCuenta", null) =>
-                    "INSERT INTO \"PagosCuenta\" (\"MovimientoId\", \"Mes\") " +
-                    "SELECT \"Id\", strftime('%Y-%m', \"Fecha\") FROM \"MovimientosV2\" WHERE \"Tipo\" = 'Cuenta' AND \"EstaPagado\" = 1;",
+                    "INSERT INTO \"PagosCuenta\" (\"MovimientoId\", \"Mes\", \"Monto\") " +
+                    "SELECT \"Id\", strftime('%Y-%m', \"Fecha\"), \"Venta\" FROM \"MovimientosV2\" WHERE \"Tipo\" = 'Cuenta' AND \"EstaPagado\" = 1;",
+
+                // Los pagos ya registrados se toman por el valor de su cuenta
+                ("PagosCuenta", nameof(PagoCuenta.Monto)) =>
+                    "UPDATE \"PagosCuenta\" SET \"Monto\" = IFNULL((SELECT \"Venta\" FROM \"MovimientosV2\" m WHERE m.\"Id\" = \"PagosCuenta\".\"MovimientoId\"), '0.0');",
+
+                // Las cuentas existentes se repiten cada mes y quedan como "Otros" hasta que se les ponga categoría
+                ("MovimientosV2", nameof(Movimiento.Frecuencia)) =>
+                    $"UPDATE \"MovimientosV2\" SET \"Frecuencia\" = '{Frecuencias.Mensual}';",
+                ("MovimientosV2", nameof(Movimiento.Categoria)) =>
+                    "UPDATE \"MovimientosV2\" SET \"Categoria\" = 'Otros' WHERE \"Tipo\" = 'Cuenta';",
 
                 _ => null
             };
