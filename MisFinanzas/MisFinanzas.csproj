@@ -6,6 +6,23 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
+
+    <!-- Metadatos del producto y autoría (aparecen en el .exe y en el instalador) -->
+    <AssemblyName>MisFinanzas</AssemblyName>
+    <Product>Mis Finanzas</Product>
+    <Authors>Juan Almonacid</Authors>
+    <Company>Juan Almonacid</Company>
+    <Copyright>© 2026 Juan Almonacid</Copyright>
+    <Version>1.0.0</Version>
+    <FileVersion>1.0.0.0</FileVersion>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <ApplicationIcon>Recursos\app.ico</ApplicationIcon>
+
+    <!-- Opciones de publicación (self-contained: no requiere .NET instalado) -->
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <SelfContained>true</SelfContained>
+    <PublishSingleFile>false</PublishSingleFile>
+    <SatelliteResourceLanguages>es</SatelliteResourceLanguages>
   </PropertyGroup>
 
   <ItemGroup>

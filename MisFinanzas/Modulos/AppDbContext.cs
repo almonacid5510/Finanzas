@@ -1,4 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿// ============================================================
+//  Proyecto: Mis Finanzas
+//  Autoria: Juan Almonacid
+//  Copyright (c) 2026 Juan Almonacid. Todos los derechos reservados.
+// ============================================================
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.IO;
 

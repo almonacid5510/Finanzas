@@ -1,4 +1,9 @@
-﻿using System.Configuration;
+// ============================================================
+//  Proyecto: Mis Finanzas
+//  Autoria: Juan Almonacid
+//  Copyright (c) 2026 Juan Almonacid. Todos los derechos reservados.
+// ============================================================
+using System.Configuration;
 using System.Data;
 using System.Windows;
 
@@ -13,10 +18,6 @@ namespace MisFinanzas
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
-
-            // Esto asegura que la base de datos SQLite se cree 
-            // apenas abras la aplicación por primera vez
-            DatabaseConfig.InitializeDatabase();
         }
     }
 }

@@ -1,4 +1,9 @@
-﻿using System;
+﻿// ============================================================
+//  Proyecto: Mis Finanzas
+//  Autoria: Juan Almonacid
+//  Copyright (c) 2026 Juan Almonacid. Todos los derechos reservados.
+// ============================================================
+using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
@@ -91,31 +96,63 @@ namespace MisFinanzas.Modulos
             }
         }
 
+        // Vehículo pendiente de confirmar eliminación
+        private Vehiculo? _vehiculoPendienteEliminar;
+
         private void BtnEliminarVehiculo_Click(object sender, RoutedEventArgs e)
         {
-            e.Handled = true;
+            e.Handled = true; // evita que se dispare el click de la tarjeta (abrir detalle)
             var boton = sender as Button;
-            var vehiculoAEliminar = boton?.DataContext as Vehiculo;
+            _vehiculoPendienteEliminar = boton?.DataContext as Vehiculo;
 
-            if (vehiculoAEliminar != null)
+            if (_vehiculoPendienteEliminar != null)
             {
-                var resultado = MessageBox.Show($"¿Eliminar {vehiculoAEliminar.Nombre}?", "Confirmar", MessageBoxButton.YesNo);
-                if (resultado == MessageBoxResult.Yes)
+                runNombreVehiculo.Text = $"\"{_vehiculoPendienteEliminar.Nombre}\"";
+                MostrarOverlayConfirm(true);
+            }
+        }
+
+        private void ConfirmCancelar_Click(object sender, RoutedEventArgs e)
+        {
+            _vehiculoPendienteEliminar = null;
+            MostrarOverlayConfirm(false);
+        }
+
+        private void ConfirmEliminar_Click(object sender, RoutedEventArgs e)
+        {
+            var vehiculo = _vehiculoPendienteEliminar;
+            MostrarOverlayConfirm(false);
+            _vehiculoPendienteEliminar = null;
+
+            if (vehiculo == null) return;
+
+            try
+            {
+                using (var db = new AppDbContext())
                 {
-                    try
-                    {
-                        using (var db = new AppDbContext())
-                        {
-                            db.Vehiculos.Remove(vehiculoAEliminar);
-                            db.SaveChanges();
-                        }
-                        listaVehiculos.Remove(vehiculoAEliminar);
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show($"Error al eliminar: {ex.Message}");
-                    }
+                    db.Vehiculos.Remove(vehiculo);
+                    db.SaveChanges();
                 }
+                listaVehiculos.Remove(vehiculo);
+                toast.Show("Vehículo eliminado");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error al eliminar: {ex.Message}");
+            }
+        }
+
+        private void MostrarOverlayConfirm(bool visible)
+        {
+            if (visible)
+            {
+                OverlayConfirm.Visibility = Visibility.Visible;
+                OverlayConfirm.BeginAnimation(OpacityProperty,
+                    new System.Windows.Media.Animation.DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(150)));
+            }
+            else
+            {
+                OverlayConfirm.Visibility = Visibility.Collapsed;
             }
         }
 

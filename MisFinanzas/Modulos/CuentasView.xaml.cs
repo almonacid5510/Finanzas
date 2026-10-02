@@ -1,4 +1,9 @@
-﻿using System;
+// ============================================================
+//  Proyecto: Mis Finanzas
+//  Autoria: Juan Almonacid
+//  Copyright (c) 2026 Juan Almonacid. Todos los derechos reservados.
+// ============================================================
+using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
@@ -67,11 +72,11 @@ namespace MisFinanzas.Modulos
 
         private void BtnAgregarCuenta_Click(object sender, RoutedEventArgs e)
         {
-            if (!string.IsNullOrWhiteSpace(txtDescCuenta.Text) && decimal.TryParse(txtValorCuenta.Text, out decimal valor))
+            if (!string.IsNullOrWhiteSpace(txtDescCuenta.Text) && NumeroHelper.TryParseMoneda(txtValorCuenta.Text, out decimal valor))
             {
                 var nuevaCuenta = new Movimiento
                 {
-                    Fecha = DateTime.Now,
+                    Fecha = dpFechaGasto.SelectedDate ?? DateTime.Now,
                     Descripcion = txtDescCuenta.Text,
                     Costo = 0,
                     Venta = valor,

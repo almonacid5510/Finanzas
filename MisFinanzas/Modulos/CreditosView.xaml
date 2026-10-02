@@ -1,9 +1,16 @@
-﻿<UserControl x:Class="MisFinanzas.Modulos.CreditosView"
+<!--
+    Proyecto: Mis Finanzas
+    Autoria: Juan Almonacid
+    Copyright (c) 2026 Juan Almonacid. Todos los derechos reservados.
+-->
+<UserControl x:Class="MisFinanzas.Modulos.CreditosView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:modulos="clr-namespace:MisFinanzas.Modulos"
+             xmlns:controles="clr-namespace:MisFinanzas.Controles"
+             xmlns:local="clr-namespace:MisFinanzas"
              mc:Ignorable="d" d:DesignHeight="600" d:DesignWidth="900"
              Background="#F0F2F5">
 
@@ -42,6 +49,7 @@
         </Style>
     </UserControl.Resources>
 
+  <Grid>
     <Grid Margin="25">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -50,70 +58,84 @@
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" Margin="0,0,0,20">
-            <TextBlock Text="Gestión de Créditos" FontSize="26" FontWeight="ExtraBold" Foreground="#2D3748"/>
+            <TextBlock Text="Gestión de Créditos" Style="{StaticResource PageTitle}"/>
             <Rectangle Height="4" Width="60" Fill="#8E44AD" HorizontalAlignment="Left" Margin="2,5,0,0" RadiusX="2" RadiusY="2"/>
         </StackPanel>
 
-        <Border Grid.Row="1" Background="White" CornerRadius="12" Padding="20" Margin="0,0,0,25">
-            <Border.Effect>
-                <DropShadowEffect BlurRadius="15" Direction="270" Opacity="0.1" ShadowDepth="2"/>
-            </Border.Effect>
-
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="2*"/>
-                    <ColumnDefinition Width="1.2*"/>
-                    <ColumnDefinition Width="1.2*"/>
-                    <ColumnDefinition Width="1.2*"/>
-                    <ColumnDefinition Width="0.8*"/>
-                    <ColumnDefinition Width="0.8*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-
-                <StackPanel Grid.Column="0" Margin="5,0">
-                    <TextBlock Text="Nombre" FontSize="11" FontWeight="Bold" Foreground="#718096" Margin="5,0,0,3"/>
-                    <TextBox x:Name="txtNombreCredito" Padding="8" BorderBrush="#CBD5E0"/>
+        <Border Grid.Row="1" Style="{StaticResource Card}" Margin="0,0,0,25">
+            <StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                    <TextBlock Text="&#xE710;" FontFamily="Segoe MDL2 Assets" FontSize="15" Foreground="#8E44AD" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <TextBlock Text="Registrar nuevo crédito" FontSize="15" FontWeight="Bold" Foreground="#2D3748" VerticalAlignment="Center"/>
                 </StackPanel>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1.1*"/>
+                        <ColumnDefinition Width="12"/>
+                        <ColumnDefinition Width="1.3*"/>
+                        <ColumnDefinition Width="12"/>
+                        <ColumnDefinition Width="1.3*"/>
+                        <ColumnDefinition Width="12"/>
+                        <ColumnDefinition Width="1.3*"/>
+                        <ColumnDefinition Width="12"/>
+                        <ColumnDefinition Width="0.6*"/>
+                        <ColumnDefinition Width="12"/>
+                        <ColumnDefinition Width="0.6*"/>
+                        <ColumnDefinition Width="16"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
 
-                <StackPanel Grid.Column="1" Margin="5,0">
-                    <TextBlock Text="Cuota ($)" FontSize="11" FontWeight="Bold" Foreground="#718096" Margin="5,0,0,3"/>
-                    <TextBox x:Name="txtCuotaCredito" Padding="8" BorderBrush="#CBD5E0"/>
-                </StackPanel>
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="NOMBRE" Style="{StaticResource FieldLabel}"/>
+                    <TextBox   Grid.Row="1" Grid.Column="0" x:Name="txtNombreCredito" Style="{StaticResource ModernInput}"/>
 
-                <StackPanel Grid.Column="2" Margin="5,0">
-                    <TextBlock Text="Monto Total" FontSize="11" FontWeight="Bold" Foreground="#718096" Margin="5,0,0,3"/>
-                    <TextBox x:Name="txtTotalCredito" Padding="8" BorderBrush="#CBD5E0"/>
-                </StackPanel>
+                    <TextBlock Grid.Row="0" Grid.Column="2" Text="CUOTA ($)" Style="{StaticResource FieldLabel}"/>
+                    <TextBox   Grid.Row="1" Grid.Column="2" x:Name="txtCuotaCredito" Style="{StaticResource ModernInputNumeric}" local:NumeroHelper.EsMoneda="True"/>
 
-                <StackPanel Grid.Column="3" Margin="5,0">
-                    <TextBlock Text="Ya Pagado" FontSize="11" FontWeight="Bold" Foreground="#718096" Margin="5,0,0,3"/>
-                    <TextBox x:Name="txtAbonoCredito" Padding="8" BorderBrush="#CBD5E0"/>
-                </StackPanel>
+                    <TextBlock Grid.Row="0" Grid.Column="4" Text="MONTO TOTAL" Style="{StaticResource FieldLabel}"/>
+                    <TextBox   Grid.Row="1" Grid.Column="4" x:Name="txtTotalCredito" Style="{StaticResource ModernInputNumeric}" local:NumeroHelper.EsMoneda="True"/>
 
-                <StackPanel Grid.Column="4" Margin="5,0">
-                    <TextBlock Text="Tasa %" FontSize="11" FontWeight="Bold" Foreground="#718096" Margin="5,0,0,3"/>
-                    <TextBox x:Name="txtTasaEA" Padding="8" BorderBrush="#CBD5E0"/>
-                </StackPanel>
+                    <TextBlock Grid.Row="0" Grid.Column="6" Text="YA PAGADO" Style="{StaticResource FieldLabel}"/>
+                    <TextBox   Grid.Row="1" Grid.Column="6" x:Name="txtAbonoCredito" Style="{StaticResource ModernInputNumeric}" local:NumeroHelper.EsMoneda="True"/>
 
-                <StackPanel Grid.Column="5" Margin="5,0">
-                    <TextBlock Text="Meses" FontSize="11" FontWeight="Bold" Foreground="#718096" Margin="5,0,0,3"/>
-                    <TextBox x:Name="txtPlazo" Padding="8" BorderBrush="#CBD5E0"/>
-                </StackPanel>
+                    <TextBlock Grid.Row="0" Grid.Column="8" Text="TASA %" Style="{StaticResource FieldLabel}"/>
+                    <TextBox   Grid.Row="1" Grid.Column="8" x:Name="txtTasaEA" Style="{StaticResource ModernInputNumeric}"/>
 
-                <Button Grid.Column="6" Content="+ AGREGAR" Click="BtnAgregarCredito_Click" 
-                        Background="#8E44AD" Foreground="White" Width="110" Height="40" 
-                        Margin="10,15,0,0" FontWeight="Bold" VerticalAlignment="Bottom"/>
-            </Grid>
+                    <TextBlock Grid.Row="0" Grid.Column="10" Text="MESES" Style="{StaticResource FieldLabel}"/>
+                    <TextBox   Grid.Row="1" Grid.Column="10" x:Name="txtPlazo" Style="{StaticResource ModernInputNumeric}"/>
+
+                    <Button Grid.Row="1" Grid.Column="12" Content="AGREGAR" Click="BtnAgregarCredito_Click"
+                            Style="{StaticResource PrimaryButton}" Background="#8E44AD" MinWidth="120"/>
+                </Grid>
+            </StackPanel>
         </Border>
 
         <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
             <ItemsControl x:Name="icListaCreditos">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Border Background="White" Margin="0,0,0,15" Padding="20" CornerRadius="12">
-                            <Border.Effect>
-                                <DropShadowEffect BlurRadius="12" Opacity="0.06" ShadowDepth="1"/>
-                            </Border.Effect>
+                        <Border Margin="0,0,0,15" Padding="20" CornerRadius="12" BorderThickness="1.5">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Background" Value="White"/>
+                                    <Setter Property="BorderBrush" Value="Transparent"/>
+                                    <Setter Property="Effect">
+                                        <Setter.Value>
+                                            <DropShadowEffect BlurRadius="12" Opacity="0.06" ShadowDepth="1"/>
+                                        </Setter.Value>
+                                    </Setter>
+                                    <Style.Triggers>
+                                        <!-- Resalta la tarjeta mientras se edita -->
+                                        <DataTrigger Binding="{Binding Editando}" Value="True">
+                                            <Setter Property="Background" Value="#F7FBFF"/>
+                                            <Setter Property="BorderBrush" Value="#BEE3F8"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
                             <StackPanel>
                                 <Grid>
                                     <Grid.ColumnDefinitions>
@@ -123,19 +145,57 @@
 
                                     <StackPanel>
                                         <TextBlock Text="{Binding Tipo}" FontSize="18" FontWeight="Bold" Foreground="#2D3748" Style="{StaticResource ViewStyle}"/>
-                                        <TextBox Text="{Binding Tipo, UpdateSourceTrigger=PropertyChanged}" FontSize="16" Style="{StaticResource EditStyle}" Margin="0,0,10,0"/>
+                                        <TextBox Text="{Binding Tipo, UpdateSourceTrigger=PropertyChanged}" FontSize="14" Width="220" HorizontalAlignment="Left" Style="{StaticResource EditInputInline}" Margin="0,0,10,4"/>
 
-                                        <StackPanel Orientation="Horizontal" Margin="0,5">
-                                            <TextBlock Text="Monto Original: " Foreground="#718096"/>
-                                            <TextBlock Text="{Binding Total, StringFormat='{}{0:C0}'}" FontWeight="SemiBold" Style="{StaticResource ViewStyle}"/>
-                                            <TextBox Text="{Binding Total, UpdateSourceTrigger=PropertyChanged}" Width="120" Style="{StaticResource EditStyle}"/>
+                                        <StackPanel Orientation="Horizontal" Margin="0,5" VerticalAlignment="Center">
+                                            <TextBlock Text="Monto Original: " Foreground="#718096" VerticalAlignment="Center"/>
+                                            <TextBlock Text="{Binding Total, StringFormat='{}{0:C0}'}" FontWeight="SemiBold" Style="{StaticResource ViewStyle}" VerticalAlignment="Center"/>
+                                            <TextBox Text="{Binding Total, StringFormat='{}{0:N0}', UpdateSourceTrigger=LostFocus}" Width="130" Style="{StaticResource EditInputInline}"/>
                                         </StackPanel>
                                     </StackPanel>
 
                                     <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top">
-                                        <Button Content="✎" Click="BtnActivarEdicion_Click" Background="#3498DB" Style="{StaticResource RoundButtonStyle}" Margin="5,0"/>
-                                        <Button Content="✔" Click="BtnGuardarEdicion_Click" Background="#27AE60" Style="{StaticResource RoundButtonStyle}" Margin="5,0"/>
-                                        <Button Content="✕" Click="BtnEliminar_Click" Background="#E74C3C" Style="{StaticResource RoundButtonStyle}" Margin="5,0"/>
+                                        <!-- Un solo botón que alterna Editar (✎) / Guardar (✔) según el estado -->
+                                        <Button Click="BtnToggleEdicion_Click" Margin="5,0" ToolTip="Editar">
+                                            <Button.Content>
+                                                <TextBlock FontSize="15">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Text" Value="✎"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding Editando}" Value="True">
+                                                                    <Setter Property="Text" Value="✔"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                            </Button.Content>
+                                            <Button.Style>
+                                                <Style TargetType="Button" BasedOn="{StaticResource RoundButtonStyle}">
+                                                    <Setter Property="Background" Value="#3498DB"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Editando}" Value="True">
+                                                            <Setter Property="Background" Value="#27AE60"/>
+                                                            <Setter Property="ToolTip" Value="Guardar cambios"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Button.Style>
+                                        </Button>
+                                        <Button Content="✕" Click="BtnEliminar_Click" Margin="5,0" ToolTip="Eliminar">
+                                            <Button.Style>
+                                                <Style TargetType="Button" BasedOn="{StaticResource RoundButtonStyle}">
+                                                    <Setter Property="Background" Value="#E74C3C"/>
+                                                    <Style.Triggers>
+                                                        <!-- Oculta el botón eliminar mientras se edita, para no confundir -->
+                                                        <DataTrigger Binding="{Binding Editando}" Value="True">
+                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Button.Style>
+                                        </Button>
                                     </StackPanel>
                                 </Grid>
 
@@ -150,19 +210,19 @@
                                         <StackPanel Grid.Column="0">
                                             <TextBlock Text="TASA E.A." FontSize="10" FontWeight="Bold" Foreground="#A0AEC0"/>
                                             <TextBlock Text="{Binding TasaEA, StringFormat='{}{0}%'}" FontSize="14" FontWeight="Bold" Style="{StaticResource ViewStyle}"/>
-                                            <TextBox Text="{Binding TasaEA, UpdateSourceTrigger=PropertyChanged}" Width="50" HorizontalAlignment="Left" Style="{StaticResource EditStyle}"/>
+                                            <TextBox Text="{Binding TasaEA, UpdateSourceTrigger=LostFocus}" Width="70" HorizontalAlignment="Left" Style="{StaticResource EditInputInline}"/>
                                         </StackPanel>
 
                                         <StackPanel Grid.Column="1">
                                             <TextBlock Text="PLAZO RESTANTE" FontSize="10" FontWeight="Bold" Foreground="#A0AEC0"/>
                                             <TextBlock Text="{Binding PlazoMeses, StringFormat='{}{0} meses'}" FontSize="14" FontWeight="Bold" Style="{StaticResource ViewStyle}"/>
-                                            <TextBox Text="{Binding PlazoMeses, UpdateSourceTrigger=PropertyChanged}" Width="50" HorizontalAlignment="Left" Style="{StaticResource EditStyle}"/>
+                                            <TextBox Text="{Binding PlazoMeses, UpdateSourceTrigger=LostFocus}" Width="70" HorizontalAlignment="Left" Style="{StaticResource EditInputInline}"/>
                                         </StackPanel>
 
                                         <StackPanel Grid.Column="2">
                                             <TextBlock Text="CUOTA MENSUAL" FontSize="10" FontWeight="Bold" Foreground="#3182CE" HorizontalAlignment="Right"/>
                                             <TextBlock Text="{Binding CuotaMensual, StringFormat='{}{0:C0}'}" FontSize="20" FontWeight="Black" Foreground="#2B6CB0" HorizontalAlignment="Right" Style="{StaticResource ViewStyle}"/>
-                                            <TextBox Text="{Binding CuotaMensual, UpdateSourceTrigger=PropertyChanged}" FontSize="18" Width="120" HorizontalAlignment="Right" Style="{StaticResource EditStyle}"/>
+                                            <TextBox Text="{Binding CuotaMensual, StringFormat='{}{0:N0}', UpdateSourceTrigger=LostFocus}" FontSize="14" Width="130" HorizontalAlignment="Right" Style="{StaticResource EditInputInline}"/>
                                         </StackPanel>
                                     </Grid>
                                 </Border>
@@ -172,5 +232,71 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
         </ScrollViewer>
+
+        <TextBlock x:Name="lblDeudaTotal" Visibility="Collapsed" Width="0" Height="0"/>
+        <TextBlock x:Name="lblYaPagado" Visibility="Collapsed" Width="0" Height="0"/>
     </Grid>
+
+    <controles:Toast x:Name="toast" Panel.ZIndex="50"/>
+
+    <!-- ===== MODAL DE CONFIRMACIÓN DE ELIMINACIÓN ===== -->
+    <Grid x:Name="OverlayConfirm" Background="#66000000" Visibility="Collapsed" Panel.ZIndex="100">
+        <Border Background="White" CornerRadius="16" Width="400" Padding="28"
+                HorizontalAlignment="Center" VerticalAlignment="Center">
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="30" Direction="270" Opacity="0.3" ShadowDepth="6"/>
+            </Border.Effect>
+            <StackPanel>
+                <Border Width="56" Height="56" Background="#FFF5F5" CornerRadius="28" HorizontalAlignment="Center" Margin="0,0,0,16">
+                    <TextBlock Text="&#xE74D;" FontFamily="Segoe MDL2 Assets" FontSize="24" Foreground="#E53E3E"
+                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Border>
+                <TextBlock Text="Eliminar crédito" FontSize="18" FontWeight="Bold" Foreground="#2D3748" HorizontalAlignment="Center"/>
+                <TextBlock FontSize="13" Foreground="#718096" TextWrapping="Wrap" TextAlignment="Center" Margin="0,8,0,22">
+                    <Run Text="¿Seguro que deseas eliminar el crédito "/><Run x:Name="runNombreCredito" FontWeight="Bold" Foreground="#2D3748"/><Run Text="? Esta acción no se puede deshacer."/>
+                </TextBlock>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="12"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Button Grid.Column="0" Content="Cancelar" Click="ConfirmCancelar_Click"
+                            Height="42" Cursor="Hand" Foreground="#4A5568" FontWeight="SemiBold" FontSize="13">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border x:Name="b" Background="#EDF2F7" CornerRadius="10">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="b" Property="Background" Value="#E2E8F0"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                    <Button Grid.Column="2" Content="Eliminar" Click="ConfirmEliminar_Click"
+                            Height="42" Cursor="Hand" Foreground="White" FontWeight="Bold" FontSize="13">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border x:Name="b" Background="#E53E3E" CornerRadius="10">
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <TextBlock Text="&#xE74D;" FontFamily="Segoe MDL2 Assets" FontSize="13" Margin="0,0,7,0" VerticalAlignment="Center"/>
+                                        <ContentPresenter VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="b" Property="Background" Value="#C53030"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                </Grid>
+            </StackPanel>
+        </Border>
+    </Grid>
+  </Grid>
 </UserControl>

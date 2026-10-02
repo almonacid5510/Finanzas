@@ -1,4 +1,9 @@
-﻿using System;
+// ============================================================
+//  Proyecto: Mis Finanzas
+//  Autoria: Juan Almonacid
+//  Copyright (c) 2026 Juan Almonacid. Todos los derechos reservados.
+// ============================================================
+using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics.Metrics;
 using System.Linq; // Necesario para el .Sum()
@@ -33,6 +38,7 @@ namespace MisFinanzas.Modulos
                 // Ahora icMetas ya no es null
                 icMetas.ItemsSource = ListaMetas;
                 CargarMetasDesdeBD();
+                CargarSalarioDesdeBD();
             };
         }
         private void CargarMetasDesdeBD()
@@ -57,6 +63,31 @@ namespace MisFinanzas.Modulos
                 MessageBox.Show($"Error al cargar: {ex.Message}");
             }
         }
+
+        private void CargarSalarioDesdeBD()
+        {
+            try
+            {
+                using (var db = new AppDbContext())
+                {
+                    var ingreso = db.Movimientos.FirstOrDefault(m => m.Tipo == "Ingreso");
+                    if (ingreso != null)
+                    {
+                        SalarioGuardado = ingreso.Venta.ToString("C0");
+                    }
+                    else
+                    {
+                        SalarioGuardado = "$ 0";
+                    }
+                    lblIngresoTotal.Text = SalarioGuardado;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error al cargar salario: {ex.Message}");
+            }
+        }
+
         // --- LÓGICA DE EDICIÓN DE SALARIO (IN-PLACE) ---
 
         private void BtnActivarEdicion_Click(object sender, RoutedEventArgs e)
@@ -65,18 +96,51 @@ namespace MisFinanzas.Modulos
             pnlLecturaSalario.Visibility = Visibility.Collapsed;
             pnlEdicionSalario.Visibility = Visibility.Visible;
 
-            // Limpia el formato de moneda para editar solo números
-            txtEditarSalario.Text = lblIngresoTotal.Text.Replace("$", "").Replace(".", "").Trim();
+            // Pre-cargamos el valor ya formateado con separadores de miles
+            NumeroHelper.TryParseMoneda(lblIngresoTotal.Text, out var actual);
+            txtEditarSalario.Text = actual > 0 ? NumeroHelper.FormatearMoneda(actual) : "";
             txtEditarSalario.Focus();
         }
 
         private void BtnConfirmarSalario_Click(object sender, RoutedEventArgs e)
         {
-            if (decimal.TryParse(txtEditarSalario.Text, out decimal nuevoSalario))
+            if (NumeroHelper.TryParseMoneda(txtEditarSalario.Text, out decimal nuevoSalario))
             {
-                SalarioGuardado = nuevoSalario.ToString("C0"); // Guardamos en la variable estática
-                lblIngresoTotal.Text = SalarioGuardado;
-                FinalizarEdicion();
+                try
+                {
+                    using (var db = new AppDbContext())
+                    {
+                        var ingreso = db.Movimientos.FirstOrDefault(m => m.Tipo == "Ingreso");
+                        if (ingreso != null)
+                        {
+                            ingreso.Venta = nuevoSalario;
+                            ingreso.Fecha = DateTime.Now;
+                            db.Movimientos.Update(ingreso);
+                        }
+                        else
+                        {
+                            var nuevoIngreso = new Movimiento
+                            {
+                                Descripcion = "Salario Mensual",
+                                Venta = nuevoSalario,
+                                Costo = 0,
+                                Tipo = "Ingreso",
+                                EstaPagado = true,
+                                Fecha = DateTime.Now
+                            };
+                            db.Movimientos.Add(nuevoIngreso);
+                        }
+                        db.SaveChanges();
+                    }
+
+                    SalarioGuardado = nuevoSalario.ToString("C0");
+                    lblIngresoTotal.Text = SalarioGuardado;
+                    FinalizarEdicion();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error al guardar salario: {ex.Message}");
+                }
             }
         }
 
@@ -96,7 +160,7 @@ namespace MisFinanzas.Modulos
         private void BtnNuevaMeta_Click(object sender, RoutedEventArgs e)
         {
             if (!string.IsNullOrWhiteSpace(txtNombreMeta.Text) &&
-                decimal.TryParse(txtValorMeta.Text, out decimal objetivo) &&
+                NumeroHelper.TryParseMoneda(txtValorMeta.Text, out decimal objetivo) &&
                 int.TryParse(txtMesesMeta.Text, out int meses))
             {
                 var nuevaMeta = new MetaAhorro
@@ -121,7 +185,7 @@ namespace MisFinanzas.Modulos
                     txtMesesMeta.Clear();
                     ActualizarAhorroAcumulado();
 
-                    MessageBox.Show("Meta guardada con éxito en la base de datos.");
+                    MostrarToast("Meta creada correctamente");
                 }
                 catch (Exception ex)
                 {
@@ -136,28 +200,93 @@ namespace MisFinanzas.Modulos
             decimal totalAcumulado = ListaMetas.Sum(m => m.MontoActual);
             lblAhorroAcumulado.Text = totalAcumulado.ToString("C0");
         }
+        // Meta pendiente de confirmar eliminación
+        private MetaAhorro? _metaPendienteEliminar;
+
         private void BtnEliminarMeta_Click(object sender, RoutedEventArgs e)
         {
-            // Obtenemos el botón y la meta vinculada
             var boton = (Button)sender;
-            var metaAEliminar = (MetaAhorro)boton.CommandParameter;
+            _metaPendienteEliminar = (MetaAhorro)boton.CommandParameter;
 
-            if (metaAEliminar != null)
+            if (_metaPendienteEliminar != null)
             {
-                // Validación de seguridad con un MessageBox
-                MessageBoxResult resultado = MessageBox.Show(
-                    $"¿Estás seguro de que deseas eliminar la meta '{metaAEliminar.Nombre}'?",
-                    "Confirmar eliminación",
-                    MessageBoxButton.YesNo,
-                    MessageBoxImage.Warning);
-
-                // Si el usuario presiona "Sí", procedemos a borrar
-                if (resultado == MessageBoxResult.Yes)
-                {
-                    ListaMetas.Remove(metaAEliminar);
-                    ActualizarAhorroAcumulado();
-                }
+                txtConfirmMsg.Text = $"¿Seguro que deseas eliminar la meta \"{_metaPendienteEliminar.Nombre}\"? Esta acción no se puede deshacer.";
+                MostrarOverlayConfirm(true);
             }
+        }
+
+        private void ConfirmCancelar_Click(object sender, RoutedEventArgs e)
+        {
+            _metaPendienteEliminar = null;
+            MostrarOverlayConfirm(false);
+        }
+
+        private void ConfirmEliminar_Click(object sender, RoutedEventArgs e)
+        {
+            var metaAEliminar = _metaPendienteEliminar;
+            MostrarOverlayConfirm(false);
+            _metaPendienteEliminar = null;
+
+            if (metaAEliminar == null) return;
+
+            try
+            {
+                using (var db = new AppDbContext())
+                {
+                    var metaDb = db.Metas.FirstOrDefault(m => m.Id == metaAEliminar.Id);
+                    if (metaDb != null)
+                    {
+                        db.Metas.Remove(metaDb);
+                        db.SaveChanges();
+                    }
+                }
+                ListaMetas.Remove(metaAEliminar);
+                ActualizarAhorroAcumulado();
+                MostrarToast("Meta eliminada");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error al eliminar la meta de la base de datos: {ex.Message}");
+            }
+        }
+
+        private void MostrarOverlayConfirm(bool visible)
+        {
+            if (visible)
+            {
+                OverlayConfirm.Visibility = Visibility.Visible;
+                OverlayConfirm.BeginAnimation(OpacityProperty,
+                    new System.Windows.Media.Animation.DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(150)));
+            }
+            else
+            {
+                OverlayConfirm.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        // Notificación discreta tipo toast (aparece, espera y se desvanece)
+        private void MostrarToast(string mensaje)
+        {
+            txtToast.Text = mensaje;
+            Toast.Visibility = Visibility.Visible;
+
+            var sb = new System.Windows.Media.Animation.Storyboard();
+
+            var aparecer = new System.Windows.Media.Animation.DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(200));
+            System.Windows.Media.Animation.Storyboard.SetTarget(aparecer, Toast);
+            System.Windows.Media.Animation.Storyboard.SetTargetProperty(aparecer, new PropertyPath(OpacityProperty));
+
+            var desvanecer = new System.Windows.Media.Animation.DoubleAnimation(1, 0, TimeSpan.FromMilliseconds(400))
+            {
+                BeginTime = TimeSpan.FromMilliseconds(2200)
+            };
+            System.Windows.Media.Animation.Storyboard.SetTarget(desvanecer, Toast);
+            System.Windows.Media.Animation.Storyboard.SetTargetProperty(desvanecer, new PropertyPath(OpacityProperty));
+
+            sb.Children.Add(aparecer);
+            sb.Children.Add(desvanecer);
+            sb.Completed += (s, e) => Toast.Visibility = Visibility.Collapsed;
+            sb.Begin();
         }
         private void BtnAbonarMeta_Click(object sender, RoutedEventArgs e)
         {
@@ -169,7 +298,7 @@ namespace MisFinanzas.Modulos
                 var parent = VisualTreeHelper.GetParent(boton) as Grid;
                 var textBox = parent?.Children.OfType<TextBox>().FirstOrDefault();
 
-                if (textBox != null && decimal.TryParse(textBox.Text, out decimal montoAbono))
+                if (textBox != null && NumeroHelper.TryParseMoneda(textBox.Text, out decimal montoAbono))
                 {
                     try
                     {

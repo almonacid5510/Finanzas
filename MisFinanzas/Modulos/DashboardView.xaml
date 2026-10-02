@@ -1,9 +1,32 @@
+<!--
+    Proyecto: Mis Finanzas
+    Autoria: Juan Almonacid
+    Copyright (c) 2026 Juan Almonacid. Todos los derechos reservados.
+-->
 <UserControl x:Class="MisFinanzas.Modulos.DashboardView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             Background="#F0F2F5"
+             Background="#F8FAFC"
              Loaded="UserControl_Loaded">
-    <Grid Margin="25">
+
+    <UserControl.Resources>
+        <!-- Tarjeta KPI reutilizable: fondo blanco, sombra suave, esquinas 16px -->
+        <Style x:Key="KpiCard" TargetType="Border">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="CornerRadius" Value="16"/>
+            <Setter Property="Padding" Value="18,16"/>
+            <Setter Property="Margin" Value="7"/>
+            <Setter Property="BorderBrush" Value="#EDF2F7"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect BlurRadius="16" Direction="270" Opacity="0.08" ShadowDepth="3"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Margin="25,20,25,20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -11,97 +34,289 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Text="Resumen Financiero" FontSize="28" FontWeight="Bold" Foreground="#1A202C" Margin="10,0,0,20"/>
+        <!-- ===== ENCABEZADO ===== -->
+        <StackPanel Grid.Row="0" Margin="3,0,0,16">
+            <TextBlock Text="Resumen Financiero" FontSize="26" FontWeight="ExtraBold" Foreground="#1A202C"/>
+            <Rectangle Height="4" Width="60" Fill="#4A90E2" HorizontalAlignment="Left" Margin="2,5,0,0" RadiusX="2" RadiusY="2"/>
+        </StackPanel>
 
-        <UniformGrid Grid.Row="1" Columns="4" VerticalAlignment="Top" Margin="0,0,0,20">
+        <!-- ===== BANNER DE ALERTA / SALUD FINANCIERA ===== -->
+        <Border x:Name="cardSaludFinanciera" Grid.Row="1" Background="#F0FFF4" BorderBrush="#9AE6B4" BorderThickness="1"
+                CornerRadius="12" Padding="16,12" Margin="0,0,0,16">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <TextBlock x:Name="txtEmojiSalud" Text="😊" FontSize="22" Margin="0,0,12,0" VerticalAlignment="Center"/>
+                <TextBlock x:Name="txtMensajeSalud" Text="¡Tus finanzas están saludables!" FontSize="14" FontWeight="SemiBold" Foreground="#276749" VerticalAlignment="Center"/>
+            </StackPanel>
+        </Border>
 
-            <Border Background="White" CornerRadius="15" Margin="6" Padding="15,20" BorderBrush="#E2E8F0" BorderThickness="1">
-                <Border.Effect>
-                    <DropShadowEffect BlurRadius="8" Opacity="0.03" ShadowDepth="1"/>
-                </Border.Effect>
+        <!-- ===== KPI CARDS (4) ===== -->
+        <UniformGrid Grid.Row="2" Columns="4" Margin="-7,0,-7,8">
+
+            <!-- Total Ingresos -->
+            <Border Style="{StaticResource KpiCard}">
                 <StackPanel>
-                    <TextBlock Text="TOTAL INGRESOS" FontSize="11" FontWeight="Bold" Foreground="#718096"/>
-                    <TextBlock x:Name="lblDashIngresos" Text="$ 0" FontSize="22" FontWeight="Black" Foreground="#2F855A" Margin="0,10,0,0"/>
+                    <Grid>
+                        <TextBlock Text="TOTAL INGRESOS" FontSize="11" FontWeight="Bold" Foreground="#718096" VerticalAlignment="Center"/>
+                        <Border Width="34" Height="34" Background="#F0FFF4" CornerRadius="10" HorizontalAlignment="Right">
+                            <TextBlock Text="&#xE1D8;" FontFamily="Segoe MDL2 Assets" FontSize="16" Foreground="#2F855A"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </Grid>
+                    <Viewbox Height="30" HorizontalAlignment="Left" Margin="0,12,0,0" StretchDirection="DownOnly" Stretch="Uniform">
+                        <TextBlock x:Name="lblDashIngresos" Text="$ 0" FontWeight="Black" Foreground="#2F855A"/>
+                    </Viewbox>
+                    <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                        <TextBlock Text="&#xE74A;" FontFamily="Segoe MDL2 Assets" FontSize="10" Foreground="#2F855A" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                        <TextBlock Text="Entradas del periodo" FontSize="10" Foreground="#A0AEC0" VerticalAlignment="Center"/>
+                    </StackPanel>
                 </StackPanel>
             </Border>
 
-            <Border Background="White" CornerRadius="15" Margin="6" Padding="15,20" BorderBrush="#E2E8F0" BorderThickness="1">
-                <Border.Effect>
-                    <DropShadowEffect BlurRadius="8" Opacity="0.03" ShadowDepth="1"/>
-                </Border.Effect>
+            <!-- Gastos y Compromisos -->
+            <Border Style="{StaticResource KpiCard}">
                 <StackPanel>
-                    <TextBlock Text="GASTOS Y COMPROMISOS" FontSize="11" FontWeight="Bold" Foreground="#718096"/>
-                    <TextBlock x:Name="lblDashGastos" Text="$ 0" FontSize="22" FontWeight="Black" Foreground="#E53E3E" Margin="0,10,0,0"/>
+                    <Grid>
+                        <TextBlock Text="GASTOS Y COMPROMISOS" FontSize="11" FontWeight="Bold" Foreground="#718096" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                        <Border Width="34" Height="34" Background="#FFF5F5" CornerRadius="10" HorizontalAlignment="Right">
+                            <TextBlock Text="&#xE7BB;" FontFamily="Segoe MDL2 Assets" FontSize="16" Foreground="#E53E3E"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </Grid>
+                    <Viewbox Height="30" HorizontalAlignment="Left" Margin="0,12,0,0" StretchDirection="DownOnly" Stretch="Uniform">
+                        <TextBlock x:Name="lblDashGastos" Text="$ 0" FontWeight="Black" Foreground="#E53E3E"/>
+                    </Viewbox>
+                    <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                        <TextBlock Text="&#xE74B;" FontFamily="Segoe MDL2 Assets" FontSize="10" Foreground="#E53E3E" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                        <TextBlock Text="Salidas del periodo" FontSize="10" Foreground="#A0AEC0" VerticalAlignment="Center"/>
+                    </StackPanel>
                 </StackPanel>
             </Border>
 
-            <Border Background="White" CornerRadius="15" Margin="6" Padding="15,20" BorderBrush="#E2E8F0" BorderThickness="1">
-                <Border.Effect>
-                    <DropShadowEffect BlurRadius="8" Opacity="0.03" ShadowDepth="1"/>
-                </Border.Effect>
+            <!-- Disponible / Neto -->
+            <Border Style="{StaticResource KpiCard}">
                 <StackPanel>
-                    <TextBlock Text="DISPONIBLE / NETO" FontSize="11" FontWeight="Bold" Foreground="#718096"/>
-                    <TextBlock x:Name="lblDashBalance" Text="$ 0" FontSize="22" FontWeight="Black" Foreground="#4A5568" Margin="0,10,0,0"/>
+                    <Grid>
+                        <TextBlock Text="DISPONIBLE / NETO" FontSize="11" FontWeight="Bold" Foreground="#718096" VerticalAlignment="Center"/>
+                        <Border Width="34" Height="34" Background="#EBF8FF" CornerRadius="10" HorizontalAlignment="Right">
+                            <TextBlock Text="&#xE8C7;" FontFamily="Segoe MDL2 Assets" FontSize="16" Foreground="#3182CE"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </Grid>
+                    <Viewbox Height="30" HorizontalAlignment="Left" Margin="0,12,0,0" StretchDirection="DownOnly" Stretch="Uniform">
+                        <TextBlock x:Name="lblDashBalance" Text="$ 0" FontWeight="Black" Foreground="#4A5568"/>
+                    </Viewbox>
+                    <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                        <TextBlock Text="&#xE9D9;" FontFamily="Segoe MDL2 Assets" FontSize="10" Foreground="#3182CE" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                        <TextBlock Text="Balance actual" FontSize="10" Foreground="#A0AEC0" VerticalAlignment="Center"/>
+                    </StackPanel>
                 </StackPanel>
             </Border>
 
-            <Border Background="White" CornerRadius="15" Margin="6" Padding="15,20" BorderBrush="#E2E8F0" BorderThickness="1">
-                <Border.Effect>
-                    <DropShadowEffect BlurRadius="8" Opacity="0.03" ShadowDepth="1"/>
-                </Border.Effect>
+            <!-- Inversión Vehículos -->
+            <Border Style="{StaticResource KpiCard}">
                 <StackPanel>
-                    <TextBlock Text="INVERSION VEHICULOS" FontSize="11" FontWeight="Bold" Foreground="#718096"/>
-                    <TextBlock x:Name="lblDashMoto" Text="$ 0" FontSize="22" FontWeight="Black" Foreground="#2B6CB0" Margin="0,10,0,0"/>
+                    <Grid>
+                        <TextBlock Text="INVERSIÓN VEHÍCULOS" FontSize="11" FontWeight="Bold" Foreground="#718096" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                        <Border Width="34" Height="34" Background="#EBF4FF" CornerRadius="10" HorizontalAlignment="Right">
+                            <TextBlock Text="&#xE804;" FontFamily="Segoe MDL2 Assets" FontSize="16" Foreground="#2B6CB0"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </Grid>
+                    <Viewbox Height="30" HorizontalAlignment="Left" Margin="0,12,0,0" StretchDirection="DownOnly" Stretch="Uniform">
+                        <TextBlock x:Name="lblDashMoto" Text="$ 0" FontWeight="Black" Foreground="#2B6CB0"/>
+                    </Viewbox>
+                    <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                        <TextBlock Text="&#xE9D9;" FontFamily="Segoe MDL2 Assets" FontSize="10" Foreground="#2B6CB0" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                        <TextBlock Text="Capital en activos" FontSize="10" Foreground="#A0AEC0" VerticalAlignment="Center"/>
+                    </StackPanel>
                 </StackPanel>
             </Border>
         </UniformGrid>
 
-        <TextBlock Grid.Row="2" Text="PROGRESO DE MIS METAS" FontSize="14" FontWeight="Bold" Foreground="#4A5568" Margin="10,15,0,10"/>
+        <!-- ===== GRID DE 2 COLUMNAS ===== -->
+        <Grid Grid.Row="3" Margin="0,10,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1.2*"/>
+                <ColumnDefinition Width="18"/>
+                <ColumnDefinition Width="1*"/>
+            </Grid.ColumnDefinitions>
 
-        <ScrollViewer Grid.Row="3" VerticalScrollBarVisibility="Auto">
-            <ItemsControl x:Name="icMetasCirculares">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <WrapPanel Orientation="Horizontal" HorizontalAlignment="Left"/>
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <Border Background="White" CornerRadius="15" Padding="20" Margin="10" Width="200" Height="190">
-                            <Border.Effect>
-                                <DropShadowEffect BlurRadius="10" Opacity="0.05" ShadowDepth="2"/>
-                            </Border.Effect>
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="*"/>
-                                    <RowDefinition Height="Auto"/>
-                                </Grid.RowDefinitions>
+            <!-- ===== COLUMNA IZQUIERDA: ESTADO DE CUENTAS ===== -->
+            <Border Grid.Column="0" Background="White" CornerRadius="16" Padding="20" BorderBrush="#EDF2F7" BorderThickness="1">
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="16" Direction="270" Opacity="0.06" ShadowDepth="2"/>
+                </Border.Effect>
+                <DockPanel>
+                    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,14">
+                        <TextBlock Text="&#xE8C7;" FontFamily="Segoe MDL2 Assets" FontSize="15" Foreground="#4A5568" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                        <TextBlock Text="Estado de Cuentas" FontSize="15" FontWeight="Bold" Foreground="#2D3748" VerticalAlignment="Center"/>
+                    </StackPanel>
 
-                                <TextBlock Text="{Binding Nombre}" FontSize="14" FontWeight="Bold" Foreground="#2D3748" HorizontalAlignment="Center"/>
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <ItemsControl x:Name="icEstadoCuentas">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="White" CornerRadius="10" Padding="14,12" Margin="0,4"
+                                            BorderBrush="{Binding BorderColor}" BorderThickness="1">
+                                        <Border.Effect>
+                                            <DropShadowEffect BlurRadius="6" Opacity="0.04" ShadowDepth="1"/>
+                                        </Border.Effect>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="5"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
 
-                                <StackPanel Grid.Row="1" VerticalAlignment="Center" Margin="0,10">
-                                    <ProgressBar Value="{Binding Progreso, Mode=OneWay}" Height="12" Maximum="100" Minimum="0" Background="#EDF2F7" Foreground="#319795">
-                                        <ProgressBar.Template>
-                                            <ControlTemplate TargetType="ProgressBar">
-                                                <Grid x:Name="TemplateRoot" SnapsToDevicePixels="true">
-                                                    <Border Background="{TemplateBinding Background}" CornerRadius="6"/>
-                                                    <Decorator x:Name="PART_Track" HorizontalAlignment="Left">
-                                                        <Border x:Name="PART_Indicator" Background="{TemplateBinding Foreground}" CornerRadius="6"/>
-                                                    </Decorator>
-                                                </Grid>
-                                            </ControlTemplate>
-                                        </ProgressBar.Template>
-                                    </ProgressBar>
-                                    <TextBlock Text="{Binding Progreso, StringFormat={}{0:F0}%}" FontSize="16" FontWeight="Black" Foreground="#2D3748" HorizontalAlignment="Center" Margin="0,8,0,0"/>
-                                </StackPanel>
+                                            <!-- Marca de color lateral según estado -->
+                                            <Rectangle Grid.Column="0" Width="4" RadiusX="2" RadiusY="2" Fill="{Binding TextColor}" Margin="0,0,10,0"/>
 
-                                <TextBlock Grid.Row="2" Text="{Binding MontoActual, StringFormat='{}{0:C0}'}" FontSize="13" FontWeight="SemiBold" Foreground="#718096" HorizontalAlignment="Center"/>
-                            </Grid>
+                                            <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="6,0,0,0">
+                                                <TextBlock Text="{Binding Cuenta.Descripcion}" FontSize="14" FontWeight="Bold" Foreground="#2D3748" TextTrimming="CharacterEllipsis"/>
+                                                <TextBlock Text="{Binding Cuenta.Venta, StringFormat='{}{0:C0}'}" FontSize="13" FontWeight="SemiBold" Foreground="#4A5568" Margin="0,2,0,0"/>
+                                            </StackPanel>
+
+                                            <!-- Badge de vencimiento -->
+                                            <Border Grid.Column="2" Background="{Binding BackgroundColor}" CornerRadius="8" Padding="10,5" VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding MensajeEstado}" FontSize="11" FontWeight="SemiBold" Foreground="{Binding TextColor}"/>
+                                            </Border>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </DockPanel>
+            </Border>
+
+            <!-- ===== COLUMNA DERECHA: GRÁFICO + METAS ===== -->
+            <Grid Grid.Column="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- Gráfico Ingresos vs Gastos (barras nativas) -->
+                <Border Grid.Row="0" Background="White" CornerRadius="16" Padding="20" BorderBrush="#EDF2F7" BorderThickness="1" Margin="0,0,0,16">
+                    <Border.Effect>
+                        <DropShadowEffect BlurRadius="16" Direction="270" Opacity="0.06" ShadowDepth="2"/>
+                    </Border.Effect>
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                            <TextBlock Text="&#xE9D2;" FontFamily="Segoe MDL2 Assets" FontSize="15" Foreground="#4A5568" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <TextBlock Text="Ingresos vs Gastos" FontSize="15" FontWeight="Bold" Foreground="#2D3748" VerticalAlignment="Center"/>
+                        </StackPanel>
+
+                        <!-- Barra Ingresos -->
+                        <Grid Margin="0,0,0,12">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <DockPanel Grid.Row="0" Margin="0,0,0,5">
+                                <TextBlock Text="Ingresos" FontSize="12" FontWeight="SemiBold" Foreground="#4A5568" DockPanel.Dock="Left"/>
+                                <TextBlock x:Name="lblGraphIngresos" Text="$ 0" FontSize="12" FontWeight="Bold" Foreground="#2F855A" HorizontalAlignment="Right"/>
+                            </DockPanel>
+                            <Border Grid.Row="1" Height="12" Background="#EDF2F7" CornerRadius="6" SizeChanged="Barras_SizeChanged">
+                                <Border x:Name="barIngresos" HorizontalAlignment="Left" Width="0" CornerRadius="6">
+                                    <Border.Background>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                            <GradientStop Color="#48BB78" Offset="0"/>
+                                            <GradientStop Color="#2F855A" Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </Border.Background>
+                                </Border>
+                            </Border>
+                        </Grid>
+
+                        <!-- Barra Gastos -->
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <DockPanel Grid.Row="0" Margin="0,0,0,5">
+                                <TextBlock Text="Gastos y compromisos" FontSize="12" FontWeight="SemiBold" Foreground="#4A5568" DockPanel.Dock="Left"/>
+                                <TextBlock x:Name="lblGraphGastos" Text="$ 0" FontSize="12" FontWeight="Bold" Foreground="#E53E3E" HorizontalAlignment="Right"/>
+                            </DockPanel>
+                            <Border Grid.Row="1" Height="12" Background="#EDF2F7" CornerRadius="6" SizeChanged="Barras_SizeChanged">
+                                <Border x:Name="barGastos" HorizontalAlignment="Left" Width="0" CornerRadius="6">
+                                    <Border.Background>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                            <GradientStop Color="#FC8181" Offset="0"/>
+                                            <GradientStop Color="#E53E3E" Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </Border.Background>
+                                </Border>
+                            </Border>
+                        </Grid>
+
+                        <!-- Resumen del ahorro/déficit -->
+                        <Border Background="#F8FAFC" CornerRadius="10" Padding="12,10" Margin="0,16,0,0">
+                            <DockPanel>
+                                <TextBlock Text="Diferencia" FontSize="12" FontWeight="SemiBold" Foreground="#718096" DockPanel.Dock="Left" VerticalAlignment="Center"/>
+                                <TextBlock x:Name="lblGraphDiferencia" Text="$ 0" FontSize="15" FontWeight="Black" Foreground="#2D3748" HorizontalAlignment="Right"/>
+                            </DockPanel>
                         </Border>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-        </ScrollViewer>
+                    </StackPanel>
+                </Border>
+
+                <!-- Progreso de Metas -->
+                <Border Grid.Row="1" Background="White" CornerRadius="16" Padding="20" BorderBrush="#EDF2F7" BorderThickness="1">
+                    <Border.Effect>
+                        <DropShadowEffect BlurRadius="16" Direction="270" Opacity="0.06" ShadowDepth="2"/>
+                    </Border.Effect>
+                    <DockPanel>
+                        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,14">
+                            <TextBlock Text="&#xE7C1;" FontFamily="Segoe MDL2 Assets" FontSize="15" Foreground="#4A5568" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <TextBlock Text="Progreso de mis metas" FontSize="15" FontWeight="Bold" Foreground="#2D3748" VerticalAlignment="Center"/>
+                        </StackPanel>
+
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <ItemsControl x:Name="icMetasCirculares">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel Orientation="Horizontal" HorizontalAlignment="Center"/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Background="#F8FAFC" CornerRadius="14" Padding="12" Margin="6" Width="150" Height="180" BorderBrush="#EDF2F7" BorderThickness="1">
+                                            <Grid>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto"/>
+                                                    <RowDefinition Height="*"/>
+                                                    <RowDefinition Height="Auto"/>
+                                                </Grid.RowDefinitions>
+
+                                                <TextBlock Text="{Binding Nombre}" FontSize="13" FontWeight="Bold" Foreground="#2D3748" HorizontalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+
+                                                <Grid Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,8">
+                                                    <Ellipse Width="90" Height="90" Stroke="#EDF2F7" StrokeThickness="9"/>
+                                                    <Ellipse Width="90" Height="90" Stroke="#319795" StrokeThickness="9"
+                                                             StrokeDashArray="32.2 100"
+                                                             StrokeDashOffset="{Binding ProgresoStrokeOffset, Mode=OneWay}"
+                                                             StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                                                             RenderTransformOrigin="0.5,0.5">
+                                                        <Ellipse.RenderTransform>
+                                                            <RotateTransform Angle="-90"/>
+                                                        </Ellipse.RenderTransform>
+                                                    </Ellipse>
+                                                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                                        <TextBlock Text="{Binding Progreso, StringFormat={}{0:F0}%}" FontSize="18" FontWeight="Black" Foreground="#2D3748" HorizontalAlignment="Center"/>
+                                                    </StackPanel>
+                                                </Grid>
+
+                                                <TextBlock Grid.Row="2" Text="{Binding MontoActual, StringFormat='{}{0:C0}'}" FontSize="12" FontWeight="SemiBold" Foreground="#718096" HorizontalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </DockPanel>
+                </Border>
+            </Grid>
+        </Grid>
     </Grid>
 </UserControl>

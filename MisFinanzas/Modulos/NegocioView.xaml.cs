@@ -1,4 +1,9 @@
-﻿using System;
+﻿// ============================================================
+//  Proyecto: Mis Finanzas
+//  Autoria: Juan Almonacid
+//  Copyright (c) 2026 Juan Almonacid. Todos los derechos reservados.
+// ============================================================
+using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
@@ -54,8 +59,8 @@ namespace MisFinanzas.Modulos
         private void BtnAgregar_Click(object sender, RoutedEventArgs e)
         {
             if (!string.IsNullOrWhiteSpace(txtDescNegocio.Text) &&
-                decimal.TryParse(txtInversionNegocio.Text, out decimal costo) &&
-                decimal.TryParse(txtValorNegocio.Text, out decimal venta))
+                NumeroHelper.TryParseMoneda(txtInversionNegocio.Text, out decimal costo) &&
+                NumeroHelper.TryParseMoneda(txtValorNegocio.Text, out decimal venta))
             {
                 var nuevoMovimiento = new Movimiento
                 {
@@ -96,27 +101,63 @@ namespace MisFinanzas.Modulos
             }
         }
 
+        // Movimiento pendiente de confirmar eliminación
+        private Movimiento? _movPendienteEliminar;
+
         private void BtnEliminar_Click(object sender, RoutedEventArgs e)
         {
             var btn = (Button)sender;
-            var movimiento = (Movimiento)btn.DataContext;
+            _movPendienteEliminar = btn.DataContext as Movimiento;
 
-            if (movimiento != null && MessageBox.Show("¿Deseas eliminar este registro de forma permanente?", "Confirmar", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+            if (_movPendienteEliminar != null)
             {
-                try
+                runNombreMov.Text = $"\"{_movPendienteEliminar.Descripcion}\"";
+                MostrarOverlayConfirm(true);
+            }
+        }
+
+        private void ConfirmCancelar_Click(object sender, RoutedEventArgs e)
+        {
+            _movPendienteEliminar = null;
+            MostrarOverlayConfirm(false);
+        }
+
+        private void ConfirmEliminar_Click(object sender, RoutedEventArgs e)
+        {
+            var movimiento = _movPendienteEliminar;
+            MostrarOverlayConfirm(false);
+            _movPendienteEliminar = null;
+
+            if (movimiento == null) return;
+
+            try
+            {
+                using (var db = new AppDbContext())
                 {
-                    using (var db = new AppDbContext())
-                    {
-                        db.Movimientos.Remove(movimiento);
-                        db.SaveChanges();
-                    }
-                    ListaMovimientos.Remove(movimiento);
-                    ActualizarTotal();
+                    db.Movimientos.Remove(movimiento);
+                    db.SaveChanges();
                 }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Error al eliminar de la base de datos: {ex.Message}");
-                }
+                ListaMovimientos.Remove(movimiento);
+                ActualizarTotal();
+                toast.Show("Movimiento eliminado");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error al eliminar de la base de datos: {ex.Message}");
+            }
+        }
+
+        private void MostrarOverlayConfirm(bool visible)
+        {
+            if (visible)
+            {
+                OverlayConfirm.Visibility = Visibility.Visible;
+                OverlayConfirm.BeginAnimation(OpacityProperty,
+                    new System.Windows.Media.Animation.DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(150)));
+            }
+            else
+            {
+                OverlayConfirm.Visibility = Visibility.Collapsed;
             }
         }
 

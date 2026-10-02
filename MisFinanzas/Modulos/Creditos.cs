@@ -1,5 +1,11 @@
-﻿using System;
+﻿// ============================================================
+//  Proyecto: Mis Finanzas
+//  Autoria: Juan Almonacid
+//  Copyright (c) 2026 Juan Almonacid. Todos los derechos reservados.
+// ============================================================
+using System;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Runtime.CompilerServices;
 
 namespace MisFinanzas.Modulos
@@ -37,7 +43,10 @@ namespace MisFinanzas.Modulos
         private int _plazoMeses;
         public int PlazoMeses { get => _plazoMeses; set { _plazoMeses = value; OnPropertyChanged(); } }
 
+        // Estado solo de UI: NO se persiste en la base de datos.
+        // Así los créditos siempre cargan en modo solo lectura al abrir la app.
         private bool _editando;
+        [NotMapped]
         public bool Editando { get => _editando; set { _editando = value; OnPropertyChanged(); } }
 
         private bool _pagado;

@@ -1,28 +1,104 @@
-﻿<Window x:Class="MisFinanzas.MainWindow"
+﻿<!--
+    Proyecto: Mis Finanzas
+    Autoria: Juan Almonacid
+    Copyright (c) 2026 Juan Almonacid. Todos los derechos reservados.
+-->
+<Window x:Class="MisFinanzas.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:MisFinanzas"
         Title="Gestor de Finanzas Personal" Height="650" Width="1100" 
         Background="#F4F7F9" WindowStartupLocation="CenterScreen">
 
+    <Window.Resources>
+        <!-- Estilo de botón de navegación: icono + texto, con estado activo y hover.
+             El estado activo se controla desde el code-behind marcando la propiedad adjunta
+             local:NavState.IsActive = True sobre el botón seleccionado. -->
+        <Style x:Key="NavButtonStyle" TargetType="Button">
+            <Setter Property="Margin" Value="8,3"/>
+            <Setter Property="Height" Value="46"/>
+            <Setter Property="Foreground" Value="#CBD5E0"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bd" Background="{TemplateBinding Background}" CornerRadius="10">
+                            <Grid>
+                                <!-- Barra indicadora del ítem activo -->
+                                <Rectangle x:Name="indicator" Width="4" HorizontalAlignment="Left"
+                                           Fill="#4A90E2" RadiusX="2" RadiusY="2" Margin="0,10"
+                                           Visibility="Collapsed"/>
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <!-- Icono emoji (viene del Tag). Ancho fijo para alinear en modo colapsado -->
+                                    <TextBlock Text="{TemplateBinding Tag}"
+                                               FontSize="20" Width="48" TextAlignment="Center"
+                                               VerticalAlignment="Center"/>
+                                    <ContentPresenter VerticalAlignment="Center"
+                                                      Opacity="{Binding Opacity, ElementName=txtLogo}"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="#34495E"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                            <!-- Estado activo del ítem de navegación -->
+                            <Trigger Property="local:NavState.IsActive" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="#3B5266"/>
+                                <Setter TargetName="indicator" Property="Visibility" Value="Visible"/>
+                                <Setter Property="Foreground" Value="White"/>
+                                <Setter Property="FontWeight" Value="Bold"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
     <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="220"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
+        <!-- Contenido principal: ocupa todo el ancho. Reserva 68px a la izquierda
+             para el sidebar colapsado; el sidebar expandido flota por encima (overlay). -->
+        <ContentControl x:Name="ContenedorPrincipal" Margin="88,20,20,20"/>
 
-        <Border Background="#2C3E50" Grid.Column="0">
-            <StackPanel Margin="10,30,10,10">
-                <TextBlock Text="MIS FINANZAS" Foreground="White" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,30"/>
+        <!-- ============ SIDEBAR COLAPSABLE (OVERLAY) ============ -->
+        <Border x:Name="Sidebar" Background="#2C3E50" Width="68"
+                HorizontalAlignment="Left" VerticalAlignment="Stretch"
+                MouseEnter="Sidebar_MouseEnter" MouseLeave="Sidebar_MouseLeave" Panel.ZIndex="100">
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="15" Direction="0" Opacity="0.15" ShadowDepth="2"/>
+            </Border.Effect>
+            <DockPanel Margin="0,25,0,14">
 
-                <Button Content="Dashboard" Click="NavDashboard_Click" Margin="0,5" Height="40" Background="#34495E" Foreground="White" Cursor="Hand"/>
-                <Button Content="Ingresos" Click="NavIngresos_Click" Margin="0,5" Height="40" Background="#34495E" Foreground="White" Cursor="Hand"/>
-                <Button Content="Cuentas" Click="NavCuentas_Click" Margin="0,5" Height="40" Background="#34495E" Foreground="White" Cursor="Hand"/>
-                <Button Content="Créditos" Click="NavCreditos_Click" Margin="0,5" Height="40" Background="#34495E" Foreground="White" Cursor="Hand"/>
-                <Button Content="Vehiculos" Click="NavVehiculo_Click" Margin="0,5" Height="40" Background="#34495E" Foreground="White" Cursor="Hand"/>
-                <Button Content="Inversiones" Click="NavNegocio_Click" Margin="0,5" Height="40" Background="#34495E" Foreground="White" Cursor="Hand"/>
-            </StackPanel>
+                <!-- Pie del sidebar: crédito de autoría -->
+                <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Margin="8,10,8,0" VerticalAlignment="Bottom">
+                    <TextBlock Text="©" FontSize="12" Foreground="#718096" Width="48" TextAlignment="Center" VerticalAlignment="Center"/>
+                    <TextBlock Text="2026 Juan Almonacid" FontSize="11" Foreground="#718096"
+                               VerticalAlignment="Center" Opacity="{Binding Opacity, ElementName=txtLogo}"/>
+                </StackPanel>
+
+              <StackPanel DockPanel.Dock="Top">
+                <!-- Logo / título: mismo margen lateral (8px) que los botones de navegación
+                     para que el ícono quede alineado con el resto del menú -->
+                <StackPanel Orientation="Horizontal" Height="40" Margin="8,0,8,25">
+                    <TextBlock Text="💼" FontSize="22" Width="48" TextAlignment="Center"
+                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    <TextBlock x:Name="txtLogo" Text="MIS FINANZAS" Foreground="White" FontSize="16" FontWeight="Bold"
+                               VerticalAlignment="Center" Opacity="0"/>
+                </StackPanel>
+
+                <Button x:Name="btnNavDashboard" Content="Dashboard" Tag="📊" Click="NavDashboard_Click" Style="{StaticResource NavButtonStyle}"/>
+                <Button x:Name="btnNavIngresos"  Content="Ingresos"  Tag="💰" Click="NavIngresos_Click"  Style="{StaticResource NavButtonStyle}"/>
+                <Button x:Name="btnNavCuentas"   Content="Cuentas"   Tag="🏦" Click="NavCuentas_Click"   Style="{StaticResource NavButtonStyle}"/>
+                <Button x:Name="btnNavCreditos"  Content="Créditos"  Tag="💳" Click="NavCreditos_Click"  Style="{StaticResource NavButtonStyle}"/>
+                <Button x:Name="btnNavVehiculo"  Content="Vehiculos" Tag="🚗" Click="NavVehiculo_Click"  Style="{StaticResource NavButtonStyle}"/>
+                <Button x:Name="btnNavNegocio"   Content="Inversiones" Tag="📈" Click="NavNegocio_Click"  Style="{StaticResource NavButtonStyle}"/>
+              </StackPanel>
+            </DockPanel>
         </Border>
-
-        <ContentControl x:Name="ContenedorPrincipal" Grid.Column="1" Margin="20"/>
     </Grid>
 </Window>

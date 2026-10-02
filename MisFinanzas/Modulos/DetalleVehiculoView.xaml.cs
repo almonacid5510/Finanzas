@@ -1,4 +1,9 @@
-﻿using System;
+﻿// ============================================================
+//  Proyecto: Mis Finanzas
+//  Autoria: Juan Almonacid
+//  Copyright (c) 2026 Juan Almonacid. Todos los derechos reservados.
+// ============================================================
+using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
@@ -64,7 +69,7 @@ namespace MisFinanzas.Modulos
             GastoVehiculo nuevoGasto = null;
 
             // Asumiendo que aquí tienes tu lógica de creación
-            if (decimal.TryParse(txtValor.Text, out decimal valor))
+            if (NumeroHelper.TryParseMoneda(txtValor.Text, out decimal valor))
             {
                 nuevoGasto = new GastoVehiculo
                 {
@@ -94,6 +99,102 @@ namespace MisFinanzas.Modulos
             catch (Exception ex)
             {
                 MessageBox.Show($"Error: {ex.Message}");
+            }
+        }
+
+        // --- Edición / guardado de un gasto (mismo flujo que Créditos) ---
+        private void BtnToggleEdicionGasto_Click(object sender, RoutedEventArgs e)
+        {
+            var gasto = ((Button)sender).DataContext as GastoVehiculo;
+            if (gasto == null) return;
+
+            if (!gasto.Editando)
+            {
+                gasto.Editando = true;
+            }
+            else
+            {
+                // Confirmar el valor del TextBox con foco (UpdateSourceTrigger=LostFocus)
+                var enfocado = System.Windows.Input.Keyboard.FocusedElement as TextBox;
+                enfocado?.GetBindingExpression(TextBox.TextProperty)?.UpdateSource();
+
+                try
+                {
+                    using (var db = new AppDbContext())
+                    {
+                        db.GastosVehiculo.Update(gasto);
+                        db.SaveChanges();
+                    }
+                    gasto.Editando = false;
+                    VehiculoActual.NotificarCambioTotal();
+                    toast.Show("Cambios guardados correctamente");
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error al guardar: {ex.Message}");
+                }
+            }
+        }
+
+        // --- Eliminación con modal de confirmación ---
+        private GastoVehiculo? _gastoPendienteEliminar;
+
+        private void BtnEliminarGasto_Click(object sender, RoutedEventArgs e)
+        {
+            _gastoPendienteEliminar = ((Button)sender).DataContext as GastoVehiculo;
+            if (_gastoPendienteEliminar != null)
+            {
+                runNombreGasto.Text = $"\"{_gastoPendienteEliminar.Concepto}\"";
+                MostrarOverlayConfirm(true);
+            }
+        }
+
+        private void ConfirmCancelar_Click(object sender, RoutedEventArgs e)
+        {
+            _gastoPendienteEliminar = null;
+            MostrarOverlayConfirm(false);
+        }
+
+        private void ConfirmEliminar_Click(object sender, RoutedEventArgs e)
+        {
+            var gasto = _gastoPendienteEliminar;
+            MostrarOverlayConfirm(false);
+            _gastoPendienteEliminar = null;
+
+            if (gasto == null) return;
+
+            try
+            {
+                using (var db = new AppDbContext())
+                {
+                    var dbGasto = db.GastosVehiculo.Find(gasto.Id);
+                    if (dbGasto != null)
+                    {
+                        db.GastosVehiculo.Remove(dbGasto);
+                        db.SaveChanges();
+                    }
+                }
+                VehiculoActual.Gastos.Remove(gasto);
+                VehiculoActual.NotificarCambioTotal();
+                toast.Show("Registro eliminado");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error al eliminar: {ex.Message}");
+            }
+        }
+
+        private void MostrarOverlayConfirm(bool visible)
+        {
+            if (visible)
+            {
+                OverlayConfirm.Visibility = Visibility.Visible;
+                OverlayConfirm.BeginAnimation(OpacityProperty,
+                    new System.Windows.Media.Animation.DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(150)));
+            }
+            else
+            {
+                OverlayConfirm.Visibility = Visibility.Collapsed;
             }
         }
 

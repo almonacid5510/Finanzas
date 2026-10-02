@@ -1,4 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
+// ============================================================
+//  Proyecto: Mis Finanzas
+//  Autoria: Juan Almonacid
+//  Copyright (c) 2026 Juan Almonacid. Todos los derechos reservados.
+// ============================================================
+using Microsoft.EntityFrameworkCore;
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
@@ -28,8 +33,8 @@ namespace MisFinanzas.Modulos
 
         private void BtnAgregarCredito_Click(object sender, RoutedEventArgs e)
         {
-            if (decimal.TryParse(txtTotalCredito.Text, out decimal total) &&
-                decimal.TryParse(txtCuotaCredito.Text, out decimal cuota) &&
+            if (NumeroHelper.TryParseMoneda(txtTotalCredito.Text, out decimal total) &&
+                NumeroHelper.TryParseMoneda(txtCuotaCredito.Text, out decimal cuota) &&
                 !string.IsNullOrWhiteSpace(txtNombreCredito.Text))
             {
                 try
@@ -42,7 +47,7 @@ namespace MisFinanzas.Modulos
                             NombreCustom = txtNombreCredito.Text,
                             Tipo = txtNombreCredito.Text, // Llenamos ambos por si acaso
                             Total = total,
-                            Disponible = total - (decimal.TryParse(txtAbonoCredito.Text, out var a) ? a : 0),
+                            Disponible = total - (NumeroHelper.TryParseMoneda(txtAbonoCredito.Text, out var a) ? a : 0),
                             CuotaMensual = cuota,
                             TasaEA = double.TryParse(txtTasaEA.Text, out var t) ? t : 0,
                             PlazoMeses = int.TryParse(txtPlazo.Text, out var p) ? p : 0,
@@ -69,57 +74,27 @@ namespace MisFinanzas.Modulos
             }
         }
 
-        // Este es el método que hace la magia de la persistencia
-        private void GuardarCreditoEnBD(string nom, decimal cuota, decimal total, decimal pagado, decimal tasa, int meses)
+        // Un solo botón alterna entre Editar (✎) y Guardar (✔)
+        private void BtnToggleEdicion_Click(object sender, RoutedEventArgs e)
         {
-            try
+            var creditoEditado = ((Button)sender).DataContext as Credito;
+            if (creditoEditado == null) return;
+
+            if (!creditoEditado.Editando)
             {
-                using (var connection = DatabaseConfig.GetConnection())
-                {
-                    connection.Open();
-                    var command = connection.CreateCommand();
-
-                    command.CommandText = @"INSERT INTO Creditos (NombreCustom, MontoTotal, SaldoPendiente, Tasa, PlazoMeses, CuotaMensual) 
-                        VALUES (@nom, @total, @pendiente, @tasa, @meses, @cuota)";
-                    command.Parameters.AddWithValue("@cuota", cuota); // Ya recibes 'cuota' como parámetro en este método
-
-                    command.Parameters.AddWithValue("@nom", nom);
-                    command.Parameters.AddWithValue("@total", total);
-                    command.Parameters.AddWithValue("@pendiente", total - pagado);
-                    command.Parameters.AddWithValue("@tasa", tasa);
-                    command.Parameters.AddWithValue("@meses", meses);
-
-                    command.ExecuteNonQuery();
-                }
+                // Estaba en solo lectura -> activar edición
+                creditoEditado.Editando = true;
             }
-            catch (Exception ex)
+            else
             {
-                MessageBox.Show("Error al guardar en la base de datos: " + ex.Message);
-            }
-        }
+                // Aseguramos que el TextBox con foco confirme su valor (UpdateSourceTrigger=LostFocus)
+                var enfocado = System.Windows.Input.Keyboard.FocusedElement as System.Windows.Controls.TextBox;
+                enfocado?.GetBindingExpression(System.Windows.Controls.TextBox.TextProperty)?.UpdateSource();
 
-        private void BtnActivarEdicion_Click(object sender, RoutedEventArgs e) =>
-            ((Credito)((Button)sender).DataContext).Editando = true;
-
-        private void BtnGuardarEdicion_Click(object sender, RoutedEventArgs e)
-        {
-            // 1. Identificamos el crédito que se está editando
-            var boton = sender as Button;
-            var creditoEditado = boton?.DataContext as Credito;
-
-            if (creditoEditado != null)
-            {
-                // 2. LLAMADA CRUCIAL: Guardamos los cambios en SQLite
-                // Pasamos el objeto completo que ya tiene el ID y los datos nuevos
+                // Estaba en edición -> guardar y volver a solo lectura
                 ActualizarCreditoEnBD(creditoEditado);
-
-                // 3. Cerramos el modo edición visual (lo que ya hacías)
                 creditoEditado.Editando = false;
-
-                // 4. Refrescamos la tabla para que se bloqueen los TextBox
-                icListaCreditos.Items.Refresh();
-
-                MessageBox.Show("Cambios guardados correctamente.");
+                toast.Show("Cambios guardados correctamente");
             }
         }
 
@@ -127,26 +102,11 @@ namespace MisFinanzas.Modulos
         {
             try
             {
-                using (var connection = DatabaseConfig.GetConnection())
+                c.NombreCustom = c.Tipo; // Sincronizamos NombreCustom con el Tipo que se edita en la interfaz
+                using (var db = new AppDbContext())
                 {
-                    connection.Open();
-                    var command = connection.CreateCommand();
-
-                    // Usamos el ID para asegurar que editamos la fila correcta
-                    command.CommandText = @"UPDATE Creditos SET 
-                        NombreCustom = @nom, MontoTotal = @total, SaldoPendiente = @pendiente, 
-                        Tasa = @tasa, PlazoMeses = @meses, CuotaMensual = @cuota 
-                        WHERE Id = @id";
-                    command.Parameters.AddWithValue("@cuota", c.CuotaMensual);
-
-                    command.Parameters.AddWithValue("@nom", c.Tipo);
-                    command.Parameters.AddWithValue("@total", c.Total);
-                    command.Parameters.AddWithValue("@pendiente", c.Disponible);
-                    command.Parameters.AddWithValue("@tasa", (decimal)c.TasaEA);
-                    command.Parameters.AddWithValue("@meses", c.PlazoMeses);
-                    command.Parameters.AddWithValue("@id", c.Id);
-
-                    command.ExecuteNonQuery();
+                    db.Creditos.Update(c);
+                    db.SaveChanges();
                 }
             }
             catch (Exception ex)
@@ -155,78 +115,69 @@ namespace MisFinanzas.Modulos
             }
         }
 
+        // Crédito pendiente de confirmar eliminación
+        private Credito? _creditoPendienteEliminar;
+
         private void BtnEliminar_Click(object sender, RoutedEventArgs e)
         {
-            // 1. Identificamos el crédito desde el botón
             var button = sender as Button;
-            var creditoAEliminar = button?.DataContext as Credito;
+            _creditoPendienteEliminar = button?.DataContext as Credito;
 
-            if (creditoAEliminar != null)
+            if (_creditoPendienteEliminar != null)
             {
-                // 2. Llamamos al método que tiene el MessageBox
-                EliminarCreditoGlobal(creditoAEliminar);
+                runNombreCredito.Text = $"\"{_creditoPendienteEliminar.NombreCustom}\"";
+                MostrarOverlayConfirm(true);
             }
         }
 
-        // Método de apoyo para la persistencia
-        private void EliminarCreditoDeBD(string nombre)
+        private void ConfirmCancelar_Click(object sender, RoutedEventArgs e)
         {
-            try
-            {
-                using (var connection = DatabaseConfig.GetConnection())
-                {
-                    connection.Open();
-                    var command = connection.CreateCommand();
-
-                    // Usamos NombreCustom porque es el campo parametrizable en tu DB
-                    command.CommandText = "DELETE FROM Creditos WHERE NombreCustom = @nom";
-                    command.Parameters.AddWithValue("@nom", nombre);
-
-                    command.ExecuteNonQuery();
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Error al borrar en base de datos: " + ex.Message);
-            }
+            _creditoPendienteEliminar = null;
+            MostrarOverlayConfirm(false);
         }
 
-        private void CargarCreditosDesdeBD()
+        private void ConfirmEliminar_Click(object sender, RoutedEventArgs e)
         {
+            var credito = _creditoPendienteEliminar;
+            MostrarOverlayConfirm(false);
+            _creditoPendienteEliminar = null;
+
+            if (credito == null) return;
+
             try
             {
-                using (var connection = DatabaseConfig.GetConnection())
+                using (var db = new AppDbContext())
                 {
-                    connection.Open();
-                    var command = connection.CreateCommand();
-
-                    // AGREGAMOS "Id" al principio de la consulta SQL
-                    command.CommandText = "SELECT Id, NombreCustom, MontoTotal, SaldoPendiente, Tasa, PlazoMeses, CuotaMensual FROM Creditos";
-
-                    using (var reader = command.ExecuteReader())
+                    var creditoDb = db.Creditos.Find(credito.Id);
+                    if (creditoDb != null)
                     {
-                        ListaCreditosPersistente.Clear();
-                        while (reader.Read())
-                        {
-                            ListaCreditosPersistente.Add(new Credito
-                            {
-                                // Ahora los índices coinciden con el SELECT de arriba
-                                Id = reader.GetInt32(0),          
-                                Tipo = reader.GetString(1),        
-                                Total = reader.GetDecimal(2),      
-                                Disponible = reader.GetDecimal(3), 
-                                TasaEA = reader.GetDouble(4),      
-                                PlazoMeses = reader.GetInt32(5),
-                                CuotaMensual = reader.GetDecimal(6), 
-                                Editando = false
-                            });
-                        }
+                        db.Creditos.Remove(creditoDb);
+                        db.SaveChanges();
                     }
                 }
+
+                if (ListaCreditosPersistente.Contains(credito))
+                    ListaCreditosPersistente.Remove(credito);
+
+                toast.Show("Crédito eliminado");
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error al cargar datos: " + ex.Message);
+                MessageBox.Show("Error al eliminar: " + ex.Message);
+            }
+        }
+
+        private void MostrarOverlayConfirm(bool visible)
+        {
+            if (visible)
+            {
+                OverlayConfirm.Visibility = Visibility.Visible;
+                OverlayConfirm.BeginAnimation(OpacityProperty,
+                    new System.Windows.Media.Animation.DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(150)));
+            }
+            else
+            {
+                OverlayConfirm.Visibility = Visibility.Collapsed;
             }
         }
         // En CreditosView.xaml.cs
@@ -244,40 +195,13 @@ namespace MisFinanzas.Modulos
                         ListaCreditosPersistente.Clear();
                         foreach (var c in lista)
                         {
+                            c.Editando = false; // siempre inician en modo solo lectura
                             ListaCreditosPersistente.Add(c);
                         }
                     });
                 }
             }
             catch (Exception ex) { /* ... */ }
-        }
-        // Método para eliminar de forma global
-        public static void EliminarCreditoGlobal(Credito credito)
-        {
-            if (credito == null) return;
-
-            var resultado = MessageBox.Show($"¿Estás seguro de que deseas eliminar el crédito '{credito.NombreCustom}'?",
-                                          "Confirmar eliminación",
-                                          MessageBoxButton.YesNo,
-                                          MessageBoxImage.Warning);
-
-            if (resultado == MessageBoxResult.Yes)
-            {
-                using (var db = new AppDbContext())
-                {
-                    var creditoDb = db.Creditos.Find(credito.Id);
-                    if (creditoDb != null)
-                    {
-                        db.Creditos.Remove(creditoDb);
-                        db.SaveChanges();
-                    }
-                }
-
-                if (ListaCreditosPersistente.Contains(credito))
-                {
-                    ListaCreditosPersistente.Remove(credito);
-                }
-            }
         }
     }
 }
