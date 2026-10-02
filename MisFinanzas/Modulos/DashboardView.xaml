@@ -64,7 +64,7 @@
     </UserControl.Resources>
 
     <!-- Toda la página se desplaza: así ninguna tarjeta queda cortada en ventanas pequeñas -->
-    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" PreviewMouseWheel="Pagina_PreviewMouseWheel">
     <StackPanel Margin="25,20,25,25">
 
         <!-- ===== ENCABEZADO + ESTADO DE SALUD FINANCIERA ===== -->
@@ -96,8 +96,9 @@
                     <Grid>
                         <TextBlock Text="TOTAL INGRESOS" FontSize="11" FontWeight="Bold" Foreground="#718096" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Margin="0,0,40,0"/>
                         <Border Width="34" Height="34" Background="#F0FFF4" CornerRadius="10" HorizontalAlignment="Right">
-                            <TextBlock Text="&#xE1D8;" FontFamily="Segoe MDL2 Assets" FontSize="16" Foreground="#2F855A"
-                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <Viewbox Width="18" Height="18">
+                                <Path Width="24" Height="24" Data="M3,17 L9,11 L13,15 L21,7 M15,7 H21 V13" Stroke="#2F855A" StrokeThickness="2" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                            </Viewbox>
                         </Border>
                     </Grid>
                     <Viewbox Height="28" HorizontalAlignment="Left" Margin="0,10,0,0" StretchDirection="DownOnly" Stretch="Uniform">
@@ -113,8 +114,9 @@
                     <Grid>
                         <TextBlock Text="GASTOS DEL MES" FontSize="11" FontWeight="Bold" Foreground="#718096" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Margin="0,0,40,0"/>
                         <Border Width="34" Height="34" Background="#FFF5F5" CornerRadius="10" HorizontalAlignment="Right">
-                            <TextBlock Text="&#xE7BB;" FontFamily="Segoe MDL2 Assets" FontSize="16" Foreground="#E53E3E"
-                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <Viewbox Width="18" Height="18">
+                                <Path Width="24" Height="24" Data="M3,7 L9,13 L13,9 L21,17 M15,17 H21 V11" Stroke="#E53E3E" StrokeThickness="2" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                            </Viewbox>
                         </Border>
                     </Grid>
                     <Viewbox Height="28" HorizontalAlignment="Left" Margin="0,10,0,0" StretchDirection="DownOnly" Stretch="Uniform">
@@ -130,8 +132,9 @@
                     <Grid>
                         <TextBlock Text="DISPONIBLE" FontSize="11" FontWeight="Bold" Foreground="#718096" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Margin="0,0,40,0"/>
                         <Border Width="34" Height="34" Background="#EBF8FF" CornerRadius="10" HorizontalAlignment="Right">
-                            <TextBlock Text="&#xE8C7;" FontFamily="Segoe MDL2 Assets" FontSize="16" Foreground="#3182CE"
-                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <Viewbox Width="18" Height="18">
+                                <Path Width="24" Height="24" Data="M4,8 A2,2 0 0 1 6,6 H18 A2,2 0 0 1 20,8 V17 A2,2 0 0 1 18,19 H6 A2,2 0 0 1 4,17 Z M4,10 H20 M15,14.5 H17" Stroke="#3182CE" StrokeThickness="2" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                            </Viewbox>
                         </Border>
                     </Grid>
                     <Viewbox Height="28" HorizontalAlignment="Left" Margin="0,10,0,0" StretchDirection="DownOnly" Stretch="Uniform">
@@ -147,8 +150,9 @@
                     <Grid>
                         <TextBlock Text="VEHÍCULOS" FontSize="11" FontWeight="Bold" Foreground="#718096" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Margin="0,0,40,0"/>
                         <Border Width="34" Height="34" Background="#EBF4FF" CornerRadius="10" HorizontalAlignment="Right">
-                            <TextBlock Text="&#xE804;" FontFamily="Segoe MDL2 Assets" FontSize="16" Foreground="#2B6CB0"
-                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <Viewbox Width="18" Height="18">
+                                <Path Width="24" Height="24" Data="M5,16 V12 L7,7 H17 L19,12 V16 Z M5,12 H19 M8,14 H9 M15,14 H16 M6,16 V18 M18,16 V18" Stroke="#2B6CB0" StrokeThickness="2" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                            </Viewbox>
                         </Border>
                     </Grid>
                     <Viewbox Height="28" HorizontalAlignment="Left" Margin="0,10,0,0" StretchDirection="DownOnly" Stretch="Uniform">
@@ -233,7 +237,6 @@
                     </StackPanel>
                     <TextBlock x:Name="lblSinProximas" DockPanel.Dock="Top" Text="Nada por pagar en los próximos 30 días."
                                Style="{StaticResource TextoVacio}" Visibility="Collapsed"/>
-                    <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="250">
                         <ItemsControl x:Name="icProximasFechas">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
@@ -261,7 +264,6 @@
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
-                    </ScrollViewer>
                 </DockPanel>
             </Border>
         </Grid>
@@ -283,7 +285,6 @@
                     </StackPanel>
                     <TextBlock x:Name="lblSinCuentas" DockPanel.Dock="Top" Style="{StaticResource TextoVacio}" Visibility="Collapsed"
                                Text="No hay gastos registrados este mes. Agrégalos en la pestaña Cuentas."/>
-                    <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="320">
                         <ItemsControl x:Name="icEstadoCuentas">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
@@ -313,7 +314,6 @@
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
-                    </ScrollViewer>
                 </DockPanel>
             </Border>
 
@@ -326,7 +326,6 @@
                     </StackPanel>
                     <TextBlock x:Name="lblSinCategorias" DockPanel.Dock="Top" Style="{StaticResource TextoVacio}" Visibility="Collapsed"
                                Text="Aún no hay gastos este mes."/>
-                    <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="320">
                         <ItemsControl x:Name="icCategoriasMes">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
@@ -347,7 +346,6 @@
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
-                    </ScrollViewer>
                 </DockPanel>
             </Border>
         </Grid>
