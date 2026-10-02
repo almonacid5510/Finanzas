@@ -32,7 +32,7 @@
                                            Fill="#4A90E2" RadiusX="2" RadiusY="2" Margin="0,10"
                                            Visibility="Collapsed"/>
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                    <!-- Icono (viene del Tag): un emoji o un dibujo vectorial.
+                                    <!-- Icono (viene del Tag): un dibujo vectorial (o un emoji).
                                          Ancho fijo para alinear en modo colapsado -->
                                     <Border Width="48" VerticalAlignment="Center">
                                         <ContentPresenter Content="{TemplateBinding Tag}" TextElement.FontSize="20"
@@ -60,6 +60,32 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <!-- ===== Íconos del menú: dibujos de línea con el mismo grosor (cuadrícula de 24x24).
+             Toman el color del texto del botón: gris normal, blanco cuando está activo. ===== -->
+        <Style x:Key="IconoNav" TargetType="Path">
+            <Setter Property="Width" Value="24"/>
+            <Setter Property="Height" Value="24"/>
+            <Setter Property="StrokeThickness" Value="1.8"/>
+            <Setter Property="StrokeLineJoin" Value="Round"/>
+            <Setter Property="StrokeStartLineCap" Value="Round"/>
+            <Setter Property="StrokeEndLineCap" Value="Round"/>
+            <Setter Property="Stroke" Value="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
+        </Style>
+        <!-- Dashboard: gráfico de barras dentro de un marco -->
+        <Geometry x:Key="IcoDashboard">M5,3 H19 A2,2 0 0 1 21,5 V19 A2,2 0 0 1 19,21 H5 A2,2 0 0 1 3,19 V5 A2,2 0 0 1 5,3 Z M8,17 V13 M12,17 V8 M16,17 V11</Geometry>
+        <!-- Ingresos: moneda con signo $ -->
+        <Geometry x:Key="IcoIngresos">M3,12 A9,9 0 1 1 21,12 A9,9 0 1 1 3,12 Z M14.8,9.4 C14.6,8.3 13.5,7.6 12,7.6 C10.4,7.6 9.3,8.4 9.3,9.6 C9.3,12.4 14.8,11.2 14.8,14.3 C14.8,15.6 13.6,16.4 12,16.4 C10.4,16.4 9.3,15.6 9.2,14.5 M12,6 V7.6 M12,16.4 V18</Geometry>
+        <!-- Cuentas: recibo / factura -->
+        <Geometry x:Key="IcoCuentas">M6,3 H18 V21 L15.5,19.5 L13,21 L10.5,19.5 L8,21 L6,19.8 Z M9,8 H15 M9,12 H15 M9,16 H12</Geometry>
+        <!-- Créditos: tarjeta -->
+        <Geometry x:Key="IcoCreditos">M3,7 A2,2 0 0 1 5,5 H19 A2,2 0 0 1 21,7 V17 A2,2 0 0 1 19,19 H5 A2,2 0 0 1 3,17 Z M3,10 H21 M7,15 H10</Geometry>
+        <!-- Vehículos: carro -->
+        <Geometry x:Key="IcoVehiculos">M5,17 V12 L7,6.5 H17 L19,12 V17 Z M5,12 H19 M8,14.5 H9 M15,14.5 H16 M6.5,17 V19 M17.5,17 V19</Geometry>
+        <!-- Inversiones: caja fuerte -->
+        <Geometry x:Key="IcoInversiones">M5,3 H19 A2,2 0 0 1 21,5 V17 A2,2 0 0 1 19,19 H5 A2,2 0 0 1 3,17 V5 A2,2 0 0 1 5,3 Z M8.5,11 A3.5,3.5 0 1 1 15.5,11 A3.5,3.5 0 1 1 8.5,11 Z M12,11 L14,9 M6,7 V9 M6,13 V15 M7,19 V21 M17,19 V21</Geometry>
+        <!-- Logo: billetera -->
+        <Geometry x:Key="IcoLogo">M4,7 A2,2 0 0 1 6,5 H18 A2,2 0 0 1 20,7 V9 M4,7 V17 A2,2 0 0 1 6,19 H20 V9 H6 A2,2 0 0 1 4,7 Z M16,14 H16.5</Geometry>
     </Window.Resources>
 
     <Grid>
@@ -87,26 +113,44 @@
                 <!-- Logo / título: mismo margen lateral (8px) que los botones de navegación
                      para que el ícono quede alineado con el resto del menú -->
                 <StackPanel Orientation="Horizontal" Height="40" Margin="8,0,8,25">
-                    <TextBlock Text="💼" FontSize="22" Width="48" TextAlignment="Center"
-                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    <Border Width="48" VerticalAlignment="Center">
+                        <Viewbox Width="26" Height="26" HorizontalAlignment="Center">
+                            <Path Data="{StaticResource IcoLogo}" Width="24" Height="24" Stroke="White" StrokeThickness="1.8"
+                                  StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                        </Viewbox>
+                    </Border>
                     <TextBlock x:Name="txtLogo" Text="MIS FINANZAS" Foreground="White" FontSize="16" FontWeight="Bold"
                                VerticalAlignment="Center" Opacity="0"/>
                 </StackPanel>
 
-                <Button x:Name="btnNavDashboard" Content="Dashboard" Tag="📊" Click="NavDashboard_Click" Style="{StaticResource NavButtonStyle}"/>
-                <Button x:Name="btnNavIngresos"  Content="Ingresos"  Tag="💰" Click="NavIngresos_Click"  Style="{StaticResource NavButtonStyle}"/>
-                <Button x:Name="btnNavCuentas"   Content="Cuentas"   Tag="🏦" Click="NavCuentas_Click"   Style="{StaticResource NavButtonStyle}"/>
-                <Button x:Name="btnNavCreditos"  Content="Créditos"  Tag="💳" Click="NavCreditos_Click"  Style="{StaticResource NavButtonStyle}"/>
-                <Button x:Name="btnNavVehiculo"  Content="Vehiculos" Tag="🚗" Click="NavVehiculo_Click"  Style="{StaticResource NavButtonStyle}"/>
-                <Button x:Name="btnNavNegocio"   Content="Inversiones" Click="NavNegocio_Click"  Style="{StaticResource NavButtonStyle}">
-                    <!-- Caja fuerte dibujada (no existe emoji); toma el color del texto del menú -->
+                <Button x:Name="btnNavDashboard" Content="Dashboard" Click="NavDashboard_Click" Style="{StaticResource NavButtonStyle}">
                     <Button.Tag>
-                        <Viewbox Width="22" Height="22">
-                            <Path Width="24" Height="24" StrokeThickness="1.7"
-                                  StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
-                                  Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
-                                  Data="M5,3 H19 A2,2 0 0 1 21,5 V17 A2,2 0 0 1 19,19 H5 A2,2 0 0 1 3,17 V5 A2,2 0 0 1 5,3 Z M8.5,11 A3.5,3.5 0 1 1 15.5,11 A3.5,3.5 0 1 1 8.5,11 Z M12,11 L14,9 M6,7 V9 M6,13 V15 M7,19 V21 M17,19 V21"/>
-                        </Viewbox>
+                        <Viewbox Width="22" Height="22"><Path Style="{StaticResource IconoNav}" Data="{StaticResource IcoDashboard}"/></Viewbox>
+                    </Button.Tag>
+                </Button>
+                <Button x:Name="btnNavIngresos" Content="Ingresos" Click="NavIngresos_Click" Style="{StaticResource NavButtonStyle}">
+                    <Button.Tag>
+                        <Viewbox Width="22" Height="22"><Path Style="{StaticResource IconoNav}" Data="{StaticResource IcoIngresos}"/></Viewbox>
+                    </Button.Tag>
+                </Button>
+                <Button x:Name="btnNavCuentas" Content="Cuentas" Click="NavCuentas_Click" Style="{StaticResource NavButtonStyle}">
+                    <Button.Tag>
+                        <Viewbox Width="22" Height="22"><Path Style="{StaticResource IconoNav}" Data="{StaticResource IcoCuentas}"/></Viewbox>
+                    </Button.Tag>
+                </Button>
+                <Button x:Name="btnNavCreditos" Content="Créditos" Click="NavCreditos_Click" Style="{StaticResource NavButtonStyle}">
+                    <Button.Tag>
+                        <Viewbox Width="22" Height="22"><Path Style="{StaticResource IconoNav}" Data="{StaticResource IcoCreditos}"/></Viewbox>
+                    </Button.Tag>
+                </Button>
+                <Button x:Name="btnNavVehiculo" Content="Vehículos" Click="NavVehiculo_Click" Style="{StaticResource NavButtonStyle}">
+                    <Button.Tag>
+                        <Viewbox Width="22" Height="22"><Path Style="{StaticResource IconoNav}" Data="{StaticResource IcoVehiculos}"/></Viewbox>
+                    </Button.Tag>
+                </Button>
+                <Button x:Name="btnNavNegocio" Content="Inversiones" Click="NavNegocio_Click" Style="{StaticResource NavButtonStyle}">
+                    <Button.Tag>
+                        <Viewbox Width="22" Height="22"><Path Style="{StaticResource IconoNav}" Data="{StaticResource IcoInversiones}"/></Viewbox>
                     </Button.Tag>
                 </Button>
               </StackPanel>
