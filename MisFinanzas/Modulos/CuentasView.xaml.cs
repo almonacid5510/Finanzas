@@ -6,39 +6,36 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
-using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
 
 namespace MisFinanzas.Modulos
 {
     public partial class CuentasView : UserControl
     {
-        // Todas las cuentas (de todos los meses). La pantalla muestra solo las del mes seleccionado.
+        // Todas las cuentas registradas (plantillas recurrentes). El Dashboard escucha sus cambios.
         public static ObservableCollection<Movimiento> listaCuentasPersistente { get; set; } = new ObservableCollection<Movimiento>();
 
         // Mes que se está consultando (siempre el día 1)
         private DateTime _mesSeleccionado = Periodo.InicioMes(DateTime.Today);
 
-        // Vista filtrada propia de esta pantalla sobre la lista global
-        private readonly ListCollectionView _cuentasDelMes;
+        // Cuentas del mes seleccionado, con su vencimiento y estado de pago de ese mes
+        private readonly ObservableCollection<CuentaMes> _cuentasDelMes = new ObservableCollection<CuentaMes>();
 
         public CuentasView()
         {
             InitializeComponent();
+
+            // Días posibles de pago; por defecto el día de hoy
+            cbDiaPago.ItemsSource = Enumerable.Range(1, 31).ToList();
+            cbDiaPago.SelectedItem = DateTime.Today.Day;
 
             // 1. Cargamos los datos
             CreditosView.CargarDatosGlobal();
             CargarDatosDesdeBD();
 
             // 2. Vinculamos las listas
-            _cuentasDelMes = new ListCollectionView(listaCuentasPersistente)
-            {
-                Filter = o => Periodo.CuentaDelMes((Movimiento)o, _mesSeleccionado)
-            };
-            _cuentasDelMes.SortDescriptions.Add(new SortDescription(nameof(Movimiento.Fecha), ListSortDirection.Ascending));
             icCuentas.ItemsSource = _cuentasDelMes;
             icCreditosCompromisos.ItemsSource = CreditosView.ListaCreditosPersistente;
 
@@ -75,6 +72,25 @@ namespace MisFinanzas.Modulos
             }
         }
 
+        // Recalcula qué cuentas aplican al mes seleccionado y su estado de pago
+        private void CargarCuentasDelMes()
+        {
+            try
+            {
+                using (var db = new AppDbContext())
+                {
+                    _cuentasDelMes.Clear();
+                    foreach (var c in CuentasMensuales.DelMes(db, _mesSeleccionado))
+                        _cuentasDelMes.Add(c);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al cargar las cuentas del mes: " + ex.Message);
+            }
+            ActualizarTotal();
+        }
+
         private void Lista_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs? e)
         {
             ActualizarTotal();
@@ -88,7 +104,6 @@ namespace MisFinanzas.Modulos
         private void CambiarMes(DateTime mes)
         {
             _mesSeleccionado = Periodo.InicioMes(mes);
-            _cuentasDelMes.Refresh();
             MostrarMes();
         }
 
@@ -101,25 +116,26 @@ namespace MisFinanzas.Modulos
 
             // El estado de pago de los créditos solo existe para el mes en curso
             pnlCreditos.Visibility = esActual ? Visibility.Visible : Visibility.Collapsed;
-            ActualizarTotal();
+            CargarCuentasDelMes();
         }
 
         private void BtnAgregarCuenta_Click(object sender, RoutedEventArgs e)
         {
-            if (!string.IsNullOrWhiteSpace(txtDescCuenta.Text) && NumeroHelper.TryParseMoneda(txtValorCuenta.Text, out decimal valor))
+            if (!string.IsNullOrWhiteSpace(txtDescCuenta.Text) &&
+                NumeroHelper.TryParseMoneda(txtValorCuenta.Text, out decimal valor) &&
+                cbDiaPago.SelectedItem is int dia)
             {
-                // Sin fecha elegida: hoy si se ve el mes actual, o el día 1 del mes que se está viendo
-                var fechaPorDefecto = Periodo.EsMesActual(_mesSeleccionado) ? DateTime.Now : _mesSeleccionado;
-
+                // El gasto se repite cada mes el día elegido, a partir del mes que se está viendo
                 var nuevaCuenta = new Movimiento
                 {
-                    Fecha = dpFechaGasto.SelectedDate ?? fechaPorDefecto,
                     Descripcion = txtDescCuenta.Text,
                     Costo = 0,
                     Venta = valor,
                     EstaPagado = false,
-                    Tipo = "Cuenta"
+                    Tipo = "Cuenta",
+                    DiaPago = dia
                 };
+                nuevaCuenta.Fecha = CuentasMensuales.Vencimiento(nuevaCuenta, _mesSeleccionado);
 
                 // 1. Guardamos en la base de datos
                 try
@@ -136,13 +152,10 @@ namespace MisFinanzas.Modulos
                     return;
                 }
 
-                // 2. Agregamos a la lista visual
+                // 2. Actualizamos las listas visuales
                 listaCuentasPersistente.Add(nuevaCuenta);
-                ActualizarTotal();
-
-                // Si la cuenta cae en otro mes, avisamos dónde quedó
-                if (!Periodo.CuentaDelMes(nuevaCuenta, _mesSeleccionado))
-                    toast.Show($"Gasto registrado en {Periodo.Nombre(nuevaCuenta.Fecha)}");
+                CargarCuentasDelMes();
+                toast.Show($"Gasto registrado: se repetirá el día {dia} de cada mes");
 
                 // 3. Limpiar campos
                 txtDescCuenta.Clear();
@@ -153,16 +166,14 @@ namespace MisFinanzas.Modulos
             }
             else
             {
-                MessageBox.Show("Por favor, ingresa una descripción y un valor válido.");
+                MessageBox.Show("Por favor, ingresa una descripción, un valor válido y el día de pago.");
             }
         }
 
         public void ActualizarTotal()
         {
-            // 1. Sumar Movimientos (Gastos) no pagados del mes seleccionado
-            decimal totalMovimientos = listaCuentasPersistente
-                .Where(m => !m.EstaPagado && Periodo.CuentaDelMes(m, _mesSeleccionado))
-                .Sum(m => m.Venta);
+            // 1. Sumar las cuentas del mes seleccionado que no se han pagado
+            decimal totalMovimientos = _cuentasDelMes.Where(c => !c.Pagada).Sum(c => c.Venta);
 
             // 2. Sumar cuotas de créditos no pagadas (solo aplica al mes en curso)
             decimal totalCreditos = Periodo.EsMesActual(_mesSeleccionado)
@@ -173,31 +184,30 @@ namespace MisFinanzas.Modulos
         }
 
 
-        // Método para eliminar el gasto de la lista y de la base de datos
+        // Deja de cobrar el gasto desde el mes que se está viendo (los meses anteriores se conservan)
         private void BtnEliminar_Click(object sender, RoutedEventArgs e)
         {
-            var boton = (Button)sender;
-            var movimientoAEliminar = (Movimiento)boton.DataContext;
+            if (((Button)sender).DataContext is not CuentaMes cuentaMes) return;
 
-            if (movimientoAEliminar != null)
+            try
             {
-                // 1. Eliminar de la base de datos física
-                try
+                bool borradaCompleta;
+                using (var db = new AppDbContext())
                 {
-                    using (var db = new AppDbContext())
-                    {
-                        db.Movimientos.Remove(movimientoAEliminar);
-                        db.SaveChanges();
-                    }
+                    borradaCompleta = CuentasMensuales.EliminarDesde(db, cuentaMes.Cuenta.Id, _mesSeleccionado);
+                }
 
-                    // 2. Eliminar de la lista visual
-                    listaCuentasPersistente.Remove(movimientoAEliminar);
-                    ActualizarTotal();
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("Error al eliminar: " + ex.Message);
-                }
+                var enLista = listaCuentasPersistente.FirstOrDefault(m => m.Id == cuentaMes.Cuenta.Id);
+                if (enLista != null) listaCuentasPersistente.Remove(enLista);
+                CargarCuentasDelMes();
+
+                toast.Show(borradaCompleta
+                    ? "Gasto eliminado"
+                    : $"\"{cuentaMes.Descripcion}\" ya no se cobrará desde {Periodo.Nombre(_mesSeleccionado)}");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al eliminar: " + ex.Message);
             }
         }
 
@@ -213,16 +223,10 @@ namespace MisFinanzas.Modulos
                 // 2. Usamos 'pattern matching' para saber qué tipo de dato es
                 using (var db = new AppDbContext())
                 {
-                    // CASO A: Es un Gasto normal (Movimiento)
-                    if (cb.DataContext is Movimiento mov)
+                    // CASO A: Es un gasto del mes: el pago se registra solo para ese mes
+                    if (cb.DataContext is CuentaMes cuentaMes)
                     {
-                        // Buscamos el registro en la BD por su ID y lo actualizamos
-                        var dbMov = db.Movimientos.Find(mov.Id);
-                        if (dbMov != null)
-                        {
-                            dbMov.EstaPagado = mov.EstaPagado; // Sincronizamos el estado
-                            db.SaveChanges();
-                        }
+                        CuentasMensuales.MarcarPagada(db, cuentaMes.Cuenta.Id, cuentaMes.Mes, cuentaMes.Pagada);
                     }
                     // CASO B: Es un Compromiso de Crédito (Credito): el pago vale para el mes actual
                     else if (cb.DataContext is Credito credito)

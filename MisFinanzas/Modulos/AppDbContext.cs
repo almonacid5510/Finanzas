@@ -16,6 +16,7 @@ namespace MisFinanzas.Modulos
         public DbSet<Vehiculo> Vehiculos { get; set; }
         public DbSet<GastoVehiculo> GastosVehiculo { get; set; }
         public DbSet<Credito> Creditos { get; set; }
+        public DbSet<PagoCuenta> PagosCuenta { get; set; }
 
         // La ruta en Documentos es correcta y persistente
         public static string RutaBD { get; set; } =

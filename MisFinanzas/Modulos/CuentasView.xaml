@@ -76,8 +76,9 @@
                     <TextBlock Grid.Row="0" Grid.Column="2" Text="VALOR ($)" Style="{StaticResource FieldLabel}"/>
                     <TextBox   Grid.Row="1" Grid.Column="2" x:Name="txtValorCuenta" Style="{StaticResource ModernInputNumeric}" local:NumeroHelper.EsMoneda="True"/>
 
-                    <TextBlock Grid.Row="0" Grid.Column="4" Text="FECHA DEL GASTO" Style="{StaticResource FieldLabel}"/>
-                    <DatePicker Grid.Row="1" Grid.Column="4" x:Name="dpFechaGasto" Style="{StaticResource ModernDatePicker}"/>
+                    <!-- Los gastos se repiten cada mes: solo se elige el día en que vencen -->
+                    <TextBlock Grid.Row="0" Grid.Column="4" Text="DÍA DE PAGO (CADA MES)" Style="{StaticResource FieldLabel}"/>
+                    <ComboBox  Grid.Row="1" Grid.Column="4" x:Name="cbDiaPago" Style="{StaticResource ModernCombo}" MaxDropDownHeight="260"/>
 
                     <Button Grid.Row="1" Grid.Column="6" Content="AGREGAR GASTO" Click="BtnAgregarCuenta_Click" Style="{StaticResource PrimaryButton}"/>
                 </Grid>
@@ -103,7 +104,7 @@
                     </Grid.ColumnDefinitions>
 
                     <TextBlock Grid.Column="1" Text="Descripción" FontSize="11" FontWeight="SemiBold" Foreground="#A0AEC0" HorizontalAlignment="Left"/>
-                    <TextBlock Grid.Column="2" Text="Fecha" FontSize="11" FontWeight="SemiBold" Foreground="#A0AEC0" HorizontalAlignment="Center"/>
+                    <TextBlock Grid.Column="2" Text="Vence" FontSize="11" FontWeight="SemiBold" Foreground="#A0AEC0" HorizontalAlignment="Center"/>
                     <TextBlock Grid.Column="3" Text="Valor" FontSize="11" FontWeight="SemiBold" Foreground="#A0AEC0" HorizontalAlignment="Right" Margin="0,0,8,0"/>
                 </Grid>
 
@@ -123,7 +124,7 @@
                                         <ColumnDefinition Width="40"/>
                                     </Grid.ColumnDefinitions>
 
-                                    <CheckBox IsChecked="{Binding EstaPagado, UpdateSourceTrigger=PropertyChanged}" 
+                                    <CheckBox IsChecked="{Binding Pagada, UpdateSourceTrigger=PropertyChanged}" 
                                               Click="CheckBox_Click" Style="{StaticResource ModernCheckBox}"
                                               VerticalAlignment="Center" HorizontalAlignment="Center"/>
 
@@ -134,7 +135,7 @@
                                                 <Setter Property="FontWeight" Value="SemiBold"/>
                                                 <Setter Property="Foreground" Value="#2D3748"/>
                                                 <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding EstaPagado}" Value="True">
+                                                    <DataTrigger Binding="{Binding Pagada}" Value="True">
                                                         <Setter Property="TextDecorations" Value="Strikethrough"/>
                                                         <Setter Property="Foreground" Value="#A0AEC0"/>
                                                         <Setter Property="FontWeight" Value="Normal"/>
@@ -144,8 +145,31 @@
                                         </TextBlock.Style>
                                     </TextBlock>
 
-                                    <Border Grid.Column="2" Background="#EDF2F7" CornerRadius="6" Padding="8,3" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                        <TextBlock Text="{Binding Fecha, StringFormat='{}{0:dd/MM/yyyy}'}" FontSize="12" Foreground="#718096"/>
+                                    <!-- Fecha de vencimiento en este mes; en rojo si ya pasó sin pagarse -->
+                                    <Border Grid.Column="2" CornerRadius="6" Padding="8,3" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="Background" Value="#EDF2F7"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Vencida}" Value="True">
+                                                        <Setter Property="Background" Value="#FFF5F5"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <TextBlock Text="{Binding Vence, StringFormat='{}{0:dd/MM/yyyy}'}" FontSize="12">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Foreground" Value="#718096"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Vencida}" Value="True">
+                                                            <Setter Property="Foreground" Value="#C53030"/>
+                                                            <Setter Property="FontWeight" Value="SemiBold"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
                                     </Border>
 
                                     <TextBlock Grid.Column="3" Text="{Binding Venta, StringFormat='{}{0:C0}'}" FontSize="14" FontWeight="Bold" Foreground="#2D3748" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,8,0"/>

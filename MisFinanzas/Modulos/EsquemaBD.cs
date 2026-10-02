@@ -71,7 +71,11 @@ namespace MisFinanzas.Modulos
                     scriptCreacion ??= db.Database.GenerateCreateScript();
                     var m = Regex.Match(scriptCreacion, $"CREATE TABLE \"{Regex.Escape(tabla)}\" \\(.*?\\n\\);",
                                         RegexOptions.Singleline);
-                    if (m.Success) cambios.Add(m.Value);
+                    if (m.Success)
+                    {
+                        cambios.Add(m.Value);
+                        AgregarDatosIniciales(cambios, tabla, null);
+                    }
                     continue;
                 }
 
@@ -85,10 +89,7 @@ namespace MisFinanzas.Modulos
                     if (!prop.IsColumnNullable(tablaId))
                         sql += $" NOT NULL DEFAULT {ValorPorDefecto(prop.ClrType)}";
                     cambios.Add(sql + ";");
-
-                    // Los créditos que ya estaban marcados como pagados se toman como pagados este mes
-                    if (tabla == "Creditos" && columna == nameof(Credito.MesPagado))
-                        cambios.Add($"UPDATE \"Creditos\" SET \"MesPagado\" = '{Periodo.MesActual}' WHERE \"Pagado\" = 1;");
+                    AgregarDatosIniciales(cambios, tabla, columna);
                 }
             }
 
@@ -99,12 +100,45 @@ namespace MisFinanzas.Modulos
                 cambios.Add($"ALTER TABLE \"{tabla}\" DROP COLUMN \"{columna}\";");
             }
 
-            // Gastos de vehículos que ya no existen (versiones anteriores no los borraban)
-            const string condicionHuerfanos = "FROM \"GastosVehiculo\" WHERE \"VehiculoId\" NOT IN (SELECT \"Id\" FROM \"Vehiculos\")";
-            if (Convert.ToInt64(Escalar(conn, $"SELECT COUNT(*) {condicionHuerfanos};")) > 0)
-                cambios.Add($"DELETE {condicionHuerfanos};");
+            // Registros que apuntan a algo que ya no existe (versiones anteriores no los borraban)
+            foreach (var (tabla, condicion) in Huerfanos)
+            {
+                if (LeerColumnas(conn, tabla).Count == 0) continue; // la tabla aún no existe
+                var desde = $"FROM \"{tabla}\" WHERE {condicion}";
+                if (Convert.ToInt64(Escalar(conn, $"SELECT COUNT(*) {desde};")) > 0)
+                    cambios.Add($"DELETE {desde};");
+            }
 
             return cambios;
+        }
+
+        private static readonly (string Tabla, string Condicion)[] Huerfanos =
+        {
+            ("GastosVehiculo", "\"VehiculoId\" NOT IN (SELECT \"Id\" FROM \"Vehiculos\")"),
+            ("PagosCuenta", "\"MovimientoId\" NOT IN (SELECT \"Id\" FROM \"MovimientosV2\")"),
+        };
+
+        // Completa los datos de una tabla (columna = null) o columna recién agregada a una BD existente
+        private static void AgregarDatosIniciales(List<string> cambios, string tabla, string? columna)
+        {
+            var sql = (tabla, columna) switch
+            {
+                // Los créditos que ya estaban marcados como pagados se toman como pagados este mes
+                ("Creditos", nameof(Credito.MesPagado)) =>
+                    $"UPDATE \"Creditos\" SET \"MesPagado\" = '{Periodo.MesActual}' WHERE \"Pagado\" = 1;",
+
+                // Las cuentas existentes se repiten cada mes el mismo día de su fecha
+                ("MovimientosV2", nameof(Movimiento.DiaPago)) =>
+                    "UPDATE \"MovimientosV2\" SET \"DiaPago\" = CAST(strftime('%d', \"Fecha\") AS INTEGER) WHERE \"Tipo\" = 'Cuenta';",
+
+                // Las cuentas que estaban pagadas quedan pagadas en el mes de su fecha
+                ("PagosCuenta", null) =>
+                    "INSERT INTO \"PagosCuenta\" (\"MovimientoId\", \"Mes\") " +
+                    "SELECT \"Id\", strftime('%Y-%m', \"Fecha\") FROM \"MovimientosV2\" WHERE \"Tipo\" = 'Cuenta' AND \"EstaPagado\" = 1;",
+
+                _ => null
+            };
+            if (sql != null) cambios.Add(sql);
         }
 
         private static HashSet<string> LeerColumnas(DbConnection conn, string tabla)
@@ -134,7 +168,9 @@ namespace MisFinanzas.Modulos
         // Copia consistente de la BD antes de tocar el esquema
         private static void RespaldarBD(DbConnection conn)
         {
-            var ruta = Path.ChangeExtension(AppDbContext.RutaBD, null) + $".respaldo-{DateTime.Now:yyyyMMdd-HHmmss}.db";
+            var baseRuta = Path.ChangeExtension(AppDbContext.RutaBD, null) + $".respaldo-{DateTime.Now:yyyyMMdd-HHmmss}";
+            var ruta = baseRuta + ".db";
+            for (int n = 2; File.Exists(ruta); n++) ruta = $"{baseRuta}-{n}.db"; // VACUUM INTO no sobrescribe
             Ejecutar(conn, $"VACUUM INTO '{ruta.Replace("'", "''")}';");
         }
 

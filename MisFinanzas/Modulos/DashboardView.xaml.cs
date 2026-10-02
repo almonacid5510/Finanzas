@@ -95,7 +95,7 @@ namespace MisFinanzas.Modulos
                 // Todo el resumen corresponde al mes en curso
                 var mesActual = DateTime.Today;
                 decimal totalIngresos;
-                System.Collections.Generic.List<Movimiento> cuentasDelMes;
+                System.Collections.Generic.List<CuentaMes> cuentasDelMes;
 
                 // --- 1. CONSULTAS A LA BASE DE DATOS (Entity Framework) ---
                 using (var db = new AppDbContext())
@@ -106,17 +106,13 @@ namespace MisFinanzas.Modulos
                                       .AsEnumerable()
                                       .Sum(m => m.Venta);
 
-                    // Cuentas del mes (incluye las pendientes arrastradas de meses anteriores)
-                    cuentasDelMes = db.Movimientos
-                                      .Where(m => m.Tipo == "Cuenta")
-                                      .AsEnumerable()
-                                      .Where(m => Periodo.CuentaDelMes(m, mesActual))
-                                      .ToList();
+                    // Gastos recurrentes que se cobran este mes, con su estado de pago del mes
+                    cuentasDelMes = CuentasMensuales.DelMes(db, mesActual);
                 }
 
                 // Los gastos del mes cuentan aunque ya estén pagados: pagar no cambia lo que se gastó.
                 decimal totalGastosCuentas = cuentasDelMes.Sum(m => m.Venta);
-                decimal pendienteCuentas = cuentasDelMes.Where(m => !m.EstaPagado).Sum(m => m.Venta);
+                decimal pendienteCuentas = cuentasDelMes.Where(m => !m.Pagada).Sum(m => m.Venta);
 
                 // --- 2. CONSULTA A LA LISTA PERSISTENTE DE CRÉDITOS ---
                 // Cada crédito registrado es un compromiso mensual por el valor de su cuota
@@ -185,37 +181,35 @@ namespace MisFinanzas.Modulos
 
                 // --- 7. ESTADO DE CUENTAS DEL MES ---
                 var listaEstados = new System.Collections.Generic.List<CuentaEstadoViewModel>();
-                var hoy = DateTime.Now.Date;
-
                 foreach (var c in cuentasDelMes)
                 {
-                    var vm = new CuentaEstadoViewModel { Cuenta = c };
-                    if (c.EstaPagado)
+                    var vm = new CuentaEstadoViewModel { Cuenta = c.Cuenta, Pagada = c.Pagada, Vence = c.Vence };
+                    if (c.Pagada)
                     {
                         vm.BackgroundColor = "#F0FFF4"; // Verde
                         vm.BorderColor = "#9AE6B4";
                         vm.TextColor = "#276749";
                         vm.MensajeEstado = "Pagada ✔️";
                     }
-                    else if (c.Fecha.Date < hoy)
+                    else if (c.Vencida)
                     {
                         vm.BackgroundColor = "#FFF5F5"; // Rojo
                         vm.BorderColor = "#FEB2B2";
                         vm.TextColor = "#C53030";
-                        vm.MensajeEstado = $"Vencida el {c.Fecha:dd/MMM}";
+                        vm.MensajeEstado = $"Vencida el {c.Vence:dd/MMM}";
                     }
                     else
                     {
                         vm.BackgroundColor = "#EBF8FF"; // Azul
                         vm.BorderColor = "#90CDF4";
                         vm.TextColor = "#2B6CB0";
-                        vm.MensajeEstado = $"Vence el {c.Fecha:dd/MMM}";
+                        vm.MensajeEstado = $"Vence el {c.Vence:dd/MMM}";
                     }
                     listaEstados.Add(vm);
                 }
                 
                 icEstadoCuentas.ItemsSource = null;
-                icEstadoCuentas.ItemsSource = listaEstados.OrderBy(x => x.Cuenta.EstaPagado).ThenBy(x => x.Cuenta.Fecha).ToList();
+                icEstadoCuentas.ItemsSource = listaEstados.OrderBy(x => x.Pagada).ThenBy(x => x.Vence).ToList();
             }
             catch (Exception ex)
             {
@@ -227,6 +221,8 @@ namespace MisFinanzas.Modulos
     public class CuentaEstadoViewModel
     {
         public Movimiento Cuenta { get; set; } = new Movimiento();
+        public bool Pagada { get; set; }
+        public DateTime Vence { get; set; }
         public string BackgroundColor { get; set; } = string.Empty;
         public string BorderColor { get; set; } = string.Empty;
         public string TextColor { get; set; } = string.Empty;

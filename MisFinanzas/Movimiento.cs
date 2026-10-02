@@ -24,6 +24,13 @@ namespace MisFinanzas.Modulos
         public bool EstaPagado { get; set; }
         public string Tipo { get; set; } = string.Empty;
 
+        // --- Solo para Tipo "Cuenta" (gasto recurrente, ver CuentasMensuales) ---
+        // Fecha marca el mes desde el que se cobra; DiaPago es el día en que vence cada mes.
+        public int DiaPago { get; set; }
+
+        // Mes ("yyyy-MM") desde el que se dejó de cobrar. Vacío = se sigue cobrando.
+        public string MesFin { get; set; } = string.Empty;
+
         [NotMapped] // Esto le dice a EF que no cree esta columna en la tabla
         public decimal Ganancia => Venta - Costo;
     }

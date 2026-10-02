@@ -14,33 +14,28 @@ namespace MisFinanzas.Modulos
 {
     public partial class VentanaRecordatorioPagos : Window
     {
-        public ObservableCollection<Movimiento> CuentasPendientes { get; set; }
+        public ObservableCollection<CuentaMes> CuentasPendientes { get; set; }
 
-        public VentanaRecordatorioPagos(List<Movimiento> cuentas)
+        public VentanaRecordatorioPagos(List<CuentaMes> cuentas)
         {
             InitializeComponent();
-            CuentasPendientes = new ObservableCollection<Movimiento>(cuentas);
+            CuentasPendientes = new ObservableCollection<CuentaMes>(cuentas);
             icCuentasPendientes.ItemsSource = CuentasPendientes;
         }
 
         private void BtnPagar_Click(object sender, RoutedEventArgs e)
         {
             var boton = sender as Button;
-            var cuenta = boton?.CommandParameter as Movimiento;
+            var cuenta = boton?.CommandParameter as CuentaMes;
 
             if (cuenta != null)
             {
                 try
                 {
+                    // El pago se registra solo para el mes de este vencimiento
                     using (var db = new AppDbContext())
                     {
-                        var cuentaDb = db.Movimientos.Find(cuenta.Id);
-                        if (cuentaDb != null)
-                        {
-                            cuentaDb.EstaPagado = true;
-                            db.Movimientos.Update(cuentaDb);
-                            db.SaveChanges();
-                        }
+                        CuentasMensuales.MarcarPagada(db, cuenta.Cuenta.Id, cuenta.Mes, true);
                     }
 
                     // Remover visualmente de la lista de pendientes

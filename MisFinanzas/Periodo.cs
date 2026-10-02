@@ -5,7 +5,6 @@
 // ============================================================
 using System;
 using System.Globalization;
-using MisFinanzas.Modulos;
 
 namespace MisFinanzas
 {
@@ -30,17 +29,6 @@ namespace MisFinanzas
             return texto.Length > 0
                 ? char.ToUpper(texto[0], CultureInfo.CurrentCulture) + texto.Substring(1)
                 : texto;
-        }
-
-        /// <summary>
-        /// Una cuenta pertenece al mes en que vence. Las cuentas sin pagar de meses
-        /// anteriores se arrastran al mes actual para que sigan contando como pendientes.
-        /// </summary>
-        public static bool CuentaDelMes(Movimiento cuenta, DateTime mes)
-        {
-            var inicio = InicioMes(mes);
-            if (cuenta.Fecha >= inicio && cuenta.Fecha < inicio.AddMonths(1)) return true;
-            return EsMesActual(mes) && !cuenta.EstaPagado && cuenta.Fecha < inicio;
         }
     }
 }

@@ -112,7 +112,7 @@
                                         <TextBlock Text="{Binding Descripcion}" FontSize="15" FontWeight="Bold" Foreground="#2D3748" TextTrimming="CharacterEllipsis"/>
                                         <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
                                             <TextBlock Text="&#xE787;" FontFamily="Segoe MDL2 Assets" FontSize="11" Foreground="#E53E3E" VerticalAlignment="Center" Margin="0,0,5,0"/>
-                                            <TextBlock Text="{Binding Fecha, StringFormat='Vence: {0:dd/MM/yyyy}'}" FontSize="12" Foreground="#E53E3E" VerticalAlignment="Center"/>
+                                            <TextBlock Text="{Binding Vence, StringFormat='Vence: {0:dd/MM/yyyy}'}" FontSize="12" Foreground="#E53E3E" VerticalAlignment="Center"/>
                                         </StackPanel>
                                     </StackPanel>
 

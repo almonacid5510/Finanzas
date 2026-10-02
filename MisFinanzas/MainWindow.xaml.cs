@@ -106,9 +106,10 @@ namespace MisFinanzas
 
                 using (var db = new AppDbContext())
                 {
-                    var hoy = DateTime.Now.Date;
-                    var cuentasPendientes = db.Movimientos
-                        .Where(m => m.Tipo == "Cuenta" && !m.EstaPagado && m.Fecha.Date <= hoy)
+                    // Gastos de este mes que vencen hoy o ya vencieron y siguen sin pagar
+                    var hoy = DateTime.Today;
+                    var cuentasPendientes = CuentasMensuales.DelMes(db, hoy)
+                        .Where(c => !c.Pagada && c.Vence <= hoy)
                         .ToList();
 
                     if (cuentasPendientes.Any())
