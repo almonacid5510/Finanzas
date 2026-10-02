@@ -73,6 +73,16 @@ namespace MisFinanzas.Modulos
             }
         }
 
+        // Clic en el resumen: despliega el detalle de ese crédito y recoge los demás
+        private void Resumen_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (((FrameworkElement)sender).DataContext is not Credito credito) return;
+            bool abrir = !credito.VerDetalle;
+            foreach (var c in ListaCreditosPersistente)
+                if (c != credito && !c.Editando) c.VerDetalle = false;
+            if (!credito.Editando) credito.VerDetalle = abrir;
+        }
+
         // Un solo botón alterna entre Editar (✎) y Guardar (✔)
         private void BtnToggleEdicion_Click(object sender, RoutedEventArgs e)
         {
