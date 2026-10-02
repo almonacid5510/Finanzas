@@ -346,10 +346,12 @@
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="45"/>
                         <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="170"/>
                         <ColumnDefinition Width="150"/>
                     </Grid.ColumnDefinitions>
                     <TextBlock Grid.Column="1" Text="Nombre" Style="{StaticResource EncabezadoTabla}" HorizontalAlignment="Left" Margin="10,0,0,0"/>
-                    <TextBlock Grid.Column="2" Text="Cuota mensual" Style="{StaticResource EncabezadoTabla}" HorizontalAlignment="Right" Margin="0,0,15,0"/>
+                    <TextBlock Grid.Column="2" Text="Saldo que debes" Style="{StaticResource EncabezadoTabla}" HorizontalAlignment="Right" Margin="0,0,15,0"/>
+                    <TextBlock Grid.Column="3" Text="Cuota del mes" Style="{StaticResource EncabezadoTabla}" HorizontalAlignment="Right" Margin="0,0,15,0"/>
                 </Grid>
 
                 <ItemsControl x:Name="icCreditosCompromisos">
@@ -360,10 +362,12 @@
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="45"/>
                                         <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="170"/>
                                         <ColumnDefinition Width="150"/>
                                     </Grid.ColumnDefinitions>
 
                                     <CheckBox IsChecked="{Binding Pagado, UpdateSourceTrigger=PropertyChanged}"
+                                              IsEnabled="{Binding PuedeMarcar}"
                                               Click="CheckBox_Click" Style="{StaticResource ModernCheckBox}"
                                               VerticalAlignment="Center" HorizontalAlignment="Center"/>
 
@@ -384,7 +388,12 @@
                                         </TextBlock.Style>
                                     </TextBlock>
 
-                                    <TextBlock Grid.Column="2" Text="{Binding CuotaMensual, StringFormat='{}{0:C0}'}"
+                                    <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,15,0">
+                                        <TextBlock Text="{Binding Disponible, StringFormat='{}{0:C0}'}" FontSize="14" FontWeight="Bold" Foreground="#C53030" HorizontalAlignment="Right"/>
+                                        <TextBlock Text="{Binding ProgresoTexto, StringFormat='{}{0} pagado'}" FontSize="10" Foreground="#718096" HorizontalAlignment="Right"/>
+                                    </StackPanel>
+
+                                    <TextBlock Grid.Column="3" Text="{Binding CuotaEsteMes, StringFormat='{}{0:C0}'}"
                                                FontSize="14" FontWeight="Bold" Foreground="#2D3748" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,15,0"/>
                                 </Grid>
                             </Border>

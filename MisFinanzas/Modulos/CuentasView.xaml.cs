@@ -350,7 +350,7 @@ namespace MisFinanzas.Modulos
 
             // 2. Sumar cuotas de créditos no pagadas (solo aplica al mes en curso)
             decimal totalCreditos = Periodo.EsMesActual(_mesSeleccionado)
-                ? CreditosView.ListaCreditosPersistente.Where(c => !c.Pagado).Sum(c => c.CuotaMensual)
+                ? CreditosView.ListaCreditosPersistente.Where(c => !c.Pagado).Sum(c => c.CuotaEsteMes)
                 : 0;
 
             lblTotalPendiente.Text = (totalMovimientos + totalCreditos).ToString("C0");
@@ -423,28 +423,22 @@ namespace MisFinanzas.Modulos
             try
             {
                 // 2. Usamos 'pattern matching' para saber qué tipo de dato es
-                using (var db = new AppDbContext())
+                // CASO A: Es un gasto del mes: el pago se registra solo para ese mes, por su valor
+                // (luego se puede ajustar el monto real en la columna "Pagado real")
+                if (cb.DataContext is CuentaMes cuentaMes)
                 {
-                    // CASO A: Es un gasto del mes: el pago se registra solo para ese mes, por su valor
-                    // (luego se puede ajustar el monto real en la columna "Pagado real")
-                    if (cb.DataContext is CuentaMes cuentaMes)
-                    {
-                        if (cuentaMes.Pagada) cuentaMes.MontoPagado = cuentaMes.Venta;
-                        CuentasMensuales.MarcarPagada(db, cuentaMes.Cuenta.Id, cuentaMes.Mes, cuentaMes.Pagada, cuentaMes.MontoPagado);
-                    }
-                    // CASO B: Es un Compromiso de Crédito (Credito): el pago vale para el mes actual
-                    else if (cb.DataContext is Credito credito)
-                    {
-                        credito.MesPagado = credito.Pagado ? Periodo.MesActual : string.Empty;
-
-                        var dbCredito = db.Creditos.Find(credito.Id);
-                        if (dbCredito != null)
-                        {
-                            dbCredito.Pagado = credito.Pagado; // Sincronizamos el estado
-                            dbCredito.MesPagado = credito.MesPagado;
-                            db.SaveChanges();
-                        }
-                    }
+                    using var db = new AppDbContext();
+                    if (cuentaMes.Pagada) cuentaMes.MontoPagado = cuentaMes.Venta;
+                    CuentasMensuales.MarcarPagada(db, cuentaMes.Cuenta.Id, cuentaMes.Mes, cuentaMes.Pagada, cuentaMes.MontoPagado);
+                }
+                // CASO B: Es la cuota de un crédito: se reparte entre intereses y capital y baja el saldo
+                else if (cb.DataContext is Credito credito)
+                {
+                    var pago = CreditosView.RegistrarCuota(credito, credito.Pagado);
+                    if (pago != null)
+                        toast.Show($"\"{credito.NombreCustom}\": {pago.Capital:C0} a capital. Ahora debes {credito.Disponible:C0}");
+                    else if (!credito.Pagado)
+                        toast.Show($"Pago deshecho. \"{credito.NombreCustom}\" vuelve a {credito.Disponible:C0}");
                 }
             }
             catch (Exception ex)

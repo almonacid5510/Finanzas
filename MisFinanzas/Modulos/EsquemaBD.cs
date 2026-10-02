@@ -116,6 +116,7 @@ namespace MisFinanzas.Modulos
         {
             ("GastosVehiculo", "\"VehiculoId\" NOT IN (SELECT \"Id\" FROM \"Vehiculos\")"),
             ("PagosCuenta", "\"MovimientoId\" NOT IN (SELECT \"Id\" FROM \"MovimientosV2\")"),
+            ("PagosCredito", "\"CreditoId\" NOT IN (SELECT \"Id\" FROM \"Creditos\")"),
         };
 
         // Completa los datos de una tabla (columna = null) o columna recién agregada a una BD existente
@@ -126,6 +127,13 @@ namespace MisFinanzas.Modulos
                 // Los créditos que ya estaban marcados como pagados se toman como pagados este mes
                 ("Creditos", nameof(Credito.MesPagado)) =>
                     $"UPDATE \"Creditos\" SET \"MesPagado\" = '{Periodo.MesActual}' WHERE \"Pagado\" = 1;",
+
+                // Las cuotas que ya estaban marcadas como pagadas quedan registradas en el historial.
+                // Se registran sin mover el saldo: en versiones anteriores el saldo se ajustaba a mano.
+                ("PagosCredito", null) =>
+                    "INSERT INTO \"PagosCredito\" (\"CreditoId\", \"Mes\", \"Fecha\", \"Tipo\", \"Monto\", \"Interes\", \"Capital\", \"SaldoAnterior\", \"SaldoNuevo\", \"MesesReducidos\") " +
+                    $"SELECT \"Id\", \"MesPagado\", datetime('now', 'localtime'), '{Amortizacion.TipoCuota}', \"CuotaMensual\", '0.0', '0.0', \"Disponible\", \"Disponible\", 0 " +
+                    "FROM \"Creditos\" WHERE \"Pagado\" = 1 AND IFNULL(\"MesPagado\", '') <> '';",
 
                 // Las cuentas existentes se repiten cada mes el mismo día de su fecha
                 ("MovimientosV2", nameof(Movimiento.DiaPago)) =>

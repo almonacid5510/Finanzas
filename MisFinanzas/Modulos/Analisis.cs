@@ -79,6 +79,7 @@ namespace MisFinanzas.Modulos
             public List<PagoCuenta> Pagos { get; init; } = new();
             public List<Movimiento> IngresosExtra { get; init; } = new();
             public List<Credito> Creditos { get; init; } = new();
+            public List<PagoCredito> PagosCredito { get; init; } = new();
             public decimal Salario { get; init; }
         }
 
@@ -88,6 +89,7 @@ namespace MisFinanzas.Modulos
             Pagos = db.PagosCuenta.ToList(),
             IngresosExtra = db.Movimientos.Where(m => m.Tipo == CuentasMensuales.TipoIngresoExtra).ToList(),
             Creditos = db.Creditos.ToList(),
+            PagosCredito = db.PagosCredito.ToList(),
             Salario = db.Movimientos.Where(m => m.Tipo == "Ingreso").Select(m => m.Venta).AsEnumerable().FirstOrDefault()
         };
 
@@ -208,8 +210,8 @@ namespace MisFinanzas.Modulos
                 var items = CuentasMensuales.DelMes(d.Cuentas, d.Pagos, mes);
                 decimal gastos = items.Sum(c => c.Pagada ? c.MontoPagado : predicciones.GetValueOrDefault(c.Cuenta.Id, c.Venta));
 
-                // Un crédito sigue cobrando mientras le queden meses de plazo (o si no se registró plazo)
-                decimal creditos = d.Creditos.Where(c => c.PlazoMeses <= 0 || i < c.PlazoMeses).Sum(c => c.CuotaMensual);
+                // Cada crédito cobra según su plan de pagos: hasta que el saldo llegue a cero
+                decimal creditos = Amortizacion.CuotasEnMes(d.Creditos, d.PagosCredito, mes);
 
                 lista.Add(new ProyeccionMes { Mes = mes, Ingresos = IngresosDelMes(d, mes), Gastos = gastos, Creditos = creditos });
             }

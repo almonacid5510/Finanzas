@@ -4,6 +4,7 @@
 //  Copyright (c) 2026 Juan Almonacid. Todos los derechos reservados.
 // ============================================================
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
@@ -148,6 +149,7 @@ namespace MisFinanzas.Modulos
                     var creditoDb = db.Creditos.Find(credito.Id);
                     if (creditoDb != null)
                     {
+                        db.PagosCredito.RemoveRange(db.PagosCredito.Where(p => p.CreditoId == credito.Id));
                         db.Creditos.Remove(creditoDb);
                         db.SaveChanges();
                     }
@@ -177,7 +179,118 @@ namespace MisFinanzas.Modulos
                 OverlayConfirm.Visibility = Visibility.Collapsed;
             }
         }
-        // En CreditosView.xaml.cs
+        // --- PAGOS: cuota del mes, abono a capital y deshacer ---
+
+        private void BtnPagarCuota_Click(object sender, RoutedEventArgs e)
+        {
+            if (((Button)sender).DataContext is not Credito credito) return;
+            if (RegistrarCuota(credito, true) is PagoCredito pago)
+                toast.Show(credito.Saldado
+                    ? "¡Última cuota pagada! Crédito saldado"
+                    : $"Cuota pagada: {pago.Interes:C0} a intereses y {pago.Capital:C0} a capital");
+        }
+
+        private void BtnDeshacerCuota_Click(object sender, RoutedEventArgs e)
+        {
+            if (((Button)sender).DataContext is not Credito credito) return;
+            RegistrarCuota(credito, false);
+            toast.Show($"Pago deshecho. Saldo {credito.Disponible:C0}");
+        }
+
+        private void BtnAbonar_Click(object sender, RoutedEventArgs e)
+        {
+            var boton = (Button)sender;
+            if (boton.DataContext is not Credito credito || boton.Tag is not TextBox txt) return;
+
+            if (!NumeroHelper.TryParseMoneda(txt.Text, out var monto) || monto <= 0)
+            {
+                MessageBox.Show("Ingresa un valor válido para el abono.");
+                return;
+            }
+            try
+            {
+                PagoCredito pago;
+                using (var db = new AppDbContext())
+                {
+                    pago = Amortizacion.Abonar(db, credito.Id, monto);
+                }
+                Recargar(credito);
+                txt.Clear();
+                toast.Show(credito.Saldado
+                    ? "¡Crédito saldado!"
+                    : $"Abono de {pago.Capital:C0} a capital. Nuevo saldo {pago.SaldoNuevo:C0}");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al registrar el abono: " + ex.Message);
+            }
+        }
+
+        // Deshace un pago del historial (cuota o abono)
+        private void BtnDeshacerPago_Click(object sender, RoutedEventArgs e)
+        {
+            var boton = (Button)sender;
+            if (boton.DataContext is not PagoCredito pago || boton.Tag is not Credito credito) return;
+            try
+            {
+                using (var db = new AppDbContext())
+                {
+                    Amortizacion.Deshacer(db, pago.Id);
+                }
+                Recargar(credito);
+                toast.Show($"Pago deshecho. Saldo {credito.Disponible:C0}");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al deshacer el pago: " + ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Paga (o deshace) la cuota del mes en curso: reparte intereses y capital y baja el saldo.
+        /// La usan también Cuentas y el recordatorio de pagos. Devuelve el pago registrado.
+        /// </summary>
+        public static PagoCredito? RegistrarCuota(Credito credito, bool pagar)
+        {
+            try
+            {
+                PagoCredito? pago = null;
+                using (var db = new AppDbContext())
+                {
+                    if (pagar)
+                        pago = Amortizacion.PagarCuota(db, credito.Id, DateTime.Today);
+                    else if (Amortizacion.CuotaDelMes(db, credito.Id, DateTime.Today) is PagoCredito existente)
+                        Amortizacion.Deshacer(db, existente.Id);
+                }
+                Recargar(credito);
+                return pago;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al guardar el pago: " + ex.Message);
+                Recargar(credito);
+                return null;
+            }
+        }
+
+        /// <summary>Copia en el objeto de pantalla lo que quedó en la BD (saldo, plazo, estado e historial).</summary>
+        public static void Recargar(Credito credito)
+        {
+            using var db = new AppDbContext();
+            var bd = db.Creditos.AsNoTracking().FirstOrDefault(c => c.Id == credito.Id);
+            if (bd == null) return;
+
+            credito.Disponible = bd.Disponible;
+            credito.PlazoMeses = bd.PlazoMeses;
+            credito.MesPagado = bd.MesPagado;
+            credito.Historial = HistorialDe(db.PagosCredito.Where(p => p.CreditoId == credito.Id).ToList());
+            credito.Pagado = credito.CuotaPagadaEsteMes != null;
+        }
+
+        // Del más reciente al más antiguo
+        private static List<PagoCredito> HistorialDe(IEnumerable<PagoCredito> pagos) =>
+            pagos.OrderByDescending(p => p.Fecha).ThenByDescending(p => p.Id).ToList();
+
         public static void CargarDatosGlobal()
         {
             try
@@ -185,17 +298,24 @@ namespace MisFinanzas.Modulos
                 using (var db = new AppDbContext())
                 {
                     var lista = db.Creditos.ToList();
+                    var pagos = db.PagosCredito.ToList();
 
-                    // El pago de la cuota vale solo para el mes en que se marcó:
+                    // La cuota cuenta como pagada solo si hay un pago registrado este mes:
                     // al iniciar un mes nuevo, la cuota vuelve a quedar pendiente.
                     var mesActual = Periodo.MesActual;
-                    bool reiniciados = false;
-                    foreach (var c in lista.Where(c => c.Pagado && c.MesPagado != mesActual))
+                    bool cambios = false;
+                    foreach (var c in lista)
                     {
-                        c.Pagado = false;
-                        reiniciados = true;
+                        c.Historial = HistorialDe(pagos.Where(p => p.CreditoId == c.Id));
+                        bool pagado = c.CuotaPagadaEsteMes != null;
+                        if (c.Pagado != pagado || c.MesPagado != (pagado ? mesActual : string.Empty))
+                        {
+                            c.Pagado = pagado;
+                            c.MesPagado = pagado ? mesActual : string.Empty;
+                            cambios = true;
+                        }
                     }
-                    if (reiniciados) db.SaveChanges();
+                    if (cambios) db.SaveChanges();
 
                     // Usamos el Dispatcher para que la UI de "Cuentas" se entere
                     Application.Current.Dispatcher.Invoke(() =>

@@ -122,10 +122,10 @@ namespace MisFinanzas.Modulos
                 decimal pendienteCuentas = cuentasDelMes.Where(m => !m.Pagada).Sum(m => m.Venta);
 
                 // --- 2. CONSULTA A LA LISTA PERSISTENTE DE CRÉDITOS ---
-                // Cada crédito registrado es un compromiso mensual por el valor de su cuota
+                // Cada crédito cobra su cuota del mes (lo pagado, o lo que falte si ya va en la última); los saldados no
                 var creditos = CreditosView.ListaCreditosPersistente;
-                decimal totalCreditosMes = creditos.Sum(c => c.CuotaMensual);
-                decimal pendienteCreditos = creditos.Where(c => !c.Pagado).Sum(c => c.CuotaMensual);
+                decimal totalCreditosMes = creditos.Sum(c => c.CuotaEsteMes);
+                decimal pendienteCreditos = creditos.Where(c => !c.Pagado).Sum(c => c.CuotaEsteMes);
 
                 // --- 3. CÁLCULO DE VEHÍCULOS ---
                 decimal totalV = VehiculosView.listaVehiculos?.Sum(v => v.TotalInvertido) ?? 0;
