@@ -17,11 +17,13 @@ namespace MisFinanzas.Modulos
         public DbSet<GastoVehiculo> GastosVehiculo { get; set; }
         public DbSet<Credito> Creditos { get; set; }
 
+        // La ruta en Documentos es correcta y persistente
+        public static string RutaBD { get; set; } =
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "MisFinanzas_Real.db");
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            // La ruta en Documentos es correcta y persistente
-            string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "MisFinanzas_Real.db");
-            optionsBuilder.UseSqlite($"Data Source={path}");
+            optionsBuilder.UseSqlite($"Data Source={RutaBD}");
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

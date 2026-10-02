@@ -32,11 +32,6 @@ namespace MisFinanzas.Modulos
         {
             get => Gastos.Sum(g => g.Valor);
         }
-        public void RefrescarTotal()
-        {
-            // Esto obliga al Binding del XAML a leer el valor de nuevo
-            OnPropertyChanged(nameof(TotalInvertido));
-        }
         // Método para forzar a la interfaz a actualizarse
         public void NotificarCambioTotal()
         {

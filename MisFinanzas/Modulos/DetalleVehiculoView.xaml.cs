@@ -22,11 +22,9 @@ namespace MisFinanzas.Modulos
 
             using (var db = new AppDbContext())
             {
-                this.VehiculoActual = db.Vehiculos.FirstOrDefault(v => v.Id == vehiculoId);
+                this.VehiculoActual = db.Vehiculos.FirstOrDefault(v => v.Id == vehiculoId)
+                                      ?? new Vehiculo { Nombre = "Vehículo no encontrado" };
             }
-
-            if (this.VehiculoActual == null)
-                this.VehiculoActual = new Vehiculo { Nombre = "Vehículo no encontrado" };
 
             if (this.VehiculoActual.Gastos == null)
                 this.VehiculoActual.Gastos = new ObservableCollection<GastoVehiculo>();
@@ -65,23 +63,16 @@ namespace MisFinanzas.Modulos
 
         private void BtnAgregarGasto_Click(object sender, RoutedEventArgs e)
         {
-            // 1. Declarar la variable AQUÍ (fuera del try/if)
-            GastoVehiculo nuevoGasto = null;
+            if (!NumeroHelper.TryParseMoneda(txtValor.Text, out decimal valor)) return; // Validación simple
 
-            // Asumiendo que aquí tienes tu lógica de creación
-            if (NumeroHelper.TryParseMoneda(txtValor.Text, out decimal valor))
+            var nuevoGasto = new GastoVehiculo
             {
-                nuevoGasto = new GastoVehiculo
-                {
-                    Concepto = txtConcepto.Text,
-                    Valor = valor,
-                    Fecha = DateTime.Now,
-                    VehiculoId = VehiculoActual.Id
-                };
-            }
-            else { return; } // Validación simple
+                Concepto = txtConcepto.Text,
+                Valor = valor,
+                Fecha = DateTime.Now,
+                VehiculoId = VehiculoActual.Id
+            };
 
-            // 2. Ahora el bloque try puede "ver" a nuevoGasto
             try
             {
                 using (var db = new AppDbContext())

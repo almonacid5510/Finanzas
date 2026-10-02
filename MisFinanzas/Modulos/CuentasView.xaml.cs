@@ -5,17 +5,25 @@
 // ============================================================
 using System;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using Microsoft.EntityFrameworkCore; // Asegúrate de tener esto para ToList()
+using System.Windows.Data;
 
 namespace MisFinanzas.Modulos
 {
     public partial class CuentasView : UserControl
     {
-        // Nota: Si en Inversiones usas el mismo nombre, cámbialo allí por 'listaInversionesPersistente'
+        // Todas las cuentas (de todos los meses). La pantalla muestra solo las del mes seleccionado.
         public static ObservableCollection<Movimiento> listaCuentasPersistente { get; set; } = new ObservableCollection<Movimiento>();
+
+        // Mes que se está consultando (siempre el día 1)
+        private DateTime _mesSeleccionado = Periodo.InicioMes(DateTime.Today);
+
+        // Vista filtrada propia de esta pantalla sobre la lista global
+        private readonly ListCollectionView _cuentasDelMes;
 
         public CuentasView()
         {
@@ -26,18 +34,20 @@ namespace MisFinanzas.Modulos
             CargarDatosDesdeBD();
 
             // 2. Vinculamos las listas
-            icCreditosCompromisos.ItemsSource = CreditosView.ListaCreditosPersistente;
-            icCuentas.ItemsSource = listaCuentasPersistente;
-
-            // 3. ¡ESTA ES LA CLAVE! 
-            // Suscribimos la pestaña Cuentas a cualquier cambio que ocurra en la lista de Créditos
-            CreditosView.ListaCreditosPersistente.CollectionChanged += (s, e) =>
+            _cuentasDelMes = new ListCollectionView(listaCuentasPersistente)
             {
-                // Esto refresca el total pendiente automáticamente si borras un crédito
-                ActualizarTotal();
+                Filter = o => Periodo.CuentaDelMes((Movimiento)o, _mesSeleccionado)
             };
+            _cuentasDelMes.SortDescriptions.Add(new SortDescription(nameof(Movimiento.Fecha), ListSortDirection.Ascending));
+            icCuentas.ItemsSource = _cuentasDelMes;
+            icCreditosCompromisos.ItemsSource = CreditosView.ListaCreditosPersistente;
 
-            ActualizarTotal();
+            // 3. Escuchamos los cambios en los créditos solo mientras la pantalla está visible,
+            // para no acumular suscripciones sobre la lista estática cada vez que se navega aquí
+            Loaded += (s, e) => CreditosView.ListaCreditosPersistente.CollectionChanged += Lista_CollectionChanged;
+            Unloaded += (s, e) => CreditosView.ListaCreditosPersistente.CollectionChanged -= Lista_CollectionChanged;
+
+            MostrarMes();
         }
 
         private static void CargarDatosDesdeBD()
@@ -65,8 +75,32 @@ namespace MisFinanzas.Modulos
             }
         }
 
-        private void Lista_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs? e)
+        private void Lista_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs? e)
         {
+            ActualizarTotal();
+        }
+
+        // --- Navegación entre meses ---
+        private void BtnMesAnterior_Click(object sender, RoutedEventArgs e) => CambiarMes(_mesSeleccionado.AddMonths(-1));
+        private void BtnMesSiguiente_Click(object sender, RoutedEventArgs e) => CambiarMes(_mesSeleccionado.AddMonths(1));
+        private void BtnMesActual_Click(object sender, RoutedEventArgs e) => CambiarMes(DateTime.Today);
+
+        private void CambiarMes(DateTime mes)
+        {
+            _mesSeleccionado = Periodo.InicioMes(mes);
+            _cuentasDelMes.Refresh();
+            MostrarMes();
+        }
+
+        private void MostrarMes()
+        {
+            bool esActual = Periodo.EsMesActual(_mesSeleccionado);
+            lblMes.Text = Periodo.Nombre(_mesSeleccionado);
+            lblTituloGastos.Text = esActual ? "GASTOS DEL MES" : $"GASTOS DE {Periodo.Nombre(_mesSeleccionado).ToUpper()}";
+            btnMesActual.Visibility = esActual ? Visibility.Collapsed : Visibility.Visible;
+
+            // El estado de pago de los créditos solo existe para el mes en curso
+            pnlCreditos.Visibility = esActual ? Visibility.Visible : Visibility.Collapsed;
             ActualizarTotal();
         }
 
@@ -74,9 +108,12 @@ namespace MisFinanzas.Modulos
         {
             if (!string.IsNullOrWhiteSpace(txtDescCuenta.Text) && NumeroHelper.TryParseMoneda(txtValorCuenta.Text, out decimal valor))
             {
+                // Sin fecha elegida: hoy si se ve el mes actual, o el día 1 del mes que se está viendo
+                var fechaPorDefecto = Periodo.EsMesActual(_mesSeleccionado) ? DateTime.Now : _mesSeleccionado;
+
                 var nuevaCuenta = new Movimiento
                 {
-                    Fecha = dpFechaGasto.SelectedDate ?? DateTime.Now,
+                    Fecha = dpFechaGasto.SelectedDate ?? fechaPorDefecto,
                     Descripcion = txtDescCuenta.Text,
                     Costo = 0,
                     Venta = valor,
@@ -84,10 +121,7 @@ namespace MisFinanzas.Modulos
                     Tipo = "Cuenta"
                 };
 
-                // 1. Agregamos a la lista visual
-                listaCuentasPersistente.Add(nuevaCuenta);
-
-                // 2. Guardamos en la base de datos
+                // 1. Guardamos en la base de datos
                 try
                 {
                     using (var db = new AppDbContext())
@@ -99,10 +133,16 @@ namespace MisFinanzas.Modulos
                 catch (Exception ex)
                 {
                     MessageBox.Show("Error al persistir: " + ex.Message);
+                    return;
                 }
 
-                // --- ESTA ES LA LÍNEA QUE DEBES AGREGAR ---
+                // 2. Agregamos a la lista visual
+                listaCuentasPersistente.Add(nuevaCuenta);
                 ActualizarTotal();
+
+                // Si la cuenta cae en otro mes, avisamos dónde quedó
+                if (!Periodo.CuentaDelMes(nuevaCuenta, _mesSeleccionado))
+                    toast.Show($"Gasto registrado en {Periodo.Nombre(nuevaCuenta.Fecha)}");
 
                 // 3. Limpiar campos
                 txtDescCuenta.Clear();
@@ -119,16 +159,15 @@ namespace MisFinanzas.Modulos
 
         public void ActualizarTotal()
         {
-            // 1. Sumar Movimientos (Gastos) no pagados
+            // 1. Sumar Movimientos (Gastos) no pagados del mes seleccionado
             decimal totalMovimientos = listaCuentasPersistente
-                .Where(m => !m.EstaPagado)
+                .Where(m => !m.EstaPagado && Periodo.CuentaDelMes(m, _mesSeleccionado))
                 .Sum(m => m.Venta);
 
-            // 2. Sumar Créditos no pagados (Accediendo a la lista estática de CreditosView)
-            // Cambia 'CreditosView' por el nombre exacto de tu clase de créditos si es distinto
-            decimal totalCreditos = CreditosView.ListaCreditosPersistente
-                .Where(c => !c.Pagado)
-                .Sum(c => c.CuotaMensual);
+            // 2. Sumar cuotas de créditos no pagadas (solo aplica al mes en curso)
+            decimal totalCreditos = Periodo.EsMesActual(_mesSeleccionado)
+                ? CreditosView.ListaCreditosPersistente.Where(c => !c.Pagado).Sum(c => c.CuotaMensual)
+                : 0;
 
             lblTotalPendiente.Text = (totalMovimientos + totalCreditos).ToString("C0");
         }
@@ -169,31 +208,40 @@ namespace MisFinanzas.Modulos
             var cb = sender as CheckBox;
             if (cb == null) return;
 
-            // 2. Usamos 'pattern matching' para saber qué tipo de dato es
-            using (var db = new AppDbContext()) // Asegúrate de que este sea el nombre de tu contexto
+            try
             {
-                // CASO A: Es un Gasto normal (Movimiento)
-                if (cb.DataContext is Movimiento mov)
+                // 2. Usamos 'pattern matching' para saber qué tipo de dato es
+                using (var db = new AppDbContext())
                 {
-                    // Buscamos el registro en la BD por su ID y lo actualizamos
-                    var dbMov = db.Movimientos.Find(mov.Id);
-                    if (dbMov != null)
+                    // CASO A: Es un Gasto normal (Movimiento)
+                    if (cb.DataContext is Movimiento mov)
                     {
-                        dbMov.EstaPagado = mov.EstaPagado; // Sincronizamos el estado
-                        db.SaveChanges();
+                        // Buscamos el registro en la BD por su ID y lo actualizamos
+                        var dbMov = db.Movimientos.Find(mov.Id);
+                        if (dbMov != null)
+                        {
+                            dbMov.EstaPagado = mov.EstaPagado; // Sincronizamos el estado
+                            db.SaveChanges();
+                        }
+                    }
+                    // CASO B: Es un Compromiso de Crédito (Credito): el pago vale para el mes actual
+                    else if (cb.DataContext is Credito credito)
+                    {
+                        credito.MesPagado = credito.Pagado ? Periodo.MesActual : string.Empty;
+
+                        var dbCredito = db.Creditos.Find(credito.Id);
+                        if (dbCredito != null)
+                        {
+                            dbCredito.Pagado = credito.Pagado; // Sincronizamos el estado
+                            dbCredito.MesPagado = credito.MesPagado;
+                            db.SaveChanges();
+                        }
                     }
                 }
-                // CASO B: Es un Compromiso de Crédito (Credito)
-                else if (cb.DataContext is Credito credito)
-                {
-                    // Buscamos el crédito en la BD y lo actualizamos
-                    var dbCredito = db.Creditos.Find(credito.Id);
-                    if (dbCredito != null)
-                    {
-                        dbCredito.Pagado = credito.Pagado; // Sincronizamos el estado
-                        db.SaveChanges();
-                    }
-                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al guardar el pago: " + ex.Message);
             }
 
             // 3. Recalculamos el total de la pantalla automáticamente

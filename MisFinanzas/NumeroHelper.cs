@@ -113,7 +113,7 @@ namespace MisFinanzas
             // Separar parte entera y decimal (si el usuario escribió separador decimal)
             int idxSep = original.IndexOf(SepDecimal, StringComparison.Ordinal);
             string parteEntera = idxSep >= 0 ? original.Substring(0, idxSep) : original;
-            string parteDecimal = idxSep >= 0 ? original.Substring(idxSep + SepDecimal.Length) : null;
+            string? parteDecimal = idxSep >= 0 ? original.Substring(idxSep + SepDecimal.Length) : null;
 
             // Dígitos de la parte entera
             string soloDigitos = new string(parteEntera.Where(char.IsDigit).ToArray());

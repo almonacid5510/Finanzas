@@ -31,22 +31,6 @@
                 </DataTrigger>
             </Style.Triggers>
         </Style>
-
-        <Style x:Key="RoundButtonStyle" TargetType="Button">
-            <Setter Property="Width" Value="32"/>
-            <Setter Property="Height" Value="32"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" CornerRadius="16">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
     </UserControl.Resources>
 
   <Grid>
@@ -144,8 +128,8 @@
                                     </Grid.ColumnDefinitions>
 
                                     <StackPanel>
-                                        <TextBlock Text="{Binding Tipo}" FontSize="18" FontWeight="Bold" Foreground="#2D3748" Style="{StaticResource ViewStyle}"/>
-                                        <TextBox Text="{Binding Tipo, UpdateSourceTrigger=PropertyChanged}" FontSize="14" Width="220" HorizontalAlignment="Left" Style="{StaticResource EditInputInline}" Margin="0,0,10,4"/>
+                                        <TextBlock Text="{Binding NombreCustom}" FontSize="18" FontWeight="Bold" Foreground="#2D3748" Style="{StaticResource ViewStyle}"/>
+                                        <TextBox Text="{Binding NombreCustom, UpdateSourceTrigger=PropertyChanged}" FontSize="14" Width="220" HorizontalAlignment="Left" Style="{StaticResource EditInputInline}" Margin="0,0,10,4"/>
 
                                         <StackPanel Orientation="Horizontal" Margin="0,5" VerticalAlignment="Center">
                                             <TextBlock Text="Monto Original: " Foreground="#718096" VerticalAlignment="Center"/>
@@ -172,7 +156,7 @@
                                                 </TextBlock>
                                             </Button.Content>
                                             <Button.Style>
-                                                <Style TargetType="Button" BasedOn="{StaticResource RoundButtonStyle}">
+                                                <Style TargetType="Button" BasedOn="{StaticResource RoundIconButton}">
                                                     <Setter Property="Background" Value="#3498DB"/>
                                                     <Style.Triggers>
                                                         <DataTrigger Binding="{Binding Editando}" Value="True">
@@ -185,7 +169,7 @@
                                         </Button>
                                         <Button Content="✕" Click="BtnEliminar_Click" Margin="5,0" ToolTip="Eliminar">
                                             <Button.Style>
-                                                <Style TargetType="Button" BasedOn="{StaticResource RoundButtonStyle}">
+                                                <Style TargetType="Button" BasedOn="{StaticResource RoundIconButton}">
                                                     <Setter Property="Background" Value="#E74C3C"/>
                                                     <Style.Triggers>
                                                         <!-- Oculta el botón eliminar mientras se edita, para no confundir -->
@@ -205,6 +189,7 @@
                                             <ColumnDefinition Width="*"/>
                                             <ColumnDefinition Width="*"/>
                                             <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="*"/>
                                         </Grid.ColumnDefinitions>
 
                                         <StackPanel Grid.Column="0">
@@ -220,6 +205,12 @@
                                         </StackPanel>
 
                                         <StackPanel Grid.Column="2">
+                                            <TextBlock Text="SALDO PENDIENTE" FontSize="10" FontWeight="Bold" Foreground="#A0AEC0"/>
+                                            <TextBlock Text="{Binding Disponible, StringFormat='{}{0:C0}'}" FontSize="14" FontWeight="Bold" Style="{StaticResource ViewStyle}"/>
+                                            <TextBox Text="{Binding Disponible, StringFormat='{}{0:N0}', UpdateSourceTrigger=LostFocus}" Width="130" HorizontalAlignment="Left" Style="{StaticResource EditInputInline}"/>
+                                        </StackPanel>
+
+                                        <StackPanel Grid.Column="3">
                                             <TextBlock Text="CUOTA MENSUAL" FontSize="10" FontWeight="Bold" Foreground="#3182CE" HorizontalAlignment="Right"/>
                                             <TextBlock Text="{Binding CuotaMensual, StringFormat='{}{0:C0}'}" FontSize="20" FontWeight="Black" Foreground="#2B6CB0" HorizontalAlignment="Right" Style="{StaticResource ViewStyle}"/>
                                             <TextBox Text="{Binding CuotaMensual, StringFormat='{}{0:N0}', UpdateSourceTrigger=LostFocus}" FontSize="14" Width="130" HorizontalAlignment="Right" Style="{StaticResource EditInputInline}"/>
@@ -232,9 +223,6 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
         </ScrollViewer>
-
-        <TextBlock x:Name="lblDeudaTotal" Visibility="Collapsed" Width="0" Height="0"/>
-        <TextBlock x:Name="lblYaPagado" Visibility="Collapsed" Width="0" Height="0"/>
     </Grid>
 
     <controles:Toast x:Name="toast" Panel.ZIndex="50"/>

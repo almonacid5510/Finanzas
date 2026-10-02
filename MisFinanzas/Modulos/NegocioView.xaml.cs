@@ -21,12 +21,6 @@ namespace MisFinanzas.Modulos
         {
             InitializeComponent();
 
-            // Aseguramos que la base de datos y sus tablas existan
-            using (var db = new AppDbContext())
-            {
-                db.Database.EnsureCreated();
-            }
-
             icListaNegocios.ItemsSource = ListaMovimientos;
 
             // EVENTO CRUCIAL: Cada vez que entres a la pestaña, se recargan los datos del disco

@@ -5,7 +5,6 @@
 // ============================================================
 using System;
 using System.Collections.ObjectModel;
-using System.Diagnostics.Metrics;
 using System.Linq; // Necesario para el .Sum()
 using System.Windows;
 using System.Windows.Controls;
@@ -23,16 +22,8 @@ namespace MisFinanzas.Modulos
         {
             InitializeComponent();
 
-            // 1. Aseguramos la base de datos primero
-            using (var db = new AppDbContext())
-            {
-                db.Database.EnsureCreated();
-            }
-
-            // 2. IMPORTANTE: No asignes icMetas aquí directamente.
-            //lblIngresoTotal.Text = SalarioGuardado; // Si esta variable existe, déjala.
-
-            // 3. Movemos la lógica al evento Loaded
+            // La BD ya se crea/actualiza al iniciar la app (MainWindow -> EsquemaBD).
+            // La carga va en Loaded, cuando los controles del XAML ya existen.
             this.Loaded += (s, e) =>
             {
                 // Ahora icMetas ya no es null
@@ -47,7 +38,6 @@ namespace MisFinanzas.Modulos
             {
                 using (var db = new AppDbContext())
                 {
-                    db.Database.EnsureCreated(); // Por seguridad
                     var metasBD = db.Metas.ToList();
 
                     ListaMetas.Clear();
@@ -185,7 +175,7 @@ namespace MisFinanzas.Modulos
                     txtMesesMeta.Clear();
                     ActualizarAhorroAcumulado();
 
-                    MostrarToast("Meta creada correctamente");
+                    toast.Show("Meta creada correctamente");
                 }
                 catch (Exception ex)
                 {
@@ -242,7 +232,7 @@ namespace MisFinanzas.Modulos
                 }
                 ListaMetas.Remove(metaAEliminar);
                 ActualizarAhorroAcumulado();
-                MostrarToast("Meta eliminada");
+                toast.Show("Meta eliminada");
             }
             catch (Exception ex)
             {
@@ -264,30 +254,6 @@ namespace MisFinanzas.Modulos
             }
         }
 
-        // Notificación discreta tipo toast (aparece, espera y se desvanece)
-        private void MostrarToast(string mensaje)
-        {
-            txtToast.Text = mensaje;
-            Toast.Visibility = Visibility.Visible;
-
-            var sb = new System.Windows.Media.Animation.Storyboard();
-
-            var aparecer = new System.Windows.Media.Animation.DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(200));
-            System.Windows.Media.Animation.Storyboard.SetTarget(aparecer, Toast);
-            System.Windows.Media.Animation.Storyboard.SetTargetProperty(aparecer, new PropertyPath(OpacityProperty));
-
-            var desvanecer = new System.Windows.Media.Animation.DoubleAnimation(1, 0, TimeSpan.FromMilliseconds(400))
-            {
-                BeginTime = TimeSpan.FromMilliseconds(2200)
-            };
-            System.Windows.Media.Animation.Storyboard.SetTarget(desvanecer, Toast);
-            System.Windows.Media.Animation.Storyboard.SetTargetProperty(desvanecer, new PropertyPath(OpacityProperty));
-
-            sb.Children.Add(aparecer);
-            sb.Children.Add(desvanecer);
-            sb.Completed += (s, e) => Toast.Visibility = Visibility.Collapsed;
-            sb.Begin();
-        }
         private void BtnAbonarMeta_Click(object sender, RoutedEventArgs e)
         {
             var boton = sender as Button;

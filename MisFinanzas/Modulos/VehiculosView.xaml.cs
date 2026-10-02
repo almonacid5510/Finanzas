@@ -25,17 +25,6 @@ namespace MisFinanzas.Modulos
             this.Loaded += (s, e) => CargarVehiculos();
         }
 
-        private void UserControl_Loaded(object sender, RoutedEventArgs e)
-        {
-            CargarVehiculos();
-
-            // FORZAR NOTIFICACIÓN PARA TODOS
-            foreach (var v in listaVehiculos)
-            {
-                v.NotificarCambioTotal();
-            }
-        }
-
         private void CargarVehiculos()
         {
             using (var db = new AppDbContext())
@@ -130,6 +119,9 @@ namespace MisFinanzas.Modulos
             {
                 using (var db = new AppDbContext())
                 {
+                    // Se eliminan también sus gastos para no dejar registros huérfanos.
+                    // Un solo SaveChanges: o se borra todo o no se borra nada.
+                    db.GastosVehiculo.RemoveRange(db.GastosVehiculo.Where(g => g.VehiculoId == vehiculo.Id));
                     db.Vehiculos.Remove(vehiculo);
                     db.SaveChanges();
                 }

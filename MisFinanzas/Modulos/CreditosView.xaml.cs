@@ -43,9 +43,7 @@ namespace MisFinanzas.Modulos
                     {
                         var nuevo = new Credito
                         {
-                            // IMPORTANTE: Usamos NombreCustom que es el que tienes en el modelo y DB
                             NombreCustom = txtNombreCredito.Text,
-                            Tipo = txtNombreCredito.Text, // Llenamos ambos por si acaso
                             Total = total,
                             Disponible = total - (NumeroHelper.TryParseMoneda(txtAbonoCredito.Text, out var a) ? a : 0),
                             CuotaMensual = cuota,
@@ -102,7 +100,6 @@ namespace MisFinanzas.Modulos
         {
             try
             {
-                c.NombreCustom = c.Tipo; // Sincronizamos NombreCustom con el Tipo que se edita en la interfaz
                 using (var db = new AppDbContext())
                 {
                     db.Creditos.Update(c);
@@ -189,6 +186,17 @@ namespace MisFinanzas.Modulos
                 {
                     var lista = db.Creditos.ToList();
 
+                    // El pago de la cuota vale solo para el mes en que se marcó:
+                    // al iniciar un mes nuevo, la cuota vuelve a quedar pendiente.
+                    var mesActual = Periodo.MesActual;
+                    bool reiniciados = false;
+                    foreach (var c in lista.Where(c => c.Pagado && c.MesPagado != mesActual))
+                    {
+                        c.Pagado = false;
+                        reiniciados = true;
+                    }
+                    if (reiniciados) db.SaveChanges();
+
                     // Usamos el Dispatcher para que la UI de "Cuentas" se entere
                     Application.Current.Dispatcher.Invoke(() =>
                     {
@@ -201,7 +209,10 @@ namespace MisFinanzas.Modulos
                     });
                 }
             }
-            catch (Exception ex) { /* ... */ }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Error al cargar créditos: " + ex.Message);
+            }
         }
     }
 }

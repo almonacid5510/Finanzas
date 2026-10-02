@@ -54,46 +54,14 @@ namespace MisFinanzas
             txtLogo.BeginAnimation(UIElement.OpacityProperty, animTexto);
         }
 
-        // Comprueba si una columna existe en una tabla SQLite (via PRAGMA table_info)
-        private static bool ColumnaExiste(AppDbContext db, string tabla, string columna)
-        {
-            var conn = db.Database.GetDbConnection();
-            conn.Open();
-            try
-            {
-                using var cmd = conn.CreateCommand();
-                cmd.CommandText = $"PRAGMA table_info(\"{tabla}\");";
-                using var reader = cmd.ExecuteReader();
-                while (reader.Read())
-                {
-                    // La columna 1 de table_info es el nombre
-                    if (string.Equals(reader.GetString(1), columna, StringComparison.OrdinalIgnoreCase))
-                        return true;
-                }
-            }
-            finally
-            {
-                conn.Close();
-            }
-            return false;
-        }
-
         private void InicializarBaseDeDatos()
         {
             try
             {
                 using (var db = new AppDbContext())
                 {
-                    // EnsureCreated solo crea si NO existe.
-                    db.Database.EnsureCreated();
-
-                    // Auto-reparación: la columna 'Editando' quedó como estado de UI ([NotMapped]).
-                    // En bases de datos antiguas seguía existiendo como NOT NULL y rompía los INSERT.
-                    // Si aún existe, la eliminamos (no afecta a los datos de los créditos).
-                    if (ColumnaExiste(db, "Creditos", "Editando"))
-                    {
-                        db.Database.ExecuteSqlRaw("ALTER TABLE \"Creditos\" DROP COLUMN \"Editando\";");
-                    }
+                    // Crea la BD si no existe y agrega/retira tablas y columnas según el modelo
+                    EsquemaBD.Actualizar(db);
                 }
             }
             catch (Exception ex)
@@ -147,6 +115,9 @@ namespace MisFinanzas
                     {
                         var ventana = new VentanaRecordatorioPagos(cuentasPendientes);
                         ventana.ShowDialog();
+
+                        // Las cuentas marcadas como pagadas en el recordatorio deben reflejarse ya
+                        (ContenedorPrincipal.Content as DashboardView)?.CargarResumen();
                     }
                 }
             }

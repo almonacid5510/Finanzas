@@ -14,9 +14,6 @@ namespace MisFinanzas.Modulos
     {
         public int Id { get; set; }
 
-        private string _tipo = string.Empty;
-        public string Tipo { get => _tipo; set { _tipo = value; OnPropertyChanged(); } }
-
         private decimal _total;
         public decimal Total { get => _total; set { _total = value; OnPropertyChanged(); } }
 
@@ -34,6 +31,7 @@ namespace MisFinanzas.Modulos
             set { _cuotaMensual = value; OnPropertyChanged(); }
         }
 
+        // Saldo pendiente del crédito (monto total menos lo ya pagado)
         private decimal _disponible;
         public decimal Disponible { get => _disponible; set { _disponible = value; OnPropertyChanged(); } }
 
@@ -55,6 +53,11 @@ namespace MisFinanzas.Modulos
             get => _pagado;
             set { _pagado = value; OnPropertyChanged(); }
         }
+
+        // Mes ("yyyy-MM") en que se pagó la cuota. Pagado solo vale para ese mes:
+        // al cambiar de mes la cuota vuelve a quedar pendiente (ver CreditosView.CargarDatosGlobal).
+        public string MesPagado { get; set; } = string.Empty;
+
         public event PropertyChangedEventHandler? PropertyChanged;
         protected void OnPropertyChanged([CallerMemberName] string? propertyName = null) =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));

@@ -8,178 +8,13 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:modulos="clr-namespace:MisFinanzas.Modulos"
+             xmlns:controles="clr-namespace:MisFinanzas.Controles"
              xmlns:local="clr-namespace:MisFinanzas"
              mc:Ignorable="d" 
              d:DesignHeight="600" d:DesignWidth="800"
              Background="#F0F2F5">
 
-    <UserControl.Resources>
-        <!-- Etiqueta de campo -->
-        <Style x:Key="FieldLabel" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="11"/>
-            <Setter Property="FontWeight" Value="Bold"/>
-            <Setter Property="Foreground" Value="#718096"/>
-            <Setter Property="Margin" Value="2,0,0,5"/>
-        </Style>
-
-        <!-- Input de texto moderno: redondeado, alto uniforme y acento azul al enfocar -->
-        <Style x:Key="ModernInput" TargetType="TextBox">
-            <Setter Property="Height" Value="40"/>
-            <Setter Property="Padding" Value="12,0"/>
-            <Setter Property="FontSize" Value="13"/>
-            <Setter Property="Foreground" Value="#2D3748"/>
-            <Setter Property="VerticalContentAlignment" Value="Center"/>
-            <Setter Property="BorderBrush" Value="#CBD5E0"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Background" Value="#FBFCFE"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="TextBox">
-                        <Border x:Name="bd"
-                                Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="8">
-                            <ScrollViewer x:Name="PART_ContentHost" Margin="{TemplateBinding Padding}" VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="bd" Property="BorderBrush" Value="#A0B4CC"/>
-                            </Trigger>
-                            <Trigger Property="IsKeyboardFocused" Value="True">
-                                <Setter TargetName="bd" Property="BorderBrush" Value="#4A90E2"/>
-                                <Setter TargetName="bd" Property="BorderThickness" Value="1.5"/>
-                                <Setter TargetName="bd" Property="Background" Value="White"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <!-- Botón primario -->
-        <Style x:Key="PrimaryButton" TargetType="Button">
-            <Setter Property="Height" Value="40"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="FontWeight" Value="Bold"/>
-            <Setter Property="FontSize" Value="13"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Background" Value="#4A90E2"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="bd" Background="{TemplateBinding Background}" CornerRadius="8">
-                            <Border.Effect>
-                                <DropShadowEffect BlurRadius="10" Direction="270" Opacity="0.25" ShadowDepth="2" Color="#4A90E2"/>
-                            </Border.Effect>
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                <TextBlock Text="&#xE710;" FontFamily="Segoe MDL2 Assets" FontSize="14" Margin="0,0,8,0" VerticalAlignment="Center"/>
-                                <ContentPresenter VerticalAlignment="Center"/>
-                            </StackPanel>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="bd" Property="Background" Value="#3B7DD8"/>
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="bd" Property="Background" Value="#2F6FC4"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <!-- Botón del calendario (icono) integrado y limpio -->
-        <Style x:Key="CalendarButtonStyle" TargetType="Button">
-            <Setter Property="Foreground" Value="#4A90E2"/>
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Focusable" Value="False"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="bg" Background="{TemplateBinding Background}" CornerRadius="8" Width="30" Height="30">
-                            <TextBlock Text="&#xE787;" FontFamily="Segoe MDL2 Assets" FontSize="15"
-                                       Foreground="{TemplateBinding Foreground}"
-                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="bg" Property="Background" Value="#E6F0FB"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <!-- TextBox interno del DatePicker sin borde propio -->
-        <Style x:Key="DatePickerTextBoxStyle" TargetType="DatePickerTextBox">
-            <Setter Property="Foreground" Value="#2D3748"/>
-            <Setter Property="FontSize" Value="13"/>
-            <Setter Property="VerticalContentAlignment" Value="Center"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="DatePickerTextBox">
-                        <Grid>
-                            <ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="Center" Margin="0"/>
-                        </Grid>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <!-- DatePicker moderno: redondeado, alto consistente y acento azul al enfocar -->
-        <Style x:Key="ModernDatePicker" TargetType="DatePicker">
-            <Setter Property="Height" Value="40"/>
-            <Setter Property="Background" Value="#FBFCFE"/>
-            <Setter Property="BorderBrush" Value="#CBD5E0"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="DatePicker">
-                        <Border x:Name="OuterBorder"
-                                Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="8">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-
-                                <DatePickerTextBox x:Name="PART_TextBox" Grid.Column="0"
-                                                   Style="{StaticResource DatePickerTextBoxStyle}"
-                                                   BorderThickness="0" Background="Transparent"
-                                                   Margin="12,0,0,0" VerticalAlignment="Center"/>
-
-                                <Button x:Name="PART_Button" Grid.Column="1"
-                                        Style="{StaticResource CalendarButtonStyle}"
-                                        Margin="0,0,3,0" VerticalAlignment="Center"/>
-
-                                <Popup x:Name="PART_Popup" AllowsTransparency="True"
-                                       Placement="Bottom" StaysOpen="False"/>
-                            </Grid>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsKeyboardFocusWithin" Value="True">
-                                <Setter TargetName="OuterBorder" Property="BorderBrush" Value="#4A90E2"/>
-                                <Setter TargetName="OuterBorder" Property="BorderThickness" Value="1.5"/>
-                                <Setter TargetName="OuterBorder" Property="Background" Value="White"/>
-                            </Trigger>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="OuterBorder" Property="BorderBrush" Value="#A0B4CC"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-    </UserControl.Resources>
-
+  <Grid>
     <Grid Margin="25">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -189,16 +24,31 @@
         </Grid.RowDefinitions>
 
         <!-- Encabezado -->
-        <StackPanel Grid.Row="0" Margin="0,0,0,20">
-            <TextBlock Text="Control de Gastos y Cuentas" FontSize="26" FontWeight="ExtraBold" Foreground="#2D3748"/>
-            <Rectangle Height="4" Width="60" Fill="#4A90E2" HorizontalAlignment="Left" Margin="2,5,0,0" RadiusX="2" RadiusY="2"/>
-        </StackPanel>
+        <Grid Grid.Row="0" Margin="0,0,0,20">
+            <StackPanel>
+                <TextBlock Text="Control de Gastos y Cuentas" Style="{StaticResource PageTitle}"/>
+                <Rectangle Height="4" Width="60" Fill="#4A90E2" HorizontalAlignment="Left" Margin="2,5,0,0" RadiusX="2" RadiusY="2"/>
+            </StackPanel>
+
+            <!-- Selector del mes que se está consultando -->
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                <Button Click="BtnMesAnterior_Click" ToolTip="Mes anterior" Style="{StaticResource RoundIconButton}" Background="#4A90E2">
+                    <TextBlock Text="&#xE76B;" FontFamily="Segoe MDL2 Assets" FontSize="12"/>
+                </Button>
+                <TextBlock x:Name="lblMes" Width="150" TextAlignment="Center" FontSize="16" FontWeight="Bold"
+                           Foreground="#2D3748" VerticalAlignment="Center"/>
+                <Button Click="BtnMesSiguiente_Click" ToolTip="Mes siguiente" Style="{StaticResource RoundIconButton}" Background="#4A90E2">
+                    <TextBlock Text="&#xE76C;" FontFamily="Segoe MDL2 Assets" FontSize="12"/>
+                </Button>
+                <Button x:Name="btnMesActual" Click="BtnMesActual_Click" ToolTip="Volver al mes actual"
+                        Style="{StaticResource RoundIconButton}" Background="#718096" Margin="8,0,0,0">
+                    <TextBlock Text="&#xE8D1;" FontFamily="Segoe MDL2 Assets" FontSize="13"/>
+                </Button>
+            </StackPanel>
+        </Grid>
 
         <!-- Tarjeta del formulario -->
-        <Border Grid.Row="1" Background="White" CornerRadius="14" Padding="24,20" Margin="0,0,0,25">
-            <Border.Effect>
-                <DropShadowEffect BlurRadius="18" Direction="270" Opacity="0.1" ShadowDepth="3"/>
-            </Border.Effect>
+        <Border Grid.Row="1" Style="{StaticResource Card}" Margin="0,0,0,25">
             <StackPanel>
                 <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
                     <TextBlock Text="&#xE710;" FontFamily="Segoe MDL2 Assets" FontSize="15" Foreground="#4A90E2" VerticalAlignment="Center" Margin="0,0,8,0"/>
@@ -240,7 +90,7 @@
 
                 <StackPanel Orientation="Horizontal" Margin="5,0,0,10">
                     <TextBlock Text="&#xE7C1;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="#4A5568" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                    <TextBlock Text="GASTOS DEL MES" FontSize="14" FontWeight="Bold" Foreground="#4A5568" VerticalAlignment="Center"/>
+                    <TextBlock x:Name="lblTituloGastos" Text="GASTOS DEL MES" FontSize="14" FontWeight="Bold" Foreground="#4A5568" VerticalAlignment="Center"/>
                 </StackPanel>
 
                 <Grid Margin="12,0,12,8">
@@ -310,6 +160,8 @@
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
 
+                <!-- Las cuotas de créditos se marcan como pagadas solo para el mes en curso -->
+                <StackPanel x:Name="pnlCreditos">
                 <StackPanel Orientation="Horizontal" Margin="5,25,0,10">
                     <TextBlock Text="&#xE950;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="#2B6CB0" VerticalAlignment="Center" Margin="0,0,8,0"/>
                     <TextBlock Text="COMPROMISOS DE CRÉDITOS" FontSize="14" FontWeight="Bold" Foreground="#2B6CB0" VerticalAlignment="Center"/>
@@ -364,6 +216,7 @@
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
+                </StackPanel>
             </StackPanel>
         </ScrollViewer>
 
@@ -384,4 +237,7 @@
             </StackPanel>
         </Border>
     </Grid>
+
+    <controles:Toast x:Name="toast" Panel.ZIndex="50"/>
+  </Grid>
 </UserControl>

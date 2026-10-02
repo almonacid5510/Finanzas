@@ -16,34 +16,27 @@ namespace MisFinanzas.Modulos
         public DashboardView()
         {
             InitializeComponent();
+        }
 
-            try
+        // Recalcula el resumen cuando cambia cualquiera de las listas globales de la app
+        private void ListaGlobal_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e) => CargarResumen();
+
+        // Las listas son estáticas y viven toda la sesión: nos suscribimos solo mientras el
+        // Dashboard está en pantalla, para no acumular manejadores cada vez que se navega aquí.
+        private void Suscribir(bool activar)
+        {
+            INotifyCollectionChanged[] listas =
             {
-                // 1. Cargamos de forma global los datos de la BD desde el arranque del Dashboard
-                // Esto despierta las colecciones persistentes sin obligar a visitar sus pestañas
-                CreditosView.CargarDatosGlobal();
-                IngresosView.CargarMetasGlobal();
+                VehiculosView.listaVehiculos,
+                CuentasView.listaCuentasPersistente,
+                CreditosView.ListaCreditosPersistente,
+                IngresosView.ListaMetas
+            };
 
-                // 2. Cargamos el primer resumen numérico y visual
-                CargarResumen();
-
-                // 3. Nos suscribimos a los cambios de todas las listas.
-                // Si agregas, marcas o eliminas algo en la app, el Dashboard se entera al instante.
-                if (VehiculosView.listaVehiculos != null)
-                    VehiculosView.listaVehiculos.CollectionChanged += (s, e) => CargarResumen();
-
-                if (CuentasView.listaCuentasPersistente != null)
-                    CuentasView.listaCuentasPersistente.CollectionChanged += (s, e) => CargarResumen();
-
-                if (CreditosView.ListaCreditosPersistente != null)
-                    CreditosView.ListaCreditosPersistente.CollectionChanged += (s, e) => CargarResumen();
-
-                if (IngresosView.ListaMetas != null)
-                    IngresosView.ListaMetas.CollectionChanged += (s, e) => CargarResumen();
-            }
-            catch (Exception ex)
+            foreach (var lista in listas)
             {
-                System.Diagnostics.Debug.WriteLine("Error en inicialización del Dashboard: " + ex.Message);
+                lista.CollectionChanged -= ListaGlobal_CollectionChanged; // evita duplicados
+                if (activar) lista.CollectionChanged += ListaGlobal_CollectionChanged;
             }
         }
 
@@ -78,44 +71,58 @@ namespace MisFinanzas.Modulos
         /// </summary>
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
-            // Forzamos una recarga fresca desde la Base de Datos para asegurar sincronización absoluta
-            IngresosView.CargarMetasGlobal();
-            CreditosView.CargarDatosGlobal();
-            CargarResumen();
+            try
+            {
+                // Forzamos una recarga fresca desde la Base de Datos para asegurar sincronización absoluta.
+                // Se recarga antes de suscribirse para no recalcular el resumen por cada elemento cargado.
+                IngresosView.CargarMetasGlobal();
+                CreditosView.CargarDatosGlobal();
+                CargarResumen();
+                Suscribir(true);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Error en inicialización del Dashboard: " + ex.Message);
+            }
         }
+
+        private void UserControl_Unloaded(object sender, RoutedEventArgs e) => Suscribir(false);
 
         public void CargarResumen()
         {
             try
             {
-                decimal totalIngresos = 0;
-                decimal totalGastosCuentas = 0;
-                decimal totalCreditosMes = 0;
+                // Todo el resumen corresponde al mes en curso
+                var mesActual = DateTime.Today;
+                decimal totalIngresos;
+                System.Collections.Generic.List<Movimiento> cuentasDelMes;
 
                 // --- 1. CONSULTAS A LA BASE DE DATOS (Entity Framework) ---
                 using (var db = new AppDbContext())
                 {
-                    // Sumamos los movimientos registrados como "Ingreso"
+                    // Ingreso mensual (salario) registrado como "Ingreso"
                     totalIngresos = db.Movimientos
                                       .Where(m => m.Tipo == "Ingreso")
                                       .AsEnumerable()
                                       .Sum(m => m.Venta);
 
-                    // Sumamos los gastos corrientes ("Cuenta") que NO estén pagados aún
-                    totalGastosCuentas = db.Movimientos
-                                           .Where(m => m.Tipo == "Cuenta" && !m.EstaPagado)
-                                           .AsEnumerable()
-                                           .Sum(m => m.Venta);
+                    // Cuentas del mes (incluye las pendientes arrastradas de meses anteriores)
+                    cuentasDelMes = db.Movimientos
+                                      .Where(m => m.Tipo == "Cuenta")
+                                      .AsEnumerable()
+                                      .Where(m => Periodo.CuentaDelMes(m, mesActual))
+                                      .ToList();
                 }
 
+                // Los gastos del mes cuentan aunque ya estén pagados: pagar no cambia lo que se gastó.
+                decimal totalGastosCuentas = cuentasDelMes.Sum(m => m.Venta);
+                decimal pendienteCuentas = cuentasDelMes.Where(m => !m.EstaPagado).Sum(m => m.Venta);
+
                 // --- 2. CONSULTA A LA LISTA PERSISTENTE DE CRÉDITOS ---
-                // Sumamos las cuotas mensuales de compromisos activos que falten por pagar
-                if (CreditosView.ListaCreditosPersistente != null)
-                {
-                    totalCreditosMes = CreditosView.ListaCreditosPersistente
-                                                   .Where(c => !c.Pagado)
-                                                   .Sum(c => c.CuotaMensual);
-                }
+                // Cada crédito registrado es un compromiso mensual por el valor de su cuota
+                var creditos = CreditosView.ListaCreditosPersistente;
+                decimal totalCreditosMes = creditos.Sum(c => c.CuotaMensual);
+                decimal pendienteCreditos = creditos.Where(c => !c.Pagado).Sum(c => c.CuotaMensual);
 
                 // --- 3. CÁLCULO DE VEHÍCULOS ---
                 decimal totalV = VehiculosView.listaVehiculos?.Sum(v => v.TotalInvertido) ?? 0;
@@ -127,6 +134,8 @@ namespace MisFinanzas.Modulos
                 // --- 5. ASIGNACIÓN A LAS ETIQUETAS DEL XAML ---
                 this.lblDashIngresos.Text = totalIngresos.ToString("C0");
                 this.lblDashGastos.Text = totalGastosYCompromisos.ToString("C0");
+                this.lblDashPendiente.Text = $"Pendiente por pagar: {(pendienteCuentas + pendienteCreditos):C0}";
+                this.lblPeriodo.Text = Periodo.Nombre(mesActual);
                 this.lblDashBalance.Text = balanceNeto.ToString("C0");
                 this.lblDashMoto.Text = totalV.ToString("C0");
 
@@ -174,17 +183,11 @@ namespace MisFinanzas.Modulos
                 icMetasCirculares.ItemsSource = null;
                 icMetasCirculares.ItemsSource = IngresosView.ListaMetas;
 
-                // --- 7. ESTADO DE CUENTAS ---
-                System.Collections.Generic.List<Movimiento> cuentasDb;
-                using (var db = new AppDbContext())
-                {
-                    cuentasDb = db.Movimientos.Where(m => m.Tipo == "Cuenta").ToList();
-                }
-
+                // --- 7. ESTADO DE CUENTAS DEL MES ---
                 var listaEstados = new System.Collections.Generic.List<CuentaEstadoViewModel>();
                 var hoy = DateTime.Now.Date;
 
-                foreach (var c in cuentasDb)
+                foreach (var c in cuentasDelMes)
                 {
                     var vm = new CuentaEstadoViewModel { Cuenta = c };
                     if (c.EstaPagado)
@@ -223,10 +226,10 @@ namespace MisFinanzas.Modulos
 
     public class CuentaEstadoViewModel
     {
-        public Movimiento Cuenta { get; set; }
-        public string BackgroundColor { get; set; }
-        public string BorderColor { get; set; }
-        public string TextColor { get; set; }
-        public string MensajeEstado { get; set; }
+        public Movimiento Cuenta { get; set; } = new Movimiento();
+        public string BackgroundColor { get; set; } = string.Empty;
+        public string BorderColor { get; set; } = string.Empty;
+        public string TextColor { get; set; } = string.Empty;
+        public string MensajeEstado { get; set; } = string.Empty;
     }
 }
