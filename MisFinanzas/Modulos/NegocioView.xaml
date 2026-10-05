@@ -15,7 +15,8 @@
   </UserControl.Resources>
 
   <Grid>
-	<Grid Margin="25">
+	<ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" controles:ScrollPagina.Activo="True">
+    <Grid Margin="18,12,18,18">
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto"/>
 			<RowDefinition Height="Auto"/>
@@ -23,12 +24,12 @@
 			<RowDefinition Height="*"/>
 		</Grid.RowDefinitions>
 
-		<StackPanel Grid.Row="0" Margin="0,0,0,20">
+		<StackPanel Grid.Row="0" Margin="0,0,0,14">
 			<TextBlock Text="Mis Inversiones" Style="{StaticResource PageTitle}"/>
 			<Rectangle Height="4" Width="60" Fill="#2ECC71" HorizontalAlignment="Left" Margin="2,5,0,0" RadiusX="2" RadiusY="2"/>
 		</StackPanel>
 
-		<Border Grid.Row="1" Background="#2D3748" CornerRadius="12" Padding="20" Margin="0,0,0,25">
+		<Border Grid.Row="1" Background="#2D3748" CornerRadius="12" Padding="20" Margin="0,0,0,14">
 			<Grid>
 				<StackPanel>
 					<TextBlock Text="TOTAL INVERTIDO" FontSize="12" FontWeight="Bold" Foreground="#A0AEC0"/>
@@ -41,7 +42,7 @@
 			</Grid>
 		</Border>
 
-		<Border Grid.Row="2" Style="{StaticResource Card}" Margin="0,0,0,25">
+		<Border Grid.Row="2" Style="{StaticResource Card}" Margin="0,0,0,14">
 			<StackPanel>
 				<StackPanel Orientation="Horizontal" Margin="0,0,0,16">
 					<TextBlock Text="&#xE710;" FontFamily="Segoe MDL2 Assets" FontSize="15" Foreground="#2ECC71" VerticalAlignment="Center" Margin="0,0,8,0"/>
@@ -154,6 +155,7 @@
 			</ItemsControl>
 		</ScrollViewer>
 	</Grid>
+    </ScrollViewer>
 
     <controles:Toast x:Name="toast" Panel.ZIndex="50"/>
 

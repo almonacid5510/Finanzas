@@ -43,7 +43,8 @@
     </UserControl.Resources>
 
   <Grid>
-    <Grid Margin="25">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" controles:ScrollPagina.Activo="True">
+    <Grid Margin="18,12,18,18">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -51,7 +52,7 @@
         </Grid.RowDefinitions>
 
         <!-- Encabezado con botón regresar -->
-        <StackPanel Grid.Row="0" Margin="0,0,0,20">
+        <StackPanel Grid.Row="0" Margin="0,0,0,14">
             <StackPanel Orientation="Horizontal">
                 <Button Click="BtnRegresar_Click" Cursor="Hand" VerticalAlignment="Center" Margin="0,0,15,0"
                         Width="40" Height="40" Background="White" BorderThickness="0">
@@ -80,7 +81,7 @@
         </StackPanel>
 
         <!-- Tarjeta del formulario -->
-        <Border Grid.Row="1" Style="{StaticResource Card}" Margin="0,0,0,20">
+        <Border Grid.Row="1" Style="{StaticResource Card}" Margin="0,0,0,14">
             <StackPanel>
                 <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
                     <TextBlock Text="&#xE710;" FontFamily="Segoe MDL2 Assets" FontSize="15" Foreground="#3498DB" VerticalAlignment="Center" Margin="0,0,8,0"/>
@@ -229,6 +230,7 @@
             </DockPanel>
         </Border>
     </Grid>
+    </ScrollViewer>
 
     <controles:Toast x:Name="toast" Panel.ZIndex="50"/>
 

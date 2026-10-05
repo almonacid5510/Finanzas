@@ -9,19 +9,20 @@
              xmlns:controles="clr-namespace:MisFinanzas.Controles"
              Background="#F0F2F5">
   <Grid>
-	<Grid Margin="25">
+	<ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" controles:ScrollPagina.Activo="True">
+    <Grid Margin="18,12,18,18">
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto"/>
 			<RowDefinition Height="Auto"/>
 			<RowDefinition Height="*"/>
 		</Grid.RowDefinitions>
 
-		<StackPanel Grid.Row="0" Margin="0,0,0,20">
+		<StackPanel Grid.Row="0" Margin="0,0,0,14">
 			<TextBlock Text="Mis Vehículos" Style="{StaticResource PageTitle}"/>
 			<Rectangle Height="4" Width="60" Fill="#3498DB" HorizontalAlignment="Left" Margin="2,5,0,0" RadiusX="2" RadiusY="2"/>
 		</StackPanel>
 
-		<Border Grid.Row="1" Style="{StaticResource Card}" Margin="0,0,0,25">
+		<Border Grid.Row="1" Style="{StaticResource Card}" Margin="0,0,0,14">
 			<StackPanel>
 				<StackPanel Orientation="Horizontal" Margin="0,0,0,16">
 					<TextBlock Text="&#xE710;" FontFamily="Segoe MDL2 Assets" FontSize="15" Foreground="#3498DB" VerticalAlignment="Center" Margin="0,0,8,0"/>
@@ -132,6 +133,7 @@
 			</StackPanel>
 		</ScrollViewer>
 	</Grid>
+    </ScrollViewer>
 
     <controles:Toast x:Name="toast" Panel.ZIndex="50"/>
 

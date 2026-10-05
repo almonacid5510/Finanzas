@@ -65,15 +65,6 @@ namespace MisFinanzas.Modulos
 
         private void Barras_SizeChanged(object sender, SizeChangedEventArgs e) => ActualizarBarras();
 
-        // Desplazamiento de la página con la rueda del mouse, más ágil que el predeterminado de WPF
-        // (que avanza muy poco por cada paso de la rueda)
-        private void Pagina_PreviewMouseWheel(object sender, System.Windows.Input.MouseWheelEventArgs e)
-        {
-            var pagina = (ScrollViewer)sender;
-            pagina.ScrollToVerticalOffset(pagina.VerticalOffset - e.Delta * 0.8);
-            e.Handled = true;
-        }
-
         /// <summary>
         /// Escucha el evento Loaded que configuramos en el XAML.
         /// Se dispara automáticamente cada vez que el usuario hace clic o vuelve a la pestaña del Dashboard.

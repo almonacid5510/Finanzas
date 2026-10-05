@@ -91,7 +91,7 @@
     <Grid>
         <!-- Contenido principal: ocupa todo el ancho. Reserva 68px a la izquierda
              para el sidebar colapsado; el sidebar expandido flota por encima (overlay). -->
-        <ContentControl x:Name="ContenedorPrincipal" Margin="88,20,20,20"/>
+        <ContentControl x:Name="ContenedorPrincipal" Margin="84,10,10,10"/>
 
         <!-- ============ SIDEBAR COLAPSABLE (OVERLAY) ============ -->
         <Border x:Name="Sidebar" Background="#2C3E50" Width="68"
