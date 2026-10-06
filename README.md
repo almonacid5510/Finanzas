@@ -6,15 +6,18 @@ Aplicación de escritorio para Windows para llevar las finanzas personales: ingr
 
 Requisito: [SDK de .NET 8](https://dotnet.microsoft.com/download/dotnet/8.0) o superior, en Windows.
 
-Desde la carpeta donde está este README (la que contiene `MisFinanzas.sln`):
+Los comandos se ejecutan desde la carpeta donde está este README, la que contiene `MisFinanzas.sln`. Si la terminal está en la carpeta de afuera (`Documents\MisFinanzas`), entra primero:
 
 ```powershell
+cd MisFinanzas
 dotnet run --project MisFinanzas/MisFinanzas.csproj
 ```
 
 La primera vez descarga los paquetes NuGet y compila, así que tarda un poco más.
 
-Otros comandos útiles:
+> Si aparece *"MSB1009: El archivo de proyecto no existe"*, la terminal está en otra carpeta. Revisa con `ls` que se vea `MisFinanzas.sln`.
+
+Otros comandos útiles (desde la misma carpeta):
 
 | Para… | Comando |
 |---|---|
