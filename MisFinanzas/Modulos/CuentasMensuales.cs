@@ -29,6 +29,32 @@ namespace MisFinanzas.Modulos
         public const string Anual = "Anual";
 
         public static readonly string[] Todas = { Mensual, Unica, Anual };
+
+        // Gastos que se cobran cada varios meses (Mensual con IntervaloMeses > 1)
+        public const int IntervaloMaximo = 6;
+        public static string CadaMeses(int meses) => meses <= 1 ? Mensual : $"Cada {meses} meses";
+
+        /// <summary>Opciones del formulario de gastos: Mensual, Cada 2…6 meses, Anual y Única.</summary>
+        public static readonly string[] Opciones =
+            new[] { Mensual }
+            .Concat(Enumerable.Range(2, IntervaloMaximo - 1).Select(CadaMeses))
+            .Concat(new[] { Anual, Unica })
+            .ToArray();
+
+        /// <summary>De la opción elegida a lo que se guarda: frecuencia e intervalo en meses.</summary>
+        public static (string Frecuencia, int Intervalo) Interpretar(string opcion)
+        {
+            for (int n = 2; n <= IntervaloMaximo; n++)
+                if (opcion == CadaMeses(n)) return (Mensual, n);
+            return (opcion, 1);
+        }
+
+        /// <summary>Texto de la frecuencia de un gasto ("Mensual", "Cada 2 meses", "Anual"...).</summary>
+        public static string Mostrar(Movimiento m)
+        {
+            var f = string.IsNullOrEmpty(m.Frecuencia) ? Mensual : m.Frecuencia;
+            return f == Mensual ? CadaMeses(m.IntervaloMeses) : f;
+        }
     }
 
     /// <summary>Una cuenta vista en un mes: su vencimiento, si se pagó y cuánto se pagó realmente.</summary>
@@ -48,7 +74,7 @@ namespace MisFinanzas.Modulos
         public DateTime Vence { get; }
         public string Descripcion => Cuenta.Descripcion;
         public decimal Venta => Cuenta.Venta;
-        public string Frecuencia => string.IsNullOrEmpty(Cuenta.Frecuencia) ? Frecuencias.Mensual : Cuenta.Frecuencia;
+        public string Frecuencia => Frecuencias.Mostrar(Cuenta);
         public string Categoria => Etiquetas.Mostrar(Cuenta.Categoria);
         public string ColorCategoria => Etiquetas.ColorTexto(Cuenta.Categoria);
         public string FondoCategoria => Etiquetas.ColorFondo(Cuenta.Categoria);
@@ -143,9 +169,13 @@ namespace MisFinanzas.Modulos
             {
                 Frecuencias.Unica => inicio == clave,
                 Frecuencias.Anual => cuenta.Fecha.Month == mes.Month,
-                _ => true
+                // Mensual: todos los meses, o cada N meses contando desde el mes de inicio
+                _ => cuenta.IntervaloMeses <= 1 || MesesEntre(cuenta.Fecha, mes) % cuenta.IntervaloMeses == 0
             };
         }
+
+        private static int MesesEntre(DateTime desde, DateTime hasta) =>
+            (hasta.Year - desde.Year) * 12 + hasta.Month - desde.Month;
 
         /// <summary>Gastos que aplican en el mes, con su estado de pago, ordenados por vencimiento.</summary>
         public static List<CuentaMes> DelMes(AppDbContext db, DateTime mes)
@@ -224,10 +254,11 @@ namespace MisFinanzas.Modulos
         /// Fecha de inicio para un valor nuevo. Mensual/Única: el mes que se está viendo.
         /// Anual: la próxima vez que llegue el mes elegido, a partir del mes que se está viendo.
         /// </summary>
-        public static DateTime FechaInicio(string frecuencia, DateTime mesVisto, int mesDelAnio, int dia)
+        public static DateTime FechaInicio(string frecuencia, DateTime mesVisto, int mesDelAnio, int dia, int intervalo = 1)
         {
             var inicio = Periodo.InicioMes(mesVisto);
-            if (frecuencia == Frecuencias.Anual)
+            // Anual y "cada N meses": empiezan la próxima vez que llegue el mes elegido (primer cobro)
+            if (frecuencia == Frecuencias.Anual || intervalo > 1)
             {
                 int anio = mesDelAnio >= inicio.Month ? inicio.Year : inicio.Year + 1;
                 inicio = new DateTime(anio, mesDelAnio, 1);

@@ -106,13 +106,13 @@
                 </DockPanel>
                 <Grid>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" MinWidth="130"/>
+                        <ColumnDefinition Width="*" MinWidth="110"/>
                         <ColumnDefinition Width="8"/>
-                        <ColumnDefinition Width="160"/>
+                        <ColumnDefinition Width="145"/>
                         <ColumnDefinition Width="8"/>
-                        <ColumnDefinition Width="130"/>
+                        <ColumnDefinition Width="118"/>
                         <ColumnDefinition Width="8"/>
-                        <ColumnDefinition Width="94"/>
+                        <ColumnDefinition Width="128"/>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="8"/>
                         <ColumnDefinition Width="64"/>
@@ -141,7 +141,7 @@
                     <!-- Mes de los gastos anuales (solo con frecuencia Anual) -->
                     <Label Grid.Column="7" x:Name="lblMesAnual" Content="Mes" Target="{Binding ElementName=cbMesAnual}" Style="{StaticResource Etiqueta}"
                            Margin="8,0,0,0" Visibility="Collapsed"/>
-                    <ComboBox Grid.Row="1" Grid.Column="7" x:Name="cbMesAnual" Style="{StaticResource ModernCombo}" Width="118" Margin="8,0,0,0"
+                    <ComboBox Grid.Row="1" Grid.Column="7" x:Name="cbMesAnual" Style="{StaticResource ModernCombo}" Width="112" Margin="8,0,0,0"
                               MaxDropDownHeight="300" Visibility="Collapsed"/>
 
                     <Label Grid.Column="9" Content="Día" Target="{Binding ElementName=cbDiaPago}" Style="{StaticResource Etiqueta}"/>

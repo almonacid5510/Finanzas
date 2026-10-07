@@ -34,6 +34,10 @@ namespace MisFinanzas.Modulos
         // Cada cuánto se repite: Mensual, Única (solo el mes de Fecha) o Anual (cada año en el mes de Fecha)
         public string Frecuencia { get; set; } = Frecuencias.Mensual;
 
+        // Con frecuencia Mensual: cada cuántos meses se cobra (1 = todos los meses, 2 = bimestral, 3 = trimestral...).
+        // Cuenta desde el mes de Fecha. 0 (registros anteriores a este campo) equivale a 1.
+        public int IntervaloMeses { get; set; } = 1;
+
         // Categoría o etiqueta libre: Hogar, Médicos, Impuestos, Freelance...
         public string Categoria { get; set; } = string.Empty;
 

@@ -33,7 +33,7 @@ namespace MisFinanzas.Modulos
 
             // Opciones del formulario
             cbDiaPago.ItemsSource = Enumerable.Range(1, 31).ToList();
-            cbFrecuencia.ItemsSource = Frecuencias.Todas;
+            cbFrecuencia.ItemsSource = Frecuencias.Opciones;
             cbMesAnual.ItemsSource = Enumerable.Range(1, 12).Select(NombreMes).ToList();
             LimpiarFormulario();
 
@@ -210,7 +210,10 @@ namespace MisFinanzas.Modulos
         private void CbFrecuencia_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (lblMesAnual == null || cbMesAnual == null) return; // aún inicializando
-            var visible = (cbFrecuencia.SelectedItem as string) == Frecuencias.Anual ? Visibility.Visible : Visibility.Collapsed;
+            var (frecuencia, intervalo) = Frecuencias.Interpretar(cbFrecuencia.SelectedItem as string ?? Frecuencias.Mensual);
+            // Anual: mes en que vence cada año. Cada N meses: mes del primer cobro.
+            var visible = frecuencia == Frecuencias.Anual || intervalo > 1 ? Visibility.Visible : Visibility.Collapsed;
+            lblMesAnual.Content = intervalo > 1 ? "Primer cobro" : "Mes";
             lblMesAnual.Visibility = visible;
             cbMesAnual.Visibility = visible;
         }
@@ -272,12 +275,13 @@ namespace MisFinanzas.Modulos
             if (string.IsNullOrWhiteSpace(txtDescCuenta.Text) ||
                 !NumeroHelper.TryParseMoneda(txtValorCuenta.Text, out decimal valor) ||
                 cbDiaPago.SelectedItem is not int dia ||
-                cbFrecuencia.SelectedItem is not string frecuencia)
+                cbFrecuencia.SelectedItem is not string opcionFrecuencia)
             {
                 MisFinanzas.Controles.Aviso.Mostrar("Por favor, ingresa una descripción, un valor válido y el día de pago.");
                 return;
             }
             int mesDelAnio = cbMesAnual.SelectedIndex + 1;
+            var (frecuencia, intervalo) = Frecuencias.Interpretar(opcionFrecuencia);
 
             try
             {
@@ -295,8 +299,9 @@ namespace MisFinanzas.Modulos
                             Venta = valor,
                             Tipo = CuentasMensuales.TipoGasto,
                             Frecuencia = frecuencia,
+                            IntervaloMeses = intervalo,
                             DiaPago = dia,
-                            Fecha = CuentasMensuales.FechaInicio(frecuencia, _mesSeleccionado, mesDelAnio, dia)
+                            Fecha = CuentasMensuales.FechaInicio(frecuencia, _mesSeleccionado, mesDelAnio, dia, intervalo)
                         };
                         db.Movimientos.Add(nueva);
                         db.SaveChanges();
@@ -306,6 +311,7 @@ namespace MisFinanzas.Modulos
                         {
                             Frecuencias.Unica => $"Gasto registrado para el {nueva.Fecha:dd/MM/yyyy}",
                             Frecuencias.Anual => $"Gasto anual registrado: vence cada {nueva.Fecha:dd 'de' MMMM}",
+                            _ when intervalo > 1 => $"Gasto registrado: se cobrará cada {intervalo} meses desde {Periodo.Nombre(nueva.Fecha)}",
                             _ => $"Gasto registrado: se repetirá el día {dia} de cada mes"
                         });
                     }
@@ -318,10 +324,11 @@ namespace MisFinanzas.Modulos
                             c.Categoria = categoria;
                             c.Venta = valor;
                             c.Frecuencia = frecuencia;
+                            c.IntervaloMeses = intervalo;
                             c.DiaPago = dia;
 
                             // Se conserva el mes de inicio; en los anuales se ajusta al mes elegido
-                            var inicio = frecuencia == Frecuencias.Anual
+                            var inicio = frecuencia == Frecuencias.Anual || intervalo > 1
                                 ? new DateTime(c.Fecha.Year, mesDelAnio, 1)
                                 : Periodo.InicioMes(c.Fecha);
                             c.Fecha = CuentasMensuales.Vencimiento(c, inicio);

@@ -151,6 +151,9 @@ namespace MisFinanzas.Modulos
                 // Las cuentas existentes se repiten cada mes y quedan como "Otros" hasta que se les ponga categoría
                 ("MovimientosV2", nameof(Movimiento.Frecuencia)) =>
                     $"UPDATE \"MovimientosV2\" SET \"Frecuencia\" = '{Frecuencias.Mensual}';",
+                // Los gastos existentes se cobran todos los meses
+                ("MovimientosV2", nameof(Movimiento.IntervaloMeses)) =>
+                    "UPDATE \"MovimientosV2\" SET \"IntervaloMeses\" = 1;",
                 ("MovimientosV2", nameof(Movimiento.Categoria)) =>
                     "UPDATE \"MovimientosV2\" SET \"Categoria\" = 'Otros' WHERE \"Tipo\" = 'Cuenta';",
 

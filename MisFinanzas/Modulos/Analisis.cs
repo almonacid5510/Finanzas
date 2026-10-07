@@ -43,7 +43,7 @@ namespace MisFinanzas.Modulos
         public string Categoria => Etiquetas.Mostrar(Cuenta.Categoria);
         public string ColorCategoria => Etiquetas.ColorTexto(Cuenta.Categoria);
         public string FondoCategoria => Etiquetas.ColorFondo(Cuenta.Categoria);
-        public string Frecuencia => string.IsNullOrEmpty(Cuenta.Frecuencia) ? Frecuencias.Mensual : Cuenta.Frecuencia;
+        public string Frecuencia => Frecuencias.Mostrar(Cuenta);
         public decimal Valor => Cuenta.Venta;
         public int MesesConDatos { get; set; }
         public decimal Promedio { get; set; }
