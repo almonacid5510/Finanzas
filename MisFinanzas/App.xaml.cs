@@ -39,6 +39,9 @@ namespace MisFinanzas
             // Los Binding con StringFormat usan el idioma del elemento (por defecto en-US: "$1,526,000")
             FrameworkElement.LanguageProperty.OverrideMetadata(typeof(FrameworkElement),
                 new FrameworkPropertyMetadata(XmlLanguage.GetLanguage("es-CO")));
+            // También los fragmentos de texto (Run) dentro de un TextBlock
+            FrameworkContentElement.LanguageProperty.OverrideMetadata(typeof(System.Windows.Documents.TextElement),
+                new FrameworkPropertyMetadata(XmlLanguage.GetLanguage("es-CO")));
         }
 
         protected override void OnStartup(StartupEventArgs e)

@@ -11,6 +11,10 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:c="clr-namespace:MisFinanzas.Controles">
 
+    <!-- Convertidores de presentación -->
+    <c:AnilloConverter x:Key="Anillo"/>
+    <BooleanToVisibilityConverter x:Key="BoolAVisible"/>
+
     <!-- ==================== TIPOGRAFÍA ==================== -->
     <FontFamily x:Key="FuenteApp">pack://application:,,,/MisFinanzas;component/Recursos/Fuentes/#Plus Jakarta Sans, Segoe UI</FontFamily>
 

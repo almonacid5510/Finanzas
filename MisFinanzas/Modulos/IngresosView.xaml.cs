@@ -28,6 +28,7 @@ namespace MisFinanzas.Modulos
             {
                 // Ahora icMetas ya no es null
                 icMetas.ItemsSource = ListaMetas;
+                lblPeriodo.Text = Periodo.Nombre(DateTime.Today);
                 CargarMetasDesdeBD();
                 CargarSalarioDesdeBD();
                 CargarIngresosExtra();
@@ -191,6 +192,24 @@ namespace MisFinanzas.Modulos
             // El ahorro total es exclusivamente la suma del MontoActual de todas las metas
             decimal totalAcumulado = ListaMetas.Sum(m => m.MontoActual);
             lblAhorroAcumulado.Text = totalAcumulado.ToString("C0");
+            lblMetasResumen.Text = ListaMetas.Count switch
+            {
+                0 => "Sin metas todavía",
+                1 => "Repartido en 1 meta",
+                _ => $"Repartido en {ListaMetas.Count} metas"
+            };
+            lblSinMetas.Visibility = ListaMetas.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        // Cuota mensual estimada de la meta nueva, con la misma fórmula de MetaAhorro.CuotaMensual
+        private void CamposMeta_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (lblCuotaEstimada == null) return;
+            bool valido = NumeroHelper.TryParseMoneda(txtValorMeta.Text, out var objetivo) &&
+                          int.TryParse(txtMesesMeta.Text, out var meses) && meses > 0;
+            lblCuotaEstimada.Text = valido
+                ? new MetaAhorro { MontoObjetivo = objetivo, PlazoMeses = int.Parse(txtMesesMeta.Text) }.CuotaMensual.ToString("C0")
+                : "$ —";
         }
         // Meta pendiente de confirmar eliminación
         private MetaAhorro? _metaPendienteEliminar;
@@ -309,13 +328,16 @@ namespace MisFinanzas.Modulos
                                              .Select(i => new CuentaMes(i, mes, null))
                                              .ToList();
                 icIngresosExtra.ItemsSource = extras;
+                icIngresosExtra.Visibility = extras.Count == 0 ? Visibility.Collapsed : Visibility.Visible;
                 lblSinIngresosExtra.Visibility = extras.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
                 lblTituloOtrosIngresos.Text = $"Otros ingresos · {Periodo.Nombre(mes)}";
+                lblTituloOtrosIngresosMes.Text = $"OTROS INGRESOS · {mes.ToString("MMMM").ToUpperInvariant()}";
+                lblOtrosIngresosMes.Text = extras.Sum(i => i.Venta).ToString("C0");
 
                 var total = Analisis.IngresosDelMes(Analisis.Cargar(db), mes);
                 lblTotalIngresosMes.Text = extras.Count > 0
-                    ? $"Total del mes con otros ingresos: {total:C0}"
-                    : string.Empty;
+                    ? $"{extras.Count} {(extras.Count == 1 ? "registro" : "registros")} · total del mes {total:C0}"
+                    : "Sin registros este mes";
             }
             catch (Exception ex)
             {

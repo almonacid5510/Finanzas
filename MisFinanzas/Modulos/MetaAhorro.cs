@@ -26,6 +26,13 @@ namespace MisFinanzas.Modulos
         [NotMapped]
         public double Progreso => MontoObjetivo > 0 ? (double)((MontoActual / MontoObjetivo) * 100) : 0;
 
+        // Lo que falta para llegar al objetivo (para mostrar)
+        [NotMapped]
+        public decimal Faltante => System.Math.Max(0, MontoObjetivo - MontoActual);
+
+        [NotMapped]
+        public string NombreMostrar => string.IsNullOrWhiteSpace(NombreCustom) ? Nombre : NombreCustom;
+
         [NotMapped]
         public double ProgresoStrokeOffset => 32.2 * (1 - (System.Math.Min(100.0, System.Math.Max(0.0, Progreso)) / 100.0));
 
