@@ -333,23 +333,23 @@
                     <TextBlock Text="Gastos = lo pagado realmente + lo pendiente por su valor. No incluye créditos. Haz clic en un mes para ver sus gastos."
                                Style="{StaticResource TextoSecundario}" TextWrapping="Wrap" Margin="0,2,0,10"/>
                     <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
-                        <StackPanel MinWidth="680" Width="{Binding ViewportWidth, RelativeSource={RelativeSource AncestorType=ScrollViewer}}">
+                        <StackPanel Grid.IsSharedSizeScope="True" MinWidth="{Binding ViewportWidth, RelativeSource={RelativeSource AncestorType=ScrollViewer}}">
                             <Grid Margin="10,0,10,6">
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="140"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="110"/>
-                                    <ColumnDefinition Width="110"/>
-                                    <ColumnDefinition Width="110"/>
-                                    <ColumnDefinition Width="110"/>
-                                    <ColumnDefinition Width="110"/>
+                                    <ColumnDefinition Width="Auto" SharedSizeGroup="HMes" MinWidth="130"/>
+                                    <ColumnDefinition Width="*" MinWidth="40"/>
+                                    <ColumnDefinition Width="Auto" SharedSizeGroup="HIng" MinWidth="104"/>
+                                    <ColumnDefinition Width="Auto" SharedSizeGroup="HGas" MinWidth="104"/>
+                                    <ColumnDefinition Width="Auto" SharedSizeGroup="HPag" MinWidth="104"/>
+                                    <ColumnDefinition Width="Auto" SharedSizeGroup="HPen" MinWidth="104"/>
+                                    <ColumnDefinition Width="Auto" SharedSizeGroup="HBal" MinWidth="104"/>
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Text="Mes" Style="{StaticResource EncabezadoTabla}"/>
-                                <TextBlock Grid.Column="2" Text="Ingresos" Style="{StaticResource EncabezadoTabla}" HorizontalAlignment="Right"/>
-                                <TextBlock Grid.Column="3" Text="Gastos" Style="{StaticResource EncabezadoTabla}" HorizontalAlignment="Right"/>
-                                <TextBlock Grid.Column="4" Text="Pagado" Style="{StaticResource EncabezadoTabla}" HorizontalAlignment="Right"/>
-                                <TextBlock Grid.Column="5" Text="Pendiente" Style="{StaticResource EncabezadoTabla}" HorizontalAlignment="Right"/>
-                                <TextBlock Grid.Column="6" Text="Balance" Style="{StaticResource EncabezadoTabla}" HorizontalAlignment="Right"/>
+                                <TextBlock Grid.Column="2" Margin="16,0,0,0" Text="Ingresos" Style="{StaticResource EncabezadoTabla}" HorizontalAlignment="Right"/>
+                                <TextBlock Grid.Column="3" Margin="16,0,0,0" Text="Gastos" Style="{StaticResource EncabezadoTabla}" HorizontalAlignment="Right"/>
+                                <TextBlock Grid.Column="4" Margin="16,0,0,0" Text="Pagado" Style="{StaticResource EncabezadoTabla}" HorizontalAlignment="Right"/>
+                                <TextBlock Grid.Column="5" Margin="16,0,0,0" Text="Pendiente" Style="{StaticResource EncabezadoTabla}" HorizontalAlignment="Right"/>
+                                <TextBlock Grid.Column="6" Margin="16,0,0,0" Text="Balance" Style="{StaticResource EncabezadoTabla}" HorizontalAlignment="Right"/>
                             </Grid>
                             <ItemsControl x:Name="icHistorial">
                                 <ItemsControl.ItemTemplate>
@@ -371,22 +371,22 @@
                                             </Button.Template>
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="140"/>
-                                                    <ColumnDefinition Width="*"/>
-                                                    <ColumnDefinition Width="110"/>
-                                                    <ColumnDefinition Width="110"/>
-                                                    <ColumnDefinition Width="110"/>
-                                                    <ColumnDefinition Width="110"/>
-                                                    <ColumnDefinition Width="110"/>
+                                                    <ColumnDefinition Width="Auto" SharedSizeGroup="HMes" MinWidth="130"/>
+                                                    <ColumnDefinition Width="*" MinWidth="40"/>
+                                                    <ColumnDefinition Width="Auto" SharedSizeGroup="HIng" MinWidth="104"/>
+                                                    <ColumnDefinition Width="Auto" SharedSizeGroup="HGas" MinWidth="104"/>
+                                                    <ColumnDefinition Width="Auto" SharedSizeGroup="HPag" MinWidth="104"/>
+                                                    <ColumnDefinition Width="Auto" SharedSizeGroup="HPen" MinWidth="104"/>
+                                                    <ColumnDefinition Width="Auto" SharedSizeGroup="HBal" MinWidth="104"/>
                                                 </Grid.ColumnDefinitions>
                                                 <TextBlock Text="{Binding Nombre}" FontSize="13.5" FontWeight="SemiBold" VerticalAlignment="Center"/>
                                                 <ProgressBar Grid.Column="1" Style="{StaticResource Barra}" Value="{Binding Proporcion, Mode=OneWay}"
                                                              Foreground="#F97066" Margin="10,0" VerticalAlignment="Center"/>
-                                                <TextBlock Grid.Column="2" Text="{Binding Ingresos, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" Foreground="{StaticResource VerdeTexto}" HorizontalAlignment="Right"/>
-                                                <TextBlock Grid.Column="3" Text="{Binding Gastos, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" FontWeight="Bold" HorizontalAlignment="Right"/>
-                                                <TextBlock Grid.Column="4" Text="{Binding Pagado, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" Foreground="{StaticResource Texto2}" HorizontalAlignment="Right"/>
-                                                <TextBlock Grid.Column="5" Text="{Binding Pendiente, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" Foreground="{StaticResource NaranjaTexto}" HorizontalAlignment="Right"/>
-                                                <TextBlock Grid.Column="6" Text="{Binding Balance, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" FontWeight="Bold" Foreground="{Binding ColorBalance}" HorizontalAlignment="Right"/>
+                                                <TextBlock Grid.Column="2" Margin="16,0,0,0" Text="{Binding Ingresos, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" Foreground="{StaticResource VerdeTexto}" HorizontalAlignment="Right"/>
+                                                <TextBlock Grid.Column="3" Margin="16,0,0,0" Text="{Binding Gastos, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" FontWeight="Bold" HorizontalAlignment="Right"/>
+                                                <TextBlock Grid.Column="4" Margin="16,0,0,0" Text="{Binding Pagado, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" Foreground="{StaticResource Texto2}" HorizontalAlignment="Right"/>
+                                                <TextBlock Grid.Column="5" Margin="16,0,0,0" Text="{Binding Pendiente, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" Foreground="{StaticResource NaranjaTexto}" HorizontalAlignment="Right"/>
+                                                <TextBlock Grid.Column="6" Margin="16,0,0,0" Text="{Binding Balance, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" FontWeight="Bold" Foreground="{Binding ColorBalance}" HorizontalAlignment="Right"/>
                                             </Grid>
                                         </Button>
                                     </DataTemplate>
@@ -396,21 +396,21 @@
                     </ScrollViewer>
 
                     <TextBlock x:Name="lblTituloCategorias" Text="Gastos por categoría" Style="{StaticResource SubTitulo}" Margin="0,20,0,10"/>
-                    <ItemsControl x:Name="icCategoriasHistorial">
+                    <ItemsControl x:Name="icCategoriasHistorial" Grid.IsSharedSizeScope="True">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <Grid Margin="0,4">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="150"/>
                                         <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="130"/>
+                                        <ColumnDefinition Width="Auto" SharedSizeGroup="HCat" MinWidth="110"/>
                                     </Grid.ColumnDefinitions>
                                     <Border Style="{StaticResource Chip}" Background="{Binding ColorFondo}">
                                         <TextBlock Text="{Binding Nombre}" Style="{StaticResource TextoChip}" Foreground="{Binding ColorTexto}"/>
                                     </Border>
                                     <ProgressBar Grid.Column="1" Style="{StaticResource Barra}" Value="{Binding Proporcion, Mode=OneWay}"
                                                  Foreground="{Binding ColorBarra}" Margin="10,0" VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Column="2" Text="{Binding Total, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Column="2" Margin="16,0,0,0" Text="{Binding Total, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Center"/>
                                 </Grid>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
@@ -423,22 +423,22 @@
                     <TextBlock Text="La predicción es el promedio de lo que pagaste realmente en los últimos 6 pagos; si aún no hay pagos, se usa el valor registrado."
                                Style="{StaticResource TextoSecundario}" TextWrapping="Wrap" Margin="0,2,0,10"/>
                     <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
-                        <StackPanel MinWidth="700" Width="{Binding ViewportWidth, RelativeSource={RelativeSource AncestorType=ScrollViewer}}">
+                        <StackPanel Grid.IsSharedSizeScope="True" MinWidth="{Binding ViewportWidth, RelativeSource={RelativeSource AncestorType=ScrollViewer}}">
                             <Grid Margin="10,0,10,6">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="104"/>
-                                    <ColumnDefinition Width="108"/>
-                                    <ColumnDefinition Width="108"/>
-                                    <ColumnDefinition Width="124"/>
-                                    <ColumnDefinition Width="150"/>
+                                    <ColumnDefinition Width="Auto" SharedSizeGroup="P0" MinWidth="104"/>
+                                    <ColumnDefinition Width="Auto" SharedSizeGroup="P1" MinWidth="108"/>
+                                    <ColumnDefinition Width="Auto" SharedSizeGroup="P2" MinWidth="108"/>
+                                    <ColumnDefinition Width="Auto" SharedSizeGroup="P3" MinWidth="124"/>
+                                    <ColumnDefinition Width="Auto" SharedSizeGroup="P4" MinWidth="150"/>
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Text="Gasto" Style="{StaticResource EncabezadoTabla}"/>
-                                <TextBlock Grid.Column="1" Text="Próximo pago" Style="{StaticResource EncabezadoTabla}"/>
-                                <TextBlock Grid.Column="2" Text="Registrado" Style="{StaticResource EncabezadoTabla}" HorizontalAlignment="Right"/>
-                                <TextBlock Grid.Column="3" Text="Predicción" Style="{StaticResource EncabezadoTabla}" HorizontalAlignment="Right"/>
-                                <TextBlock Grid.Column="4" Text="12 meses" Style="{StaticResource EncabezadoTabla}" HorizontalAlignment="Right"/>
-                                <TextBlock Grid.Column="5" Text="Tendencia" Style="{StaticResource EncabezadoTabla}" HorizontalAlignment="Right"/>
+                                <TextBlock Grid.Column="1" Margin="14,0,0,0" Text="Próximo pago" Style="{StaticResource EncabezadoTabla}"/>
+                                <TextBlock Grid.Column="2" Margin="14,0,0,0" Text="Registrado" Style="{StaticResource EncabezadoTabla}" HorizontalAlignment="Right"/>
+                                <TextBlock Grid.Column="3" Margin="14,0,0,0" Text="Predicción" Style="{StaticResource EncabezadoTabla}" HorizontalAlignment="Right"/>
+                                <TextBlock Grid.Column="4" Margin="14,0,0,0" Text="12 meses" Style="{StaticResource EncabezadoTabla}" HorizontalAlignment="Right"/>
+                                <TextBlock Grid.Column="5" Margin="14,0,0,0" Text="Tendencia" Style="{StaticResource EncabezadoTabla}" HorizontalAlignment="Right"/>
                             </Grid>
                             <ItemsControl x:Name="icPredicciones">
                                 <ItemsControl.ItemTemplate>
@@ -447,11 +447,11 @@
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*"/>
-                                                    <ColumnDefinition Width="104"/>
-                                                    <ColumnDefinition Width="108"/>
-                                                    <ColumnDefinition Width="108"/>
-                                                    <ColumnDefinition Width="124"/>
-                                                    <ColumnDefinition Width="150"/>
+                                                    <ColumnDefinition Width="Auto" SharedSizeGroup="P0" MinWidth="104"/>
+                                                    <ColumnDefinition Width="Auto" SharedSizeGroup="P1" MinWidth="108"/>
+                                                    <ColumnDefinition Width="Auto" SharedSizeGroup="P2" MinWidth="108"/>
+                                                    <ColumnDefinition Width="Auto" SharedSizeGroup="P3" MinWidth="124"/>
+                                                    <ColumnDefinition Width="Auto" SharedSizeGroup="P4" MinWidth="150"/>
                                                 </Grid.ColumnDefinitions>
                                                 <StackPanel VerticalAlignment="Center">
                                                     <TextBlock Text="{Binding Descripcion}" FontSize="13.5" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
@@ -460,11 +460,11 @@
                                                         <TextBlock Text="{Binding Frecuencia}" FontSize="12.5" Foreground="{StaticResource Texto2}" VerticalAlignment="Center"/>
                                                     </StackPanel>
                                                 </StackPanel>
-                                                <TextBlock Grid.Column="1" Text="{Binding ProximoVence, StringFormat='{}{0:dd/MM/yyyy}', TargetNullValue='—'}" Foreground="{StaticResource Texto2}" VerticalAlignment="Center"/>
-                                                <TextBlock Grid.Column="2" Text="{Binding Valor, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" Foreground="{StaticResource Texto2}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                                                <TextBlock Grid.Column="3" Text="{Binding Prediccion, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" FontWeight="Bold" Foreground="{StaticResource Azul}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                                                <TextBlock Grid.Column="4" Text="{Binding Proyeccion12, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                                                <TextBlock Grid.Column="5" Text="{Binding Tendencia}" FontSize="12.5" FontWeight="SemiBold" Foreground="{Binding ColorTendencia}"
+                                                <TextBlock Grid.Column="1" Margin="14,0,0,0" Text="{Binding ProximoVence, StringFormat='{}{0:dd/MM/yyyy}', TargetNullValue='—'}" Foreground="{StaticResource Texto2}" VerticalAlignment="Center"/>
+                                                <TextBlock Grid.Column="2" Margin="14,0,0,0" Text="{Binding Valor, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" Foreground="{StaticResource Texto2}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                                <TextBlock Grid.Column="3" Margin="14,0,0,0" Text="{Binding Prediccion, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" FontWeight="Bold" Foreground="{StaticResource Azul}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                                <TextBlock Grid.Column="4" Margin="14,0,0,0" Text="{Binding Proyeccion12, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                                <TextBlock Grid.Column="5" Margin="14,0,0,0" Text="{Binding Tendencia}" FontSize="12.5" FontWeight="SemiBold" Foreground="{Binding ColorTendencia}"
                                                            HorizontalAlignment="Right" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
                                             </Grid>
                                         </Border>
@@ -478,20 +478,20 @@
                     <TextBlock Text="Ingresos (salario + otros ingresos) frente a gastos previstos y cuotas de créditos."
                                Style="{StaticResource TextoSecundario}" TextWrapping="Wrap" Margin="0,2,0,10"/>
                     <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
-                        <StackPanel MinWidth="600" Width="{Binding ViewportWidth, RelativeSource={RelativeSource AncestorType=ScrollViewer}}">
+                        <StackPanel Grid.IsSharedSizeScope="True" MinWidth="{Binding ViewportWidth, RelativeSource={RelativeSource AncestorType=ScrollViewer}}">
                             <Grid Margin="10,0,10,6">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="124"/>
-                                    <ColumnDefinition Width="124"/>
-                                    <ColumnDefinition Width="124"/>
-                                    <ColumnDefinition Width="124"/>
+                                    <ColumnDefinition Width="Auto" SharedSizeGroup="D0" MinWidth="124"/>
+                                    <ColumnDefinition Width="Auto" SharedSizeGroup="D1" MinWidth="124"/>
+                                    <ColumnDefinition Width="Auto" SharedSizeGroup="D2" MinWidth="124"/>
+                                    <ColumnDefinition Width="Auto" SharedSizeGroup="D3" MinWidth="124"/>
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Text="Mes" Style="{StaticResource EncabezadoTabla}"/>
-                                <TextBlock Grid.Column="1" Text="Ingresos" Style="{StaticResource EncabezadoTabla}" HorizontalAlignment="Right"/>
-                                <TextBlock Grid.Column="2" Text="Gastos" Style="{StaticResource EncabezadoTabla}" HorizontalAlignment="Right"/>
-                                <TextBlock Grid.Column="3" Text="Créditos" Style="{StaticResource EncabezadoTabla}" HorizontalAlignment="Right"/>
-                                <TextBlock Grid.Column="4" Text="Balance" Style="{StaticResource EncabezadoTabla}" HorizontalAlignment="Right"/>
+                                <TextBlock Grid.Column="1" Margin="14,0,0,0" Text="Ingresos" Style="{StaticResource EncabezadoTabla}" HorizontalAlignment="Right"/>
+                                <TextBlock Grid.Column="2" Margin="14,0,0,0" Text="Gastos" Style="{StaticResource EncabezadoTabla}" HorizontalAlignment="Right"/>
+                                <TextBlock Grid.Column="3" Margin="14,0,0,0" Text="Créditos" Style="{StaticResource EncabezadoTabla}" HorizontalAlignment="Right"/>
+                                <TextBlock Grid.Column="4" Margin="14,0,0,0" Text="Balance" Style="{StaticResource EncabezadoTabla}" HorizontalAlignment="Right"/>
                             </Grid>
                             <ItemsControl x:Name="icProyeccion">
                                 <ItemsControl.ItemTemplate>
@@ -500,16 +500,16 @@
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*"/>
-                                                    <ColumnDefinition Width="124"/>
-                                                    <ColumnDefinition Width="124"/>
-                                                    <ColumnDefinition Width="124"/>
-                                                    <ColumnDefinition Width="124"/>
+                                                    <ColumnDefinition Width="Auto" SharedSizeGroup="D0" MinWidth="124"/>
+                                                    <ColumnDefinition Width="Auto" SharedSizeGroup="D1" MinWidth="124"/>
+                                                    <ColumnDefinition Width="Auto" SharedSizeGroup="D2" MinWidth="124"/>
+                                                    <ColumnDefinition Width="Auto" SharedSizeGroup="D3" MinWidth="124"/>
                                                 </Grid.ColumnDefinitions>
                                                 <TextBlock Text="{Binding Nombre}" FontWeight="SemiBold"/>
-                                                <TextBlock Grid.Column="1" Text="{Binding Ingresos, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" Foreground="{StaticResource VerdeTexto}" HorizontalAlignment="Right"/>
-                                                <TextBlock Grid.Column="2" Text="{Binding Gastos, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" HorizontalAlignment="Right"/>
-                                                <TextBlock Grid.Column="3" Text="{Binding Creditos, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" Foreground="{StaticResource MoradoTexto}" HorizontalAlignment="Right"/>
-                                                <TextBlock Grid.Column="4" Text="{Binding Balance, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" FontWeight="Bold" Foreground="{Binding ColorBalance}" HorizontalAlignment="Right"/>
+                                                <TextBlock Grid.Column="1" Margin="14,0,0,0" Text="{Binding Ingresos, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" Foreground="{StaticResource VerdeTexto}" HorizontalAlignment="Right"/>
+                                                <TextBlock Grid.Column="2" Margin="14,0,0,0" Text="{Binding Gastos, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" HorizontalAlignment="Right"/>
+                                                <TextBlock Grid.Column="3" Margin="14,0,0,0" Text="{Binding Creditos, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" Foreground="{StaticResource MoradoTexto}" HorizontalAlignment="Right"/>
+                                                <TextBlock Grid.Column="4" Margin="14,0,0,0" Text="{Binding Balance, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" FontWeight="Bold" Foreground="{Binding ColorBalance}" HorizontalAlignment="Right"/>
                                             </Grid>
                                         </Border>
                                     </DataTemplate>
