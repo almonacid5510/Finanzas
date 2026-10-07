@@ -196,7 +196,10 @@
             <Border Style="{StaticResource Card}">
                 <StackPanel>
                     <DockPanel Margin="0,0,0,12">
-                        <Button DockPanel.Dock="Right" Style="{StaticResource BotonEnlace}" Content="Ver todo" Click="BtnVerCuentas_Click"/>
+                        <Button DockPanel.Dock="Right" Content="Ver todo" Click="BtnVerCuentas_Click" Style="{StaticResource BotonSecundario}"
+                                c:Ui.Icono="{StaticResource IcoCuentas}" Height="30" Padding="10,0" FontSize="12.5" VerticalAlignment="Center" Margin="0,-6,0,-6"
+                                Background="{StaticResource AzulSuave}" Foreground="{StaticResource Azul}" BorderBrush="#C9D7F8"
+                                AutomationProperties.Name="Ver todas las cuentas" ToolTip="Ir a Cuentas del mes"/>
                         <TextBlock Text="Por pagar este mes" Style="{StaticResource TituloTarjeta}"/>
                     </DockPanel>
                     <TextBlock x:Name="lblSinProximas" Text="No tienes pagos pendientes este mes." Style="{StaticResource TextoSecundario}" Visibility="Collapsed"/>
