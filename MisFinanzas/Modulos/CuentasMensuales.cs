@@ -32,7 +32,7 @@ namespace MisFinanzas.Modulos
 
         // Gastos que se cobran cada varios meses (Mensual con IntervaloMeses > 1)
         public const int IntervaloMaximo = 6;
-        public static string CadaMeses(int meses) => meses <= 1 ? Mensual : $"Cada {meses} meses";
+        public static string CadaMeses(int meses) => meses <= 1 ? Mensual : $"{meses} meses";
 
         /// <summary>Opciones del formulario de gastos: Mensual, Cada 2…6 meses, Anual y Única.</summary>
         public static readonly string[] Opciones =
@@ -49,7 +49,7 @@ namespace MisFinanzas.Modulos
             return (opcion, 1);
         }
 
-        /// <summary>Texto de la frecuencia de un gasto ("Mensual", "Cada 2 meses", "Anual"...).</summary>
+        /// <summary>Texto de la frecuencia de un gasto ("Mensual", "2 meses", "Anual"...).</summary>
         public static string Mostrar(Movimiento m)
         {
             var f = string.IsNullOrEmpty(m.Frecuencia) ? Mensual : m.Frecuencia;
