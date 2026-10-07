@@ -310,21 +310,15 @@ namespace MisFinanzas.Modulos
             lblDeuda.Text = deuda.ToString("C0");
             barDeuda.Value = total > 0 ? (double)(creditos.Sum(c => c.CapitalPagado) / total) : 0;
 
-            // El crédito que termina más tarde, según su plan de pagos
-            var ultimo = activos.Select(c => (Credito: c, Plan: c.Plan))
-                                .Where(x => x.Plan.Count > 0 && !x.Credito.CuotaNoCubreIntereses)
-                                .OrderByDescending(x => x.Plan[^1].Mes)
-                                .FirstOrDefault();
-            if (ultimo.Credito == null)
-            {
-                lblFinCredito.Text = activos.Count == 0 ? "Sin deudas" : "Sin fecha";
-                lblFinCreditoDetalle.Text = activos.Count == 0 ? "No tienes créditos activos" : "Revisa la cuota del crédito";
-            }
+            // Avance: capital ya pagado de todos los créditos y cuánto representa del total prestado
+            decimal pagado = creditos.Sum(c => c.CapitalPagado);
+            lblFinCredito.Text = NumeroHelper.Moneda(pagado);
+            if (total <= 0)
+                lblFinCreditoDetalle.Text = "No tienes créditos registrados";
+            else if (activos.Count == 0)
+                lblFinCreditoDetalle.Text = "¡Todos tus créditos están saldados!";
             else
-            {
-                lblFinCredito.Text = Periodo.Nombre(ultimo.Plan[^1].Mes);
-                lblFinCreditoDetalle.Text = $"{ultimo.Plan.Count} cuotas restantes" + (activos.Count > 1 ? $" · {ultimo.Credito.NombreCustom}" : "");
-            }
+                lblFinCreditoDetalle.Text = $"{pagado / total:P0} de tus créditos · ¡vas avanzando!";
         }
 
         private static string NombreMeta(MetaAhorro m) => string.IsNullOrWhiteSpace(m.NombreCustom) ? m.Nombre : m.NombreCustom;

@@ -281,11 +281,12 @@
                     <ProgressBar x:Name="barDeuda" Style="{StaticResource Barra}" Height="6"/>
                 </StackPanel>
             </Button>
-            <Button Style="{StaticResource TarjetaBoton}" Click="TarjetaCreditos_Click" AutomationProperties.Name="Ver fin del crédito">
+            <!-- Lo que ya se ha pagado de los créditos (capital): el avance, no lo que falta -->
+            <Button Style="{StaticResource TarjetaBoton}" Click="TarjetaCreditos_Click" AutomationProperties.Name="Ver lo que ya has pagado">
                 <StackPanel>
-                    <TextBlock Text="Fin del crédito" FontSize="13" FontWeight="Medium" Foreground="{StaticResource Texto2}"/>
-                    <TextBlock x:Name="lblFinCredito" FontSize="20" FontWeight="ExtraBold" Margin="0,3,0,1"/>
-                    <TextBlock x:Name="lblFinCreditoDetalle" Style="{StaticResource TextoSecundario}"/>
+                    <TextBlock Text="Ya has pagado" FontSize="13" FontWeight="Medium" Foreground="{StaticResource Texto2}"/>
+                    <TextBlock x:Name="lblFinCredito" FontSize="20" FontWeight="ExtraBold" Foreground="{StaticResource VerdeTexto}" Margin="0,3,0,1"/>
+                    <TextBlock x:Name="lblFinCreditoDetalle" Style="{StaticResource TextoSecundario}" TextTrimming="CharacterEllipsis"/>
                 </StackPanel>
             </Button>
         </c:GrillaAdaptable>
