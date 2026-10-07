@@ -231,29 +231,50 @@
                 </StackPanel>
             </Border>
 
-            <!-- Gastos por categoría -->
+            <!-- Comparado con el mes anterior: en qué se gasta más o menos -->
             <Border Style="{StaticResource Card}">
                 <DockPanel>
-                    <TextBlock DockPanel.Dock="Top" Text="Gastos por categoría" Style="{StaticResource TituloTarjeta}" Margin="0,0,0,12"/>
-                    <Border DockPanel.Dock="Bottom" BorderBrush="{StaticResource Borde}" BorderThickness="0,1,0,0" Padding="0,12,0,0" Margin="0,10,0,0">
-                        <DockPanel>
-                            <TextBlock DockPanel.Dock="Right" x:Name="lblTotalCategorias" FontSize="16" FontWeight="ExtraBold"/>
-                            <TextBlock Text="Total gastos" Style="{StaticResource TextoSecundario}" FontSize="13" VerticalAlignment="Center"/>
-                        </DockPanel>
+                    <TextBlock DockPanel.Dock="Top" x:Name="lblTituloComparacion" Text="Comparado con el mes anterior" Style="{StaticResource TituloTarjeta}" Margin="0,0,0,12"/>
+                    <!-- Resumen del cambio total -->
+                    <Border DockPanel.Dock="Top" x:Name="cajaCambioTotal" Style="{StaticResource Recuadro}" Margin="0,0,0,12">
+                        <StackPanel>
+                            <TextBlock x:Name="lblCambioTotal" FontSize="22" FontWeight="ExtraBold"/>
+                            <TextBlock x:Name="lblCambioDetalle" Style="{StaticResource TextoSecundario}" TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Border>
+                    <Border DockPanel.Dock="Bottom" BorderBrush="{StaticResource Borde}" BorderThickness="0,1,0,0" Padding="0,10,0,0" Margin="0,8,0,0">
+                        <StackPanel>
+                            <DockPanel>
+                                <TextBlock DockPanel.Dock="Right" x:Name="lblTotalCategorias" FontSize="14" FontWeight="ExtraBold"/>
+                                <TextBlock Text="Gastos este mes" Style="{StaticResource TextoSecundario}" FontSize="13" VerticalAlignment="Center"/>
+                            </DockPanel>
+                            <DockPanel Margin="0,3,0,0">
+                                <TextBlock DockPanel.Dock="Right" x:Name="lblTotalAnterior" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource Texto2}"/>
+                                <TextBlock x:Name="lblNombreAnterior" Text="Mes anterior" Style="{StaticResource TextoSecundario}" FontSize="13" VerticalAlignment="Center"/>
+                            </DockPanel>
+                        </StackPanel>
                     </Border>
                     <StackPanel>
-                        <TextBlock x:Name="lblSinCategorias" Text="Sin gastos registrados este mes." Style="{StaticResource TextoSecundario}" Visibility="Collapsed"/>
+                        <TextBlock x:Name="lblSinCategorias" Text="Sin gastos registrados en estos dos meses." Style="{StaticResource TextoSecundario}" Visibility="Collapsed"/>
+                        <!-- Cada categoría: lo de este mes y cuánto cambió -->
                         <ItemsControl x:Name="icCategoriasMes">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                    <StackPanel Margin="0,0,0,10">
-                                        <DockPanel>
-                                            <TextBlock DockPanel.Dock="Right" Text="{Binding Total, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" FontSize="13.5" FontWeight="Bold"/>
-                                            <TextBlock Text="{Binding Nombre}" FontSize="13.5" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
-                                        </DockPanel>
-                                        <ProgressBar Style="{StaticResource Barra}" Value="{Binding Proporcion, Mode=OneWay}" Foreground="{Binding ColorBarra}" Margin="0,5,0,4"/>
-                                        <TextBlock Text="{Binding Detalle}" FontSize="12" Foreground="{StaticResource Texto2}"/>
-                                    </StackPanel>
+                                    <Grid Margin="0,0,0,9">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Border Width="10" Height="10" CornerRadius="3" Background="{Binding ColorBarra}" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Column="1" Text="{Binding Nombre}" FontSize="13.5" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Column="2" Text="{Binding Total, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" FontSize="13.5" FontWeight="Bold"
+                                                   VerticalAlignment="Center" Margin="8,0,10,0"/>
+                                        <Border Grid.Column="3" Style="{StaticResource Chip}" Background="{Binding FondoCambio}" CornerRadius="10" MinWidth="92">
+                                            <TextBlock Text="{Binding TextoCambio}" Style="{StaticResource TextoChip}" Foreground="{Binding ColorCambio}" HorizontalAlignment="Center"/>
+                                        </Border>
+                                    </Grid>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>

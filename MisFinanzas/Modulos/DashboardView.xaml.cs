@@ -180,18 +180,12 @@ namespace MisFinanzas.Modulos
                 icProximasFechas.ItemsSource = porPagar;
                 lblSinProximas.Visibility = porPagar.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
 
-                // --- 8. GASTOS POR CATEGORÍA (incluye las cuotas de créditos) ---
-                var categorias = Analisis.PorCategoria(cuentasDelMes, totalCreditosMes);
-                decimal sumaCategorias = categorias.Sum(c => c.Total);
-                icCategoriasMes.ItemsSource = categorias.Select(c => new FilaCategoria
-                {
-                    Nombre = c.Nombre,
-                    Total = c.Total,
-                    Proporcion = sumaCategorias > 0 ? (double)(c.Total / sumaCategorias) : 0,
-                    ColorBarra = c.ColorBarra
-                }).ToList();
-                lblTotalCategorias.Text = sumaCategorias.ToString("C0");
-                lblSinCategorias.Visibility = categorias.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+                // --- 8. COMPARADO CON EL MES ANTERIOR (por categoría, incluye las cuotas de créditos) ---
+                var mesAnterior = mesActual.AddMonths(-1);
+                var cuentasAnterior = CuentasMensuales.DelMes(datos.Cuentas, datos.Pagos, mesAnterior);
+                decimal creditosAnterior = CuotasDelMes(creditos, datos.PagosCredito, mesAnterior).Sum(c => c.Cuota);
+                MostrarComparacion(Analisis.PorCategoria(cuentasDelMes, totalCreditosMes),
+                                   Analisis.PorCategoria(cuentasAnterior, creditosAnterior), mesAnterior);
 
                 // --- 9. ACCESOS: AHORRO, INVERSIONES Y CRÉDITOS ---
                 MostrarAccesos(inversiones, creditos);
@@ -328,6 +322,53 @@ namespace MisFinanzas.Modulos
             return filas.Take(5).ToList();
         }
 
+        // En qué categorías se gasta más o menos que el mes anterior
+        private void MostrarComparacion(List<TotalCategoria> actual, List<TotalCategoria> anterior, DateTime mesAnterior)
+        {
+            string nombreAnterior = mesAnterior.ToString("MMMM");
+            decimal total = actual.Sum(c => c.Total), totalAnterior = anterior.Sum(c => c.Total);
+            decimal cambio = total - totalAnterior;
+
+            lblTituloComparacion.Text = $"Comparado con {nombreAnterior}";
+            lblTotalCategorias.Text = NumeroHelper.Moneda(total);
+            lblNombreAnterior.Text = char.ToUpper(nombreAnterior[0]) + nombreAnterior.Substring(1);
+            lblTotalAnterior.Text = NumeroHelper.Moneda(totalAnterior);
+
+            if (totalAnterior == 0)
+            {
+                lblCambioTotal.Text = "Sin comparación";
+                lblCambioTotal.Foreground = Pincel("#5B6676");
+                lblCambioDetalle.Text = $"No hay gastos registrados en {nombreAnterior} para comparar.";
+            }
+            else if (cambio == 0)
+            {
+                lblCambioTotal.Text = "Igual";
+                lblCambioTotal.Foreground = Pincel("#5B6676");
+                lblCambioDetalle.Text = $"Gastas lo mismo que en {nombreAnterior}.";
+            }
+            else
+            {
+                bool mas = cambio > 0;
+                lblCambioTotal.Text = $"{(mas ? "▲" : "▼")} {Math.Abs(cambio) / totalAnterior:P0}";
+                lblCambioTotal.Foreground = Pincel(mas ? "#B42318" : "#075E46");
+                lblCambioDetalle.Text = $"Gastas {NumeroHelper.Moneda(Math.Abs(cambio))} {(mas ? "más" : "menos")} que en {nombreAnterior}.";
+            }
+
+            // Todas las categorías de los dos meses; primero las que más cambiaron
+            var filas = actual.Select(c => c.Nombre).Union(anterior.Select(c => c.Nombre))
+                .Select(nombre =>
+                {
+                    decimal ahora = actual.FirstOrDefault(c => c.Nombre == nombre)?.Total ?? 0;
+                    decimal antes = anterior.FirstOrDefault(c => c.Nombre == nombre)?.Total ?? 0;
+                    return new FilaComparacion { Nombre = nombre, Total = ahora, Anterior = antes, ColorBarra = Etiquetas.ColorBarra(nombre) };
+                })
+                .OrderByDescending(f => Math.Abs(f.Total - f.Anterior)).ThenByDescending(f => f.Total)
+                .Take(5)
+                .ToList();
+            icCategoriasMes.ItemsSource = filas;
+            lblSinCategorias.Visibility = filas.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+        }
+
         private static string MesCorto(DateTime fecha) => fecha.ToString("MMM").TrimEnd('.').ToUpperInvariant();
 
         private void MostrarAccesos(List<Movimiento> inversiones, IEnumerable<Credito> creditos)
@@ -427,12 +468,21 @@ namespace MisFinanzas.Modulos
         public string ColorDetalle { get; set; } = "#5B6676";
     }
 
-    public class FilaCategoria
+    /// <summary>Una categoría comparada con el mes anterior.</summary>
+    public class FilaComparacion
     {
         public string Nombre { get; set; } = string.Empty;
         public decimal Total { get; set; }
-        public double Proporcion { get; set; }
+        public decimal Anterior { get; set; }
         public string ColorBarra { get; set; } = "#8A94A3";
-        public string Detalle => $"{Proporcion:P0} de tus gastos";
+        private decimal Cambio => Total - Anterior;
+
+        // ▲ más gasto (rojo), ▼ menos gasto (verde), Nuevo (no había el mes anterior), Igual
+        public string TextoCambio => Anterior == 0 ? "Nuevo"
+                                   : Total == 0 ? "Ya no"
+                                   : Cambio == 0 ? "Igual"
+                                   : $"{(Cambio > 0 ? "▲" : "▼")} {NumeroHelper.Moneda(Math.Abs(Cambio))}";
+        public string FondoCambio => Anterior == 0 ? "#EAF0FD" : Cambio > 0 ? "#FEF3F2" : Cambio < 0 ? "#E7F5EF" : "#EEF1F5";
+        public string ColorCambio => Anterior == 0 ? "#1D4FB8" : Cambio > 0 ? "#B42318" : Cambio < 0 ? "#075E46" : "#4B5565";
     }
 }
