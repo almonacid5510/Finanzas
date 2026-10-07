@@ -101,8 +101,6 @@
                                     <Border DockPanel.Dock="Left" Width="44" Height="44" CornerRadius="10" Background="{StaticResource AzulSuave}" Margin="0,0,12,0">
                                         <c:Icono Geometria="{StaticResource IcoVehiculos}" Tamano="20" Foreground="{StaticResource Azul}" HorizontalAlignment="Center"/>
                                     </Border>
-                                    <TextBlock DockPanel.Dock="Right" Text="{Binding TotalInvertido, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" FontSize="14" FontWeight="Bold"
-                                               Foreground="{StaticResource Azul}" VerticalAlignment="Center"/>
                                     <StackPanel VerticalAlignment="Center" Margin="0,0,8,0">
                                         <TextBlock Text="{Binding Nombre}" FontSize="15" FontWeight="Bold" TextTrimming="CharacterEllipsis"/>
                                         <TextBlock Text="{Binding Placa}" Style="{StaticResource TextoSecundario}"/>
