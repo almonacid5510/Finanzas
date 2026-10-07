@@ -62,22 +62,24 @@
                     </StackPanel>
                 </Border>
                 <!-- Mes (el resumen es siempre del mes en curso) -->
-                <Border Style="{StaticResource CapsulaMes}">
-                    <StackPanel Orientation="Horizontal">
-                        <Button Style="{StaticResource BotonFlecha}" c:Ui.Icono="{StaticResource IcoIzquierda}" IsEnabled="False"
-                                AutomationProperties.Name="Mes anterior" ToolTipService.ShowOnDisabled="True"
-                                ToolTip="El resumen muestra el mes en curso"/>
-                        <TextBlock x:Name="lblPeriodo" Width="150" TextAlignment="Center" FontSize="15" FontWeight="Bold"
-                                   VerticalAlignment="Center"/>
-                        <Button Style="{StaticResource BotonFlecha}" c:Ui.Icono="{StaticResource IcoDerecha}" IsEnabled="False"
-                                AutomationProperties.Name="Mes siguiente" ToolTipService.ShowOnDisabled="True"
-                                ToolTip="El resumen muestra el mes en curso"/>
-                    </StackPanel>
-                </Border>
+                <Button x:Name="btnMesActual" Content="Volver al mes actual" Click="BtnMesActual_Click" Style="{StaticResource BotonEnlace}"
+                        VerticalAlignment="Center" Margin="0,0,14,0" Visibility="Collapsed"/>
+                <StackPanel>
+                    <Border Style="{StaticResource CapsulaMes}">
+                        <StackPanel Orientation="Horizontal">
+                            <Button Style="{StaticResource BotonFlecha}" c:Ui.Icono="{StaticResource IcoIzquierda}" Click="BtnMesAnterior_Click"
+                                    AutomationProperties.Name="Mes anterior" ToolTip="Mes anterior"/>
+                            <TextBlock x:Name="lblPeriodo" Width="150" TextAlignment="Center" FontSize="15" FontWeight="Bold"
+                                       VerticalAlignment="Center"/>
+                            <Button Style="{StaticResource BotonFlecha}" c:Ui.Icono="{StaticResource IcoDerecha}" Click="BtnMesSiguiente_Click"
+                                    AutomationProperties.Name="Mes siguiente" ToolTip="Mes siguiente"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
             </StackPanel>
             <StackPanel>
                 <TextBlock Text="Resumen financiero" Style="{StaticResource TituloPagina}"/>
-                <TextBlock Text="Así va tu mes, de un vistazo" Style="{StaticResource SubtituloPagina}"/>
+                <TextBlock x:Name="lblSubtitulo" Text="Así va tu mes, de un vistazo" Style="{StaticResource SubtituloPagina}"/>
             </StackPanel>
         </DockPanel>
 

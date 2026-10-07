@@ -69,12 +69,39 @@ namespace MisFinanzas.Modulos
         // Gastos vencidos sin pagar que se muestran en el aviso rojo
         private List<CuentaMes> _vencidas = new();
 
+        // Mes que se está viendo (siempre el día 1). Empieza en el mes en curso.
+        private DateTime _mes = Periodo.InicioMes(DateTime.Today);
+
+        // --- Navegación entre meses ---
+        private void BtnMesAnterior_Click(object sender, RoutedEventArgs e) { _mes = _mes.AddMonths(-1); CargarResumen(); }
+        private void BtnMesSiguiente_Click(object sender, RoutedEventArgs e) { _mes = _mes.AddMonths(1); CargarResumen(); }
+        private void BtnMesActual_Click(object sender, RoutedEventArgs e) { _mes = Periodo.InicioMes(DateTime.Today); CargarResumen(); }
+
+        /// <summary>Cuota de un crédito en el mes que se está viendo.</summary>
+        private record CuotaDelMes(Credito Credito, decimal Cuota, bool Pagada);
+
+        // Mes en curso: lo de la pantalla de Créditos. Otros meses: lo pagado (pasados) o lo del plan de pagos (futuros).
+        private List<CuotaDelMes> CuotasDelMes(IEnumerable<Credito> creditos, List<PagoCredito> pagos, DateTime mes)
+        {
+            if (Periodo.EsMesActual(mes))
+                return creditos.Select(c => new CuotaDelMes(c, c.CuotaEsteMes, c.Pagado)).ToList();
+
+            var clave = Periodo.Clave(mes);
+            return creditos.Select(c => new CuotaDelMes(c,
+                                Amortizacion.CuotasEnMes(new[] { c }, pagos, mes),
+                                pagos.Any(p => p.CreditoId == c.Id && p.Tipo == Amortizacion.TipoCuota && p.Mes == clave)))
+                           .Where(x => x.Cuota > 0)
+                           .ToList();
+        }
+
         public void CargarResumen()
         {
             try
             {
-                // Todo el resumen corresponde al mes en curso
-                var mesActual = DateTime.Today;
+                // El resumen corresponde al mes elegido con las flechas (por defecto, el mes en curso)
+                var mesActual = _mes;
+                bool esActual = Periodo.EsMesActual(mesActual);
+                bool esFuturo = string.CompareOrdinal(Periodo.Clave(mesActual), Periodo.MesActual) > 0;
                 // --- 1. CONSULTAS A LA BASE DE DATOS (una sola carga para todo el resumen) ---
                 Analisis.Datos datos;
                 List<Movimiento> inversiones;
@@ -98,8 +125,9 @@ namespace MisFinanzas.Modulos
                 // --- 2. CONSULTA A LA LISTA PERSISTENTE DE CRÉDITOS ---
                 // Cada crédito cobra su cuota del mes (lo pagado, o lo que falte si ya va en la última); los saldados no
                 var creditos = CreditosView.ListaCreditosPersistente;
-                decimal totalCreditosMes = creditos.Sum(c => c.CuotaEsteMes);
-                decimal pendienteCreditos = creditos.Where(c => !c.Pagado).Sum(c => c.CuotaEsteMes);
+                var cuotas = CuotasDelMes(creditos, datos.PagosCredito, mesActual);
+                decimal totalCreditosMes = cuotas.Sum(c => c.Cuota);
+                decimal pendienteCreditos = cuotas.Where(c => !c.Pagada).Sum(c => c.Cuota);
 
                 // --- 3. CÁLCULO DE VEHÍCULOS ---
                 var vehiculos = VehiculosView.listaVehiculos;
@@ -111,6 +139,10 @@ namespace MisFinanzas.Modulos
 
                 // --- 5. INDICADORES ---
                 lblPeriodo.Text = Periodo.Nombre(mesActual);
+                btnMesActual.Visibility = esActual ? Visibility.Collapsed : Visibility.Visible;
+                lblSubtitulo.Text = esActual ? "Así va tu mes, de un vistazo"
+                                  : esFuturo ? "Así se proyecta este mes con tus gastos e ingresos registrados"
+                                  : "Así fue este mes";
                 lblDashIngresos.Text = totalIngresos.ToString("C0");
                 lblDashGastos.Text = totalGastosYCompromisos.ToString("C0");
                 lblDashPendiente.Text = $"Pendiente por pagar: {(pendienteCuentas + pendienteCreditos):C0}";
@@ -124,10 +156,10 @@ namespace MisFinanzas.Modulos
                 lblDashVehiculosDetalle.Text = $"Capital invertido · {nVehiculos} {(nVehiculos == 1 ? "vehículo" : "vehículos")}";
 
                 MostrarSalud(balanceNeto);
-                MostrarVencidas(cuentasDelMes);
+                MostrarVencidas(esActual ? cuentasDelMes : new List<CuentaMes>());
 
                 // --- 6. ¿A DÓNDE VA TU INGRESO? ---
-                MostrarDistribucion(cuentasDelMes, creditos, totalIngresos, totalGastosYCompromisos, balanceNeto);
+                MostrarDistribucion(cuentasDelMes, cuotas, totalIngresos, totalGastosYCompromisos, balanceNeto);
 
                 // Proyección del próximo mes, con la predicción de cada gasto
                 var siguiente = Analisis.Proyeccion(datos, mesActual.AddMonths(1), 1)[0];
@@ -142,7 +174,9 @@ namespace MisFinanzas.Modulos
                 });
 
                 // --- 7. POR PAGAR ESTE MES ---
-                var porPagar = FilasPorPagar(cuentasDelMes, creditos, Analisis.ProximasFechas(datos, DateTime.Today));
+                // Próximas: lo que se cobra el mes siguiente al que se está viendo
+                var delSiguiente = CuentasMensuales.DelMes(datos.Cuentas, datos.Pagos, mesActual.AddMonths(1)).Where(c => !c.Pagada).ToList();
+                var porPagar = FilasPorPagar(cuentasDelMes, cuotas, delSiguiente, mesActual);
                 icProximasFechas.ItemsSource = porPagar;
                 lblSinProximas.Visibility = porPagar.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
 
@@ -208,12 +242,12 @@ namespace MisFinanzas.Modulos
             }
         }
 
-        private void MostrarDistribucion(List<CuentaMes> cuentasDelMes, IEnumerable<Credito> creditos,
+        private void MostrarDistribucion(List<CuentaMes> cuentasDelMes, List<CuotaDelMes> cuotas,
                                          decimal ingresos, decimal gastos, decimal disponible)
         {
             var filas = new List<FilaDistribucion>();
-            foreach (var c in creditos.Where(c => c.CuotaEsteMes > 0))
-                filas.Add(new FilaDistribucion { Nombre = $"Crédito · {c.NombreCustom}", Monto = c.CuotaEsteMes, Color = "#6941C6" });
+            foreach (var c in cuotas.Where(c => c.Cuota > 0))
+                filas.Add(new FilaDistribucion { Nombre = $"Crédito · {c.Credito.NombreCustom}", Monto = c.Cuota, Color = "#6941C6" });
             foreach (var cat in Analisis.PorCategoria(cuentasDelMes))
                 filas.Add(new FilaDistribucion { Nombre = cat.Nombre, Monto = cat.Total, Color = cat.ColorBarra });
             filas = filas.OrderByDescending(f => f.Monto).ToList();
@@ -247,12 +281,13 @@ namespace MisFinanzas.Modulos
         }
 
         // Pendientes del mes (vencidos primero), cuotas de crédito sin pagar y las próximas fechas
-        private static List<FilaPorPagar> FilasPorPagar(List<CuentaMes> cuentasDelMes, IEnumerable<Credito> creditos, List<CuentaMes> proximas)
+        private static List<FilaPorPagar> FilasPorPagar(List<CuentaMes> cuentasDelMes, List<CuotaDelMes> cuotas, List<CuentaMes> proximas, DateTime mes)
         {
             var hoy = DateTime.Today;
             var filas = new List<FilaPorPagar>();
 
-            foreach (var c in cuentasDelMes.Where(c => !c.Pagada).OrderBy(c => c.Vence))
+            var pendientes = cuentasDelMes.Where(c => !c.Pagada).OrderBy(c => c.Vence).ToList();
+            foreach (var c in pendientes)
             {
                 bool vencida = c.Vence <= hoy;
                 filas.Add(new FilaPorPagar
@@ -263,23 +298,30 @@ namespace MisFinanzas.Modulos
                     ColorDia = vencida ? "#B42318" : "#0F1B2D", ColorDetalle = vencida ? "#B42318" : "#93370D",
                 });
             }
+            // Los vencidos van primero; luego las cuotas de crédito (las más grandes) y el resto de pendientes
+            int nVencidos = pendientes.Count(c => c.Vence <= hoy);
+            var restantes = filas.Skip(nVencidos).ToList();
+            filas = filas.Take(nVencidos).ToList();
 
-            foreach (var cr in creditos.Where(c => c.PuedePagar))
+            bool esActual = Periodo.EsMesActual(mes);
+            foreach (var cr in cuotas.Where(c => !c.Pagada && c.Cuota > 0))
                 filas.Add(new FilaPorPagar
                 {
-                    Dia = "—", MesCorto = MesCorto(hoy), Titulo = $"Cuota crédito · {cr.NombreCustom}", Monto = cr.CuotaEsteMes,
-                    Detalle = "Pendiente este mes", Fondo = "#FFFFFF", Borde = "#E3E7EE", ColorDia = "#6941C6", ColorDetalle = "#93370D",
+                    Dia = "—", MesCorto = MesCorto(mes), Titulo = $"Cuota crédito · {cr.Credito.NombreCustom}", Monto = cr.Cuota,
+                    Detalle = esActual ? "Pendiente este mes" : $"Cuota de {mes:MMMM}", Fondo = "#FFFFFF", Borde = "#E3E7EE",
+                    ColorDia = "#6941C6", ColorDetalle = "#93370D",
                 });
 
-            // Próxima ocurrencia (meses siguientes): nunca se confunde con lo vencido de este mes
-            var mesActual = Periodo.MesActual;
-            foreach (var p in proximas.Where(p => string.CompareOrdinal(Periodo.Clave(p.Vence), mesActual) > 0).Take(2))
+            filas.AddRange(restantes);
+
+            // Próxima ocurrencia (mes siguiente al que se ve): nunca se confunde con lo vencido
+            foreach (var p in proximas.OrderBy(p => p.Vence).Take(2))
             {
                 int dias = (p.Vence - hoy).Days;
                 filas.Add(new FilaPorPagar
                 {
                     Dia = p.Vence.Day.ToString("00"), MesCorto = MesCorto(p.Vence), Titulo = $"Próxima: {p.Descripcion}", Monto = p.Venta,
-                    Detalle = $"{p.Categoria} · en {dias} {(dias == 1 ? "día" : "días")}",
+                    Detalle = dias >= 0 ? $"{p.Categoria} · en {dias} {(dias == 1 ? "día" : "días")}" : $"{p.Categoria} · {p.Vence:dd/MM/yyyy}",
                     Fondo = "#F4F6F9", Borde = "#F4F6F9", ColorDia = "#5B6676", ColorDetalle = "#5B6676", ColorTitulo = "#3B4656",
                 });
             }
