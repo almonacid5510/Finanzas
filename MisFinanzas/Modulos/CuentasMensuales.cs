@@ -57,7 +57,7 @@ namespace MisFinanzas.Modulos
         public bool Pagada
         {
             get => _pagada;
-            set { _pagada = value; Avisar(nameof(Pagada), nameof(Vencida), nameof(Real)); }
+            set { _pagada = value; Avisar(nameof(Pagada), nameof(Vencida), nameof(Real), nameof(EstadoTexto), nameof(EstadoFondo), nameof(EstadoColor), nameof(FondoFila)); }
         }
 
         // Lo que realmente se pagó (por defecto, el valor registrado)
@@ -74,6 +74,12 @@ namespace MisFinanzas.Modulos
 
         /// <summary>Ya pasó la fecha de vencimiento y no se ha pagado.</summary>
         public bool Vencida => !Pagada && Vence < DateTime.Today;
+
+        // Presentación del estado del mes: Pagado (verde), Vencida (rojo) o Pendiente (naranja)
+        public string EstadoTexto => Pagada ? "Pagado" : Vencida ? "Vencida" : "Pendiente";
+        public string EstadoFondo => Pagada ? "#E7F5EF" : Vencida ? "#FEE4E2" : "#FEF6E7";
+        public string EstadoColor => Pagada ? "#075E46" : Vencida ? "#B42318" : "#93370D";
+        public string FondoFila => Vencida ? "#FFF8F7" : "Transparent";
 
         /// <summary>Cuánto falta para el vencimiento: "Hoy", "Mañana", "En 5 días", "Vencida".</summary>
         public string Falta

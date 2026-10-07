@@ -141,6 +141,7 @@ namespace MisFinanzas.Modulos
             bool esActual = Periodo.EsMesActual(_mesSeleccionado);
             lblMes.Text = Periodo.Nombre(_mesSeleccionado);
             lblTituloGastos.Text = esActual ? "GASTOS DEL MES" : $"GASTOS DE {Periodo.Nombre(_mesSeleccionado).ToUpper()}";
+            lblTituloGastos.Visibility = esActual ? Visibility.Collapsed : Visibility.Visible;
             btnMesActual.Visibility = esActual ? Visibility.Collapsed : Visibility.Visible;
 
             // El estado de pago de los créditos solo existe para el mes en curso
@@ -156,7 +157,6 @@ namespace MisFinanzas.Modulos
             pnlMes.Visibility = tabMes.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
             pnlHistorial.Visibility = tabHistorial.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
             pnlProyeccion.Visibility = tabProyeccion.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
-            barraTotal.Visibility = pnlMes.Visibility;
 
             if (tabHistorial.IsChecked == true) CargarHistorial();
             if (tabProyeccion.IsChecked == true) CargarProyeccion();
@@ -240,8 +240,8 @@ namespace MisFinanzas.Modulos
             cbFrecuencia.SelectedItem = Frecuencias.Mensual;
             cbDiaPago.SelectedItem = DateTime.Today.Day;
             cbMesAnual.SelectedIndex = _mesSeleccionado.Month - 1;
-            lblTituloFormulario.Text = "Registrar nuevo gasto";
-            btnGuardarCuenta.Content = "AGREGAR GASTO";
+            lblTituloFormulario.Text = "Registrar gasto";
+            btnGuardarCuenta.Content = "Agregar";
             btnCancelarEdicion.Visibility = Visibility.Collapsed;
         }
 
@@ -262,7 +262,7 @@ namespace MisFinanzas.Modulos
             cbDiaPago.SelectedItem = CuentasMensuales.DiaDePago(c);
 
             lblTituloFormulario.Text = $"Editar \"{c.Descripcion}\" (aplica a todos sus meses)";
-            btnGuardarCuenta.Content = "GUARDAR CAMBIOS";
+            btnGuardarCuenta.Content = "Guardar";
             btnCancelarEdicion.Visibility = Visibility.Visible;
             txtDescCuenta.Focus();
         }
@@ -354,6 +354,45 @@ namespace MisFinanzas.Modulos
                 : 0;
 
             lblTotalPendiente.Text = (totalMovimientos + totalCreditos).ToString("C0");
+            ActualizarResumenLateral(totalMovimientos + totalCreditos);
+        }
+
+        // Columna derecha: pagado frente al total del mes, gastos por categoría y proyección del mes siguiente
+        private void ActualizarResumenLateral(decimal pendiente)
+        {
+            try
+            {
+                bool esActual = Periodo.EsMesActual(_mesSeleccionado);
+                var creditos = esActual ? CreditosView.ListaCreditosPersistente.ToList() : new System.Collections.Generic.List<Credito>();
+
+                decimal pagado = _cuentasDelMes.Where(c => c.Pagada).Sum(c => c.MontoPagado)
+                               + creditos.Where(c => c.Pagado).Sum(c => c.CuotaEsteMes);
+                decimal total = pagado + pendiente;
+                lblPagadoMes.Text = $"Pagado {pagado:C0}";
+                lblTotalMes.Text = $"Total {total:C0}";
+                barPagado.Value = total > 0 ? (double)(pagado / total) : 0;
+
+                var categorias = Analisis.PorCategoria(_cuentasDelMes, creditos.Sum(c => c.CuotaEsteMes));
+                icCategoriasMes.ItemsSource = categorias;
+                lblSinCategoriasMes.Visibility = categorias.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+
+                using var db = new AppDbContext();
+                var siguiente = Analisis.Proyeccion(Analisis.Cargar(db), _mesSeleccionado.AddMonths(1), 1)[0];
+                lblTituloProyeccionLateral.Text = $"Proyección {siguiente.Mes:MMMM}";
+                lblProyGastos.Text = siguiente.TotalGastos.ToString("C0");
+                lblProyBalance.Text = siguiente.Balance.ToString("C0");
+                lblProyBalance.Foreground = (System.Windows.Media.Brush)FindResource(siguiente.Balance < 0 ? "Rojo" : "VerdeTexto");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Error en el resumen del mes: " + ex.Message);
+            }
+        }
+
+        // "Ver crédito": abre la pantalla de créditos con ese crédito seleccionado
+        private void BtnVerCredito_Click(object sender, RoutedEventArgs e)
+        {
+            if (((Button)sender).DataContext is Credito credito) MainWindow.Actual?.IrACreditos(credito.Id);
         }
 
 
@@ -448,6 +487,7 @@ namespace MisFinanzas.Modulos
 
             // 3. Recalculamos el total de la pantalla automáticamente
             ActualizarTotal();
+            MainWindow.Actual?.VerificarVencimientosCuentas();
         }
     }
 }

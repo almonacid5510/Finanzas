@@ -78,6 +78,10 @@ namespace MisFinanzas.Modulos
 
         [NotMapped] public string NombreMesActual => Periodo.Nombre(DateTime.Today);
         [NotMapped] public bool Saldado => Disponible <= 0;
+        // Presentación del estado de la cuota de este mes
+        [NotMapped] public string EstadoTexto => Pagado ? "Pagado" : Saldado ? "Saldado" : "Pendiente";
+        [NotMapped] public string EstadoFondo => Pagado || Saldado ? "#E7F5EF" : "#FEF6E7";
+        [NotMapped] public string EstadoColor => Pagado || Saldado ? "#075E46" : "#93370D";
         [NotMapped] public bool PuedePagar => !Pagado && !Saldado && CuotaMensual > 0;
         // La casilla de Cuentas sirve para pagar o para deshacer el pago de este mes
         [NotMapped] public bool PuedeMarcar => Pagado || PuedePagar;
@@ -125,7 +129,7 @@ namespace MisFinanzas.Modulos
 
         private void AvisarCalculos()
         {
-            foreach (var n in new[] { nameof(Saldado), nameof(PuedePagar), nameof(PuedeMarcar),nameof(TasaMensualTexto),nameof(CapitalPagado), nameof(Progreso), nameof(ProgresoTexto),
+            foreach (var n in new[] { nameof(Saldado), nameof(EstadoTexto), nameof(EstadoFondo), nameof(EstadoColor), nameof(PuedePagar), nameof(PuedeMarcar),nameof(TasaMensualTexto),nameof(CapitalPagado), nameof(Progreso), nameof(ProgresoTexto),
                                       nameof(InteresesPagados), nameof(TotalPagado), nameof(InteresProximo), nameof(CapitalProximo),
                                       nameof(CuotaEsteMes), nameof(CuotaPagadaEsteMes), nameof(CuotasRestantes),
                                       nameof(CuotaNoCubreIntereses), nameof(FinEstimado), nameof(InteresesPorPagar), nameof(Plan) })
