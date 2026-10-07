@@ -32,9 +32,8 @@ namespace MisFinanzas.Modulos
                 CargarDatosGlobal();
             }
 
-            // Muestra el crédito que estaba seleccionado (o el primero)
-            var marcado = ListaCreditosPersistente.FirstOrDefault(c => c.VerDetalle) ?? ListaCreditosPersistente.FirstOrDefault();
-            Seleccionar(marcado?.Id ?? 0);
+            // Al entrar se ve solo la lista; el detalle se abre al elegir un crédito
+            Seleccionar(0);
         }
 
         // "Deuda total $ X · N créditos activos"
@@ -104,25 +103,33 @@ namespace MisFinanzas.Modulos
             }
         }
 
-        /// <summary>Muestra el detalle de un crédito (también desde "Ver crédito" en otras pantallas).</summary>
+        /// <summary>
+        /// Muestra el detalle de un crédito (también desde "Ver crédito" en otras pantallas).
+        /// Con 0 (o un id que no existe) cierra el detalle y la lista ocupa todo el ancho.
+        /// </summary>
         public void Seleccionar(int creditoId)
         {
-            var elegido = ListaCreditosPersistente.FirstOrDefault(c => c.Id == creditoId) ?? ListaCreditosPersistente.FirstOrDefault();
+            var elegido = ListaCreditosPersistente.FirstOrDefault(c => c.Id == creditoId);
             foreach (var c in ListaCreditosPersistente)
             {
                 c.VerDetalle = c == elegido;
                 if (c != elegido) c.Editando = false;
             }
             detalleCredito.Content = elegido;
-            lblSinCreditos.Visibility = elegido == null ? Visibility.Visible : Visibility.Collapsed;
+            pnlDetalle.Visibility = elegido == null ? Visibility.Collapsed : Visibility.Visible;
+            Grid.SetColumnSpan(pnlLista, elegido == null ? 3 : 1);
+            lblSinCreditos.Visibility = Visibility.Collapsed;
             ActualizarEncabezado();
         }
 
-        // Clic en un crédito de la lista: muestra su detalle a la derecha
+        // Clic en un crédito de la lista: abre su detalle; clic otra vez en el mismo, lo cierra
         private void Resumen_Click(object sender, RoutedEventArgs e)
         {
-            if (((FrameworkElement)sender).DataContext is Credito credito) Seleccionar(credito.Id);
+            if (((FrameworkElement)sender).DataContext is Credito credito)
+                Seleccionar(credito.VerDetalle && !credito.Editando ? 0 : credito.Id);
         }
+
+        private void BtnCerrarDetalle_Click(object sender, RoutedEventArgs e) => Seleccionar(0);
 
         // Un solo botón alterna entre Editar (✎) y Guardar (✔)
         private void BtnToggleEdicion_Click(object sender, RoutedEventArgs e)
@@ -209,7 +216,7 @@ namespace MisFinanzas.Modulos
 
                 if (ListaCreditosPersistente.Contains(credito))
                     ListaCreditosPersistente.Remove(credito);
-                Seleccionar(ListaCreditosPersistente.FirstOrDefault()?.Id ?? 0);
+                Seleccionar(0);
 
                 toast.Show("Crédito eliminado");
             }

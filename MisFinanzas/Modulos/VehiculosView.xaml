@@ -102,14 +102,19 @@
                                         <c:Icono Geometria="{StaticResource IcoVehiculos}" Tamano="20" Foreground="{StaticResource Azul}" HorizontalAlignment="Center"/>
                                     </Border>
                                     <!-- Nombre y placa juntos: la placa distingue dos vehículos con el mismo nombre -->
-                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                        <TextBlock Text="{Binding Nombre}" FontSize="15" FontWeight="Bold" TextTrimming="CharacterEllipsis" MaxWidth="120"
-                                                   VerticalAlignment="Center"/>
-                                        <Border Background="#FFD43B" BorderBrush="#0F1B2D" BorderThickness="1.2" CornerRadius="4"
-                                                Padding="7,1" Margin="10,0,0,0" VerticalAlignment="Center">
+                                    <!-- El nombre ocupa siempre el mismo ancho: así todas las placas quedan alineadas -->
+                                    <Grid VerticalAlignment="Center">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="96"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="{Binding Nombre}" FontSize="15" FontWeight="Bold" TextTrimming="CharacterEllipsis"
+                                                   VerticalAlignment="Center" ToolTip="{Binding Nombre}"/>
+                                        <Border Grid.Column="1" Background="#FFD43B" BorderBrush="#0F1B2D" BorderThickness="1.2" CornerRadius="4"
+                                                Padding="7,1" VerticalAlignment="Center">
                                             <TextBlock Text="{Binding Placa}" FontSize="12" FontWeight="ExtraBold" Foreground="#0F1B2D"/>
                                         </Border>
-                                    </StackPanel>
+                                    </Grid>
                                 </DockPanel>
                             </Button>
                         </DataTemplate>

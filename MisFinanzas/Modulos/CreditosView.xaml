@@ -47,7 +47,7 @@
         <Style x:Key="TarjetaCredito" TargetType="Button">
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-            <Setter Property="Margin" Value="0,0,0,12"/>
+            <Setter Property="Margin" Value="0"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
@@ -96,6 +96,9 @@
                         </Button>
                         <Button Click="BtnEliminar_Click" Style="{StaticResource BotonIconoPeligro}" c:Ui.Icono="{StaticResource IcoEliminar}"
                                 Margin="8,0,0,0" AutomationProperties.Name="Eliminar crédito" ToolTip="Eliminar crédito"/>
+                        <Button Click="BtnCerrarDetalle_Click" Style="{StaticResource BotonIcono}" c:Ui.Icono="{StaticResource IcoX}"
+                                Foreground="{StaticResource Texto2}" Margin="8,0,0,0"
+                                AutomationProperties.Name="Cerrar detalle" ToolTip="Cerrar y volver a la lista"/>
                     </StackPanel>
                     <WrapPanel VerticalAlignment="Center">
                         <TextBlock Text="{Binding NombreCustom}" FontSize="22" FontWeight="ExtraBold" VerticalAlignment="Center" Style="{StaticResource ViewStyle}"/>
@@ -418,9 +421,14 @@
             </StackPanel>
         </Border>
 
-        <!-- ===== LISTA DE CRÉDITOS ===== -->
-        <StackPanel Grid.Row="2">
-            <ItemsControl x:Name="icListaCreditos">
+        <!-- ===== LISTA DE CRÉDITOS (ocupa todo el ancho hasta que se elige uno) ===== -->
+        <StackPanel x:Name="pnlLista" Grid.Row="2">
+            <ItemsControl x:Name="icListaCreditos" Margin="0,0,0,12">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <c:GrillaAdaptable Columnas="4" AnchoMinimo="250" Espacio="12"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <Button Style="{StaticResource TarjetaCredito}" Click="Resumen_Click"
@@ -450,8 +458,8 @@
             </ContentControl>
         </StackPanel>
 
-        <!-- ===== DETALLE ===== -->
-        <Border Grid.Row="2" Grid.Column="2" Style="{StaticResource Card}" VerticalAlignment="Top">
+        <!-- ===== DETALLE (solo cuando se elige un crédito) ===== -->
+        <Border x:Name="pnlDetalle" Grid.Row="2" Grid.Column="2" Style="{StaticResource Card}" VerticalAlignment="Top" Visibility="Collapsed">
             <Grid>
                 <ContentControl x:Name="detalleCredito" ContentTemplate="{StaticResource PlantillaDetalle}" Focusable="False"/>
                 <TextBlock x:Name="lblSinCreditos" Text="Aún no tienes créditos. Registra el primero con «Nuevo crédito»." Style="{StaticResource TextoSecundario}"
