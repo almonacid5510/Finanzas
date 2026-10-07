@@ -4,6 +4,7 @@
 //  Copyright (c) 2026 Juan Almonacid. Todos los derechos reservados.
 // ============================================================
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
@@ -199,19 +200,26 @@ namespace MisFinanzas.Modulos
             MostrarDistribucion(total);
         }
 
-        // Colores de cada inversión en la barra (mismo orden que las tarjetas), en tono claro sobre fondo oscuro
-        private static readonly string[] ColoresDistribucion = { "#3CCB8F", "#A9C5FF", "#C3B1F7", "#F5B963" };
 
         // Barra de distribución: qué porcentaje del total tiene cada inversión
         private void MostrarDistribucion(decimal total)
         {
-            var partes = ListaMovimientos.Select((m, i) => new FilaDistribucion
+            // Cada parte toma el color de su tipo (el de la tarjeta); si el tipo se repite, otro tono del mismo color
+            var usados = new Dictionary<TipoInversion.Estilo, int>();
+            var partes = new List<FilaDistribucion>();
+            foreach (var m in ListaMovimientos.Where(m => m.Costo > 0))
             {
-                Nombre = m.Descripcion,
-                Monto = m.Costo,
-                Porcentaje = total > 0 ? (double)(m.Costo / total) : 0,
-                Color = ColoresDistribucion[i % ColoresDistribucion.Length]
-            }).Where(p => p.Monto > 0).ToList();
+                var estilo = TipoInversion.De(m.Descripcion);
+                int n = usados.GetValueOrDefault(estilo);
+                usados[estilo] = n + 1;
+                partes.Add(new FilaDistribucion
+                {
+                    Nombre = m.Descripcion,
+                    Monto = m.Costo,
+                    Porcentaje = total > 0 ? (double)(m.Costo / total) : 0,
+                    Color = estilo.TonosBarra[n % estilo.TonosBarra.Length]
+                });
+            }
 
             icDistribucion.ItemsSource = partes;
             barraDistribucion.Children.Clear();
@@ -233,21 +241,47 @@ namespace MisFinanzas.Modulos
     }
 
     /// <summary>
-    /// Color e ícono de cada tarjeta de inversión según su posición en la lista (se repiten cada 4).
-    /// ConverterParameter: "fondo", "color" o "icono".
+    /// Tipo de inversión deducido de su nombre, con su ícono y colores:
+    /// fondo/CDT/banco → banco (verde), préstamo → persona (morado), acciones/cripto → gráfico (azul),
+    /// Nequi/Daviplata → celular (azul), casa/lote/finca → casa (naranja); el resto → gráfico (verde).
     /// </summary>
-    public class EstiloInversionConverter : System.Windows.Data.IValueConverter
+    public static class TipoInversion
     {
-        private static readonly (string Fondo, string Color, string Icono)[] Estilos =
+        public record Estilo(string Fondo, string Color, string Icono, string[] TonosBarra);
+
+        private static readonly Estilo Banco = new("VerdeSuave", "Verde", "IcoBanco", new[] { "#3CCB8F", "#9BE3C4", "#1E9E6E" });
+        private static readonly Estilo Prestamo = new("MoradoSuave", "Morado", "IcoPersona", new[] { "#C3B1F7", "#9F84EE", "#E0D6FB" });
+        private static readonly Estilo Bolsa = new("AzulSuave", "Azul", "IcoSube", new[] { "#A9C5FF", "#7FA6F5", "#D4E2FF" });
+        private static readonly Estilo Billetera = new("AzulSuave", "Azul", "IcoCelular", new[] { "#A9C5FF", "#7FA6F5", "#D4E2FF" });
+        private static readonly Estilo Inmueble = new("NaranjaSuave", "NaranjaTexto", "IcoCasa", new[] { "#F5B963", "#F09A3E", "#FAD8A6" });
+        private static readonly Estilo Otra = new("VerdeSuave", "Verde", "IcoSube", new[] { "#3CCB8F", "#9BE3C4", "#1E9E6E" });
+
+        private static readonly (string[] Palabras, Estilo Estilo)[] Reglas =
         {
-            ("VerdeSuave", "Verde", "IcoBanco"), ("AzulSuave", "Azul", "IcoCelular"),
-            ("MoradoSuave", "Morado", "IcoGrafico"), ("NaranjaSuave", "NaranjaTexto", "IcoInversiones"),
+            (new[] { "prestamo", "prestado", "presté", "preste", "deuda", "me debe" }, Prestamo),
+            (new[] { "nequi", "daviplata", "billetera", "movil", "móvil" }, Billetera),
+            (new[] { "accion", "acción", "bolsa", "cripto", "bitcoin", "etf", "trading" }, Bolsa),
+            (new[] { "casa", "apartamento", "apto", "lote", "finca", "inmueble", "local" }, Inmueble),
+            (new[] { "fondo", "cdt", "banco", "ahorro", "cuenta", "fiducia" }, Banco),
         };
 
+        public static Estilo De(string? nombre)
+        {
+            var n = (nombre ?? string.Empty).ToLowerInvariant()
+                       .Replace('á', 'a').Replace('é', 'e').Replace('í', 'i').Replace('ó', 'o').Replace('ú', 'u');
+            foreach (var (palabras, estilo) in Reglas)
+                if (palabras.Any(p => n.Contains(p.Replace('é', 'e').Replace('ó', 'o').Replace('í', 'i'))))
+                    return estilo;
+            return Otra;
+        }
+    }
+
+    /// <summary>Color e ícono de cada tarjeta según el tipo de inversión. ConverterParameter: "fondo", "color" o "icono".</summary>
+    public class EstiloInversionConverter : System.Windows.Data.IValueConverter
+    {
         public object? Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
-            int i = Math.Max(0, NegocioView.ListaMovimientos.IndexOf(value as Movimiento ?? new Movimiento()));
-            var e = Estilos[i % Estilos.Length];
+            var e = TipoInversion.De((value as Movimiento)?.Descripcion);
             var clave = (parameter as string) switch { "fondo" => e.Fondo, "icono" => e.Icono, _ => e.Color };
             return Application.Current.TryFindResource(clave);
         }
