@@ -32,6 +32,7 @@ namespace MisFinanzas.Modulos
         public double Proporcion { get; set; }
         public string ColorTexto => Etiquetas.ColorTexto(Nombre);
         public string ColorFondo => Etiquetas.ColorFondo(Nombre);
+        public string ColorBarra => Etiquetas.ColorBarra(Nombre);
     }
 
     /// <summary>Predicción de un gasto a partir de lo que realmente se ha pagado.</summary>

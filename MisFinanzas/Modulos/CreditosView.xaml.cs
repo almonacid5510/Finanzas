@@ -73,6 +73,12 @@ namespace MisFinanzas.Modulos
             }
         }
 
+        /// <summary>Muestra el detalle de un crédito (desde "Ver crédito" en otras pantallas).</summary>
+        public void Seleccionar(int creditoId)
+        {
+            foreach (var c in ListaCreditosPersistente) c.VerDetalle = c.Id == creditoId;
+        }
+
         // Clic en el resumen: despliega el detalle de ese crédito y recoge los demás
         private void Resumen_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {

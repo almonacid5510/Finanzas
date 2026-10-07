@@ -1,4 +1,4 @@
-﻿<!--
+<!--
     Proyecto: Mis Finanzas
     Autoria: Juan Almonacid
     Copyright (c) 2026 Juan Almonacid. Todos los derechos reservados.
@@ -7,51 +7,43 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:MisFinanzas"
-        Title="Gestor de Finanzas Personal" Height="650" Width="1100" 
-        Background="#F4F7F9" WindowStartupLocation="CenterScreen">
+        xmlns:c="clr-namespace:MisFinanzas.Controles"
+        Title="Gestor de Finanzas Personal" Height="800" Width="1360" MinWidth="900" MinHeight="560"
+        Background="{StaticResource Fondo}" WindowStartupLocation="CenterScreen"
+        FontFamily="{StaticResource FuenteApp}" FontSize="13" Foreground="{StaticResource Texto}"
+        Typography.NumeralAlignment="Tabular"
+        TextOptions.TextFormattingMode="Display"
+        SizeChanged="Window_SizeChanged">
 
     <Window.Resources>
-        <!-- Estilo de botón de navegación: icono + texto, con estado activo y hover.
-             El estado activo se controla desde el code-behind marcando la propiedad adjunta
-             local:NavState.IsActive = True sobre el botón seleccionado. -->
+        <!-- Ítem del menú lateral: ícono (Tag) + nombre. El activo se marca con local:NavState.IsActive -->
         <Style x:Key="NavButtonStyle" TargetType="Button">
-            <Setter Property="Margin" Value="8,3"/>
-            <Setter Property="Height" Value="46"/>
-            <Setter Property="Foreground" Value="#CBD5E0"/>
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Margin" Value="0,2"/>
+            <Setter Property="Height" Value="44"/>
+            <Setter Property="Foreground" Value="{StaticResource TextoMenu}"/>
             <Setter Property="FontSize" Value="14"/>
-            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border x:Name="bd" Background="{TemplateBinding Background}" CornerRadius="10">
-                            <Grid>
-                                <!-- Barra indicadora del ítem activo -->
-                                <Rectangle x:Name="indicator" Width="4" HorizontalAlignment="Left"
-                                           Fill="#4A90E2" RadiusX="2" RadiusY="2" Margin="0,10"
-                                           Visibility="Collapsed"/>
-                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                    <!-- Icono (viene del Tag): un dibujo vectorial (o un emoji).
-                                         Ancho fijo para alinear en modo colapsado -->
-                                    <Border Width="48" VerticalAlignment="Center">
-                                        <ContentPresenter Content="{TemplateBinding Tag}" TextElement.FontSize="20"
-                                                          HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                    </Border>
-                                    <ContentPresenter VerticalAlignment="Center"
-                                                      Opacity="{Binding Opacity, ElementName=txtLogo}"/>
-                                </StackPanel>
-                            </Grid>
+                        <Border x:Name="bd" Background="Transparent" CornerRadius="10" Padding="14,0">
+                            <DockPanel>
+                                <c:Icono DockPanel.Dock="Left" Geometria="{Binding Tag, RelativeSource={RelativeSource TemplatedParent}}"
+                                         Tamano="18" Foreground="{TemplateBinding Foreground}" Margin="0,0,13,0"/>
+                                <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
+                            </DockPanel>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="bd" Property="Background" Value="#34495E"/>
+                                <Setter TargetName="bd" Property="Background" Value="#1A2A40"/>
                                 <Setter Property="Foreground" Value="White"/>
                             </Trigger>
-                            <!-- Estado activo del ítem de navegación -->
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="#1A2A40"/>
+                            </Trigger>
                             <Trigger Property="local:NavState.IsActive" Value="True">
-                                <Setter TargetName="bd" Property="Background" Value="#3B5266"/>
-                                <Setter TargetName="indicator" Property="Visibility" Value="Visible"/>
+                                <Setter TargetName="bd" Property="Background" Value="{StaticResource OscuroActivo}"/>
                                 <Setter Property="Foreground" Value="White"/>
                                 <Setter Property="FontWeight" Value="Bold"/>
                             </Trigger>
@@ -60,101 +52,60 @@
                 </Setter.Value>
             </Setter>
         </Style>
-
-        <!-- ===== Íconos del menú: dibujos de línea con el mismo grosor (cuadrícula de 24x24).
-             Toman el color del texto del botón: gris normal, blanco cuando está activo. ===== -->
-        <Style x:Key="IconoNav" TargetType="Path">
-            <Setter Property="Width" Value="24"/>
-            <Setter Property="Height" Value="24"/>
-            <Setter Property="StrokeThickness" Value="1.8"/>
-            <Setter Property="StrokeLineJoin" Value="Round"/>
-            <Setter Property="StrokeStartLineCap" Value="Round"/>
-            <Setter Property="StrokeEndLineCap" Value="Round"/>
-            <Setter Property="Stroke" Value="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
-        </Style>
-        <!-- Dashboard: gráfico de barras dentro de un marco -->
-        <Geometry x:Key="IcoDashboard">M5,3 H19 A2,2 0 0 1 21,5 V19 A2,2 0 0 1 19,21 H5 A2,2 0 0 1 3,19 V5 A2,2 0 0 1 5,3 Z M8,17 V13 M12,17 V8 M16,17 V11</Geometry>
-        <!-- Ingresos: moneda con signo $ -->
-        <Geometry x:Key="IcoIngresos">M3,12 A9,9 0 1 1 21,12 A9,9 0 1 1 3,12 Z M14.8,9.4 C14.6,8.3 13.5,7.6 12,7.6 C10.4,7.6 9.3,8.4 9.3,9.6 C9.3,12.4 14.8,11.2 14.8,14.3 C14.8,15.6 13.6,16.4 12,16.4 C10.4,16.4 9.3,15.6 9.2,14.5 M12,6 V7.6 M12,16.4 V18</Geometry>
-        <!-- Cuentas: recibo / factura -->
-        <Geometry x:Key="IcoCuentas">M6,3 H18 V21 L15.5,19.5 L13,21 L10.5,19.5 L8,21 L6,19.8 Z M9,8 H15 M9,12 H15 M9,16 H12</Geometry>
-        <!-- Créditos: tarjeta -->
-        <Geometry x:Key="IcoCreditos">M3,7 A2,2 0 0 1 5,5 H19 A2,2 0 0 1 21,7 V17 A2,2 0 0 1 19,19 H5 A2,2 0 0 1 3,17 Z M3,10 H21 M7,15 H10</Geometry>
-        <!-- Vehículos: carro -->
-        <Geometry x:Key="IcoVehiculos">M5,17 V12 L7,6.5 H17 L19,12 V17 Z M5,12 H19 M8,14.5 H9 M15,14.5 H16 M6.5,17 V19 M17.5,17 V19</Geometry>
-        <!-- Inversiones: caja fuerte -->
-        <Geometry x:Key="IcoInversiones">M5,3 H19 A2,2 0 0 1 21,5 V17 A2,2 0 0 1 19,19 H5 A2,2 0 0 1 3,17 V5 A2,2 0 0 1 5,3 Z M8.5,11 A3.5,3.5 0 1 1 15.5,11 A3.5,3.5 0 1 1 8.5,11 Z M12,11 L14,9 M6,7 V9 M6,13 V15 M7,19 V21 M17,19 V21</Geometry>
-        <!-- Logo: billetera -->
-        <Geometry x:Key="IcoLogo">M4,7 A2,2 0 0 1 6,5 H18 A2,2 0 0 1 20,7 V9 M4,7 V17 A2,2 0 0 1 6,19 H20 V9 H6 A2,2 0 0 1 4,7 Z M16,14 H16.5</Geometry>
     </Window.Resources>
 
-    <Grid>
-        <!-- Contenido principal: ocupa todo el ancho. Reserva 68px a la izquierda
-             para el sidebar colapsado; el sidebar expandido flota por encima (overlay). -->
-        <ContentControl x:Name="ContenedorPrincipal" Margin="84,10,10,10"/>
+    <!-- Raíz con zoom: el diseño se dibuja a 1430 de ancho y se reduce si la ventana es más angosta -->
+    <Grid x:Name="Raiz">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="210"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
 
-        <!-- ============ SIDEBAR COLAPSABLE (OVERLAY) ============ -->
-        <Border x:Name="Sidebar" Background="#2C3E50" Width="68"
-                HorizontalAlignment="Left" VerticalAlignment="Stretch"
-                MouseEnter="Sidebar_MouseEnter" MouseLeave="Sidebar_MouseLeave" Panel.ZIndex="100">
-            <Border.Effect>
-                <DropShadowEffect BlurRadius="15" Direction="0" Opacity="0.15" ShadowDepth="2"/>
-            </Border.Effect>
-            <DockPanel Margin="0,25,0,14">
-
-                <!-- Pie del sidebar: crédito de autoría -->
-                <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Margin="8,10,8,0" VerticalAlignment="Bottom">
-                    <TextBlock Text="©" FontSize="12" Foreground="#718096" Width="48" TextAlignment="Center" VerticalAlignment="Center"/>
-                    <TextBlock Text="2026 Juan Almonacid" FontSize="11" Foreground="#718096"
-                               VerticalAlignment="Center" Opacity="{Binding Opacity, ElementName=txtLogo}"/>
-                </StackPanel>
-
-              <StackPanel DockPanel.Dock="Top">
-                <!-- Logo / título: mismo margen lateral (8px) que los botones de navegación
-                     para que el ícono quede alineado con el resto del menú -->
-                <StackPanel Orientation="Horizontal" Height="40" Margin="8,0,8,25">
-                    <Border Width="48" VerticalAlignment="Center">
-                        <Viewbox Width="26" Height="26" HorizontalAlignment="Center">
-                            <Path Data="{StaticResource IcoLogo}" Width="24" Height="24" Stroke="White" StrokeThickness="1.8"
-                                  StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
-                        </Viewbox>
+        <!-- ============ MENÚ LATERAL ============ -->
+        <Border Background="{StaticResource Oscuro}">
+            <DockPanel Margin="14,22,14,18">
+                <!-- Logo -->
+                <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="6,0,0,24">
+                    <Border Width="36" Height="36" CornerRadius="9" Background="{StaticResource Verde}">
+                        <c:Icono Geometria="{StaticResource IcoLogo}" Tamano="19" Foreground="White" HorizontalAlignment="Center"/>
                     </Border>
-                    <TextBlock x:Name="txtLogo" Text="MIS FINANZAS" Foreground="White" FontSize="16" FontWeight="Bold"
-                               VerticalAlignment="Center" Opacity="0"/>
+                    <StackPanel Margin="11,0,0,0" VerticalAlignment="Center">
+                        <TextBlock Text="Mis Finanzas" FontSize="15" FontWeight="Bold" Foreground="White"/>
+                        <TextBlock Text="Gestor personal" FontSize="12" Foreground="#9AA6B6"/>
+                    </StackPanel>
                 </StackPanel>
 
-                <Button x:Name="btnNavDashboard" Content="Dashboard" Click="NavDashboard_Click" Style="{StaticResource NavButtonStyle}">
-                    <Button.Tag>
-                        <Viewbox Width="22" Height="22"><Path Style="{StaticResource IconoNav}" Data="{StaticResource IcoDashboard}"/></Viewbox>
-                    </Button.Tag>
-                </Button>
-                <Button x:Name="btnNavIngresos" Content="Ingresos" Click="NavIngresos_Click" Style="{StaticResource NavButtonStyle}">
-                    <Button.Tag>
-                        <Viewbox Width="22" Height="22"><Path Style="{StaticResource IconoNav}" Data="{StaticResource IcoIngresos}"/></Viewbox>
-                    </Button.Tag>
-                </Button>
-                <Button x:Name="btnNavCuentas" Content="Cuentas" Click="NavCuentas_Click" Style="{StaticResource NavButtonStyle}">
-                    <Button.Tag>
-                        <Viewbox Width="22" Height="22"><Path Style="{StaticResource IconoNav}" Data="{StaticResource IcoCuentas}"/></Viewbox>
-                    </Button.Tag>
-                </Button>
-                <Button x:Name="btnNavCreditos" Content="Créditos" Click="NavCreditos_Click" Style="{StaticResource NavButtonStyle}">
-                    <Button.Tag>
-                        <Viewbox Width="22" Height="22"><Path Style="{StaticResource IconoNav}" Data="{StaticResource IcoCreditos}"/></Viewbox>
-                    </Button.Tag>
-                </Button>
-                <Button x:Name="btnNavVehiculo" Content="Vehículos" Click="NavVehiculo_Click" Style="{StaticResource NavButtonStyle}">
-                    <Button.Tag>
-                        <Viewbox Width="22" Height="22"><Path Style="{StaticResource IconoNav}" Data="{StaticResource IcoVehiculos}"/></Viewbox>
-                    </Button.Tag>
-                </Button>
-                <Button x:Name="btnNavNegocio" Content="Inversiones" Click="NavNegocio_Click" Style="{StaticResource NavButtonStyle}">
-                    <Button.Tag>
-                        <Viewbox Width="22" Height="22"><Path Style="{StaticResource IconoNav}" Data="{StaticResource IcoInversiones}"/></Viewbox>
-                    </Button.Tag>
-                </Button>
-              </StackPanel>
+                <!-- Pie: autoría -->
+                <TextBlock DockPanel.Dock="Bottom" Text="© 2026 Juan Almonacid" FontSize="12" Foreground="#9AA6B6" Margin="6,0,0,0"/>
+
+                <StackPanel>
+                    <Button x:Name="btnNavDashboard" Content="Dashboard" Tag="{StaticResource IcoDashboard}"
+                            Click="NavDashboard_Click" Style="{StaticResource NavButtonStyle}"/>
+                    <Button x:Name="btnNavIngresos" Content="Ingresos y ahorro" Tag="{StaticResource IcoIngresos}"
+                            Click="NavIngresos_Click" Style="{StaticResource NavButtonStyle}"/>
+                    <Button x:Name="btnNavCuentas" Tag="{StaticResource IcoCuentas}" AutomationProperties.Name="Cuentas"
+                            Click="NavCuentas_Click" Style="{StaticResource NavButtonStyle}">
+                        <DockPanel>
+                            <!-- Contador de pagos vencidos -->
+                            <Border x:Name="insigniaVencidas" DockPanel.Dock="Right" Background="#D92D20" CornerRadius="9"
+                                    MinWidth="18" Height="18" Padding="5,0" Visibility="Collapsed" VerticalAlignment="Center">
+                                <TextBlock x:Name="lblVencidas" FontSize="11" FontWeight="Bold" Foreground="White"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <TextBlock Text="Cuentas" VerticalAlignment="Center"/>
+                        </DockPanel>
+                    </Button>
+                    <Button x:Name="btnNavCreditos" Content="Créditos" Tag="{StaticResource IcoCreditos}"
+                            Click="NavCreditos_Click" Style="{StaticResource NavButtonStyle}"/>
+                    <Button x:Name="btnNavVehiculo" Content="Vehículos" Tag="{StaticResource IcoVehiculos}"
+                            Click="NavVehiculo_Click" Style="{StaticResource NavButtonStyle}"/>
+                    <Button x:Name="btnNavNegocio" Content="Inversiones" Tag="{StaticResource IcoInversiones}"
+                            Click="NavNegocio_Click" Style="{StaticResource NavButtonStyle}"/>
+                </StackPanel>
             </DockPanel>
         </Border>
+
+        <!-- ============ CONTENIDO ============ -->
+        <ContentControl x:Name="ContenedorPrincipal" Grid.Column="1" Focusable="False"/>
     </Grid>
 </Window>

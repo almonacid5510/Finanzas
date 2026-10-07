@@ -44,6 +44,9 @@ namespace MisFinanzas
             return valor.ToString("#,##0.##", Cultura);
         }
 
+        /// <summary>"$ 1.526.000" sin que el "$" quede separado de la cifra al partir la línea.</summary>
+        public static string Moneda(decimal valor) => valor.ToString("C0", Cultura).Replace(' ', ' ');
+
         // ==================== PROPIEDAD ADJUNTA ====================
         // Uso en XAML: local:NumeroHelper.EsMoneda="True"
 

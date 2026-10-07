@@ -6,7 +6,7 @@
 using System;
 using System.Linq;
 using System.Windows;
-using System.Windows.Media.Animation;
+using System.Windows.Media;
 using Microsoft.EntityFrameworkCore;
 using MisFinanzas.Modulos;
 
@@ -14,9 +14,15 @@ namespace MisFinanzas
 {
     public partial class MainWindow : Window
     {
+        // Ancho para el que está dibujado el diseño. Si la ventana es más angosta, todo se reduce
+        // proporcionalmente (hasta ZoomMinimo); por debajo de eso, las grillas pasan a menos columnas.
+        private const double AnchoDiseno = 1430;
+        private const double ZoomMinimo = 0.8;
+
         public MainWindow()
         {
             InitializeComponent();
+            AjustarTamanoInicial();
             InicializarBaseDeDatos();
             CargarDatosIniciales();
             VerificarVencimientosCuentas();
@@ -24,9 +30,24 @@ namespace MisFinanzas
             SetActiveNav(btnNavDashboard);
         }
 
-        // Anchos del sidebar
-        private const double SidebarColapsado = 68;
-        private const double SidebarExpandido = 210;
+        /// <summary>La ventana principal de la app (para navegar desde otras pantallas).</summary>
+        public static MainWindow? Actual => Application.Current?.MainWindow as MainWindow;
+
+        // Tamaño inicial: el del diseño, sin pasarse del área visible de la pantalla
+        private void AjustarTamanoInicial()
+        {
+            var area = SystemParameters.WorkArea;
+            Width = Math.Min(Width, area.Width * 0.96);
+            Height = Math.Min(Height, area.Height * 0.96);
+        }
+
+        private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            // Ancho útil de la ventana (sin bordes); no se usa el del contenido porque el zoom lo cambia
+            double ancho = e.NewSize.Width - 16;
+            double zoom = Math.Clamp(ancho / AnchoDiseno, ZoomMinimo, 1.0);
+            Raiz.LayoutTransform = new ScaleTransform(zoom, zoom);
+        }
 
         // Marca visualmente el botón de navegación activo y limpia los demás
         private void SetActiveNav(System.Windows.Controls.Button activo)
@@ -35,23 +56,6 @@ namespace MisFinanzas
             {
                 NavState.SetIsActive(btn, btn == activo);
             }
-        }
-
-        // --- Sidebar colapsable con transición suave ---
-        private void Sidebar_MouseEnter(object sender, RoutedEventArgs e) => AnimarSidebar(SidebarExpandido, 1);
-
-        private void Sidebar_MouseLeave(object sender, RoutedEventArgs e) => AnimarSidebar(SidebarColapsado, 0);
-
-        private void AnimarSidebar(double anchoDestino, double opacidadTexto)
-        {
-            var duracion = new Duration(TimeSpan.FromMilliseconds(200));
-            var ease = new QuadraticEase { EasingMode = EasingMode.EaseInOut };
-
-            var animAncho = new DoubleAnimation(anchoDestino, duracion) { EasingFunction = ease };
-            Sidebar.BeginAnimation(FrameworkElement.WidthProperty, animAncho);
-
-            var animTexto = new DoubleAnimation(opacidadTexto, duracion) { EasingFunction = ease };
-            txtLogo.BeginAnimation(UIElement.OpacityProperty, animTexto);
         }
 
         private void InicializarBaseDeDatos()
@@ -98,34 +102,27 @@ namespace MisFinanzas
             }
         }
 
-        private async void VerificarVencimientosCuentas()
+        /// <summary>
+        /// Cuenta los gastos del mes que vencen hoy o ya vencieron sin pagar y lo muestra en el menú.
+        /// El aviso ya no abre una ventana al iniciar: el Dashboard lo muestra en línea.
+        /// </summary>
+        public void VerificarVencimientosCuentas()
         {
             try
             {
-                // Esperar 2 segundos antes de mostrar el pop-up
-                await System.Threading.Tasks.Task.Delay(2000);
-
+                int vencidas;
                 using (var db = new AppDbContext())
                 {
-                    // Gastos de este mes que vencen hoy o ya vencieron y siguen sin pagar
                     var hoy = DateTime.Today;
-                    var cuentasPendientes = CuentasMensuales.DelMes(db, hoy)
-                        .Where(c => !c.Pagada && c.Vence <= hoy)
-                        .ToList();
-
-                    if (cuentasPendientes.Any())
-                    {
-                        var ventana = new VentanaRecordatorioPagos(cuentasPendientes);
-                        ventana.ShowDialog();
-
-                        // Las cuentas marcadas como pagadas en el recordatorio deben reflejarse ya
-                        (ContenedorPrincipal.Content as DashboardView)?.CargarResumen();
-                    }
+                    vencidas = CuentasMensuales.DelMes(db, hoy).Count(c => !c.Pagada && c.Vence <= hoy);
                 }
+                lblVencidas.Text = vencidas.ToString();
+                insigniaVencidas.Visibility = vencidas > 0 ? Visibility.Visible : Visibility.Collapsed;
+                btnNavCuentas.ToolTip = vencidas > 0 ? $"{vencidas} pago(s) vencido(s)" : null;
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error al verificar vencimientos: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine("Error al verificar vencimientos: " + ex.Message);
             }
         }
 
@@ -136,5 +133,17 @@ namespace MisFinanzas
         private void NavCreditos_Click(object sender, RoutedEventArgs e) { ContenedorPrincipal.Content = new CreditosView(); SetActiveNav(btnNavCreditos); }
         private void NavVehiculo_Click(object sender, RoutedEventArgs e) { ContenedorPrincipal.Content = new VehiculosView(); SetActiveNav(btnNavVehiculo); }
         private void NavNegocio_Click(object sender, RoutedEventArgs e) { ContenedorPrincipal.Content = new NegocioView(); SetActiveNav(btnNavNegocio); }
+
+        // Accesos desde otras pantallas (enlaces "Ver cuentas", "Ver crédito", tarjetas del Dashboard)
+        public void IrACuentas() => NavCuentas_Click(this, new RoutedEventArgs());
+        public void IrAIngresos() => NavIngresos_Click(this, new RoutedEventArgs());
+        public void IrAInversiones() => NavNegocio_Click(this, new RoutedEventArgs());
+        public void IrACreditos(int? creditoId = null)
+        {
+            var vista = new CreditosView();
+            ContenedorPrincipal.Content = vista;
+            SetActiveNav(btnNavCreditos);
+            if (creditoId != null) vista.Seleccionar(creditoId.Value);
+        }
     }
 }

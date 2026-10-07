@@ -62,23 +62,25 @@ namespace MisFinanzas.Modulos
 
         public static string Mostrar(string? nombre) => string.IsNullOrWhiteSpace(nombre) ? SinCategoria : nombre;
 
-        // --- Colores de las insignias: fijos para las conocidas, estables por nombre para las propias ---
-        private static readonly (string Texto, string Fondo)[] Paleta =
+        // --- Colores: fijos para las conocidas, estables por nombre para las propias ---
+        // Texto (sobre Fondo, contraste ≥ 4.5:1), Fondo de la insignia y Barra para gráficos
+        private static readonly (string Texto, string Fondo, string Barra)[] Paleta =
         {
-            ("#2B6CB0", "#EBF8FF"), ("#2F855A", "#F0FFF4"), ("#C05621", "#FFFAF0"), ("#6B46C1", "#FAF5FF"),
-            ("#C53030", "#FFF5F5"), ("#2C7A7B", "#E6FFFA"), ("#B7791F", "#FFFFF0"), ("#97266D", "#FFF5F7"),
+            ("#1D4FB8", "#EAF0FD", "#1D5BD8"), ("#075E46", "#E7F5EF", "#0B7A5C"), ("#93370D", "#FEF6E7", "#E08A1E"),
+            ("#5B34B5", "#F5F3FF", "#6941C6"), ("#B42318", "#FEF3F2", "#D92D20"), ("#0E6E6E", "#E6F6F6", "#14928F"),
+            ("#854A0E", "#FEF7C3", "#CA8504"), ("#9E165F", "#FDF2FA", "#DD2590"),
         };
 
         private static readonly Dictionary<string, int> Fijos = new(StringComparer.CurrentCultureIgnoreCase)
         {
-            ["Hogar"] = 0, ["Freelance"] = 1, ["Alimentación"] = 2, ["Impuestos"] = 3,
+            ["Hogar"] = 0, ["Freelance"] = 1, ["Alimentación"] = 2, ["Impuestos"] = 3, ["Créditos"] = 3,
             ["Médicos"] = 4, ["Servicios"] = 5, ["Transporte"] = 6, ["Entretenimiento"] = 7,
         };
 
-        private static (string Texto, string Fondo) Color(string? nombre)
+        private static (string Texto, string Fondo, string Barra) Color(string? nombre)
         {
             if (string.IsNullOrWhiteSpace(nombre) || nombre.Equals("Otros", StringComparison.CurrentCultureIgnoreCase))
-                return ("#4A5568", "#EDF2F7");
+                return ("#4B5565", "#EEF1F5", "#8A94A3");
             if (Fijos.TryGetValue(nombre, out var i)) return Paleta[i];
             int hash = nombre.ToLowerInvariant().Aggregate(17, (h, c) => unchecked(h * 31 + c));
             return Paleta[Math.Abs(hash % Paleta.Length)];
@@ -86,5 +88,6 @@ namespace MisFinanzas.Modulos
 
         public static string ColorTexto(string? nombre) => Color(nombre).Texto;
         public static string ColorFondo(string? nombre) => Color(nombre).Fondo;
+        public static string ColorBarra(string? nombre) => Color(nombre).Barra;
     }
 }
