@@ -5,7 +5,7 @@
 ; ============================================================
 
 #define MyAppName "Mis Finanzas"
-#define MyAppVersion "1.0.0"
+#define MyAppVersion "1.1.0"
 #define MyAppPublisher "Juan Almonacid"
 #define MyAppCopyright "© 2026 Juan Almonacid"
 #define MyAppExeName "MisFinanzas.exe"
