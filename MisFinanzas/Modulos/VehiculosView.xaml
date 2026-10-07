@@ -101,9 +101,14 @@
                                     <Border DockPanel.Dock="Left" Width="44" Height="44" CornerRadius="10" Background="{StaticResource AzulSuave}" Margin="0,0,12,0">
                                         <c:Icono Geometria="{StaticResource IcoVehiculos}" Tamano="20" Foreground="{StaticResource Azul}" HorizontalAlignment="Center"/>
                                     </Border>
-                                    <StackPanel VerticalAlignment="Center" Margin="0,0,8,0">
-                                        <TextBlock Text="{Binding Nombre}" FontSize="15" FontWeight="Bold" TextTrimming="CharacterEllipsis"/>
-                                        <TextBlock Text="{Binding Placa}" Style="{StaticResource TextoSecundario}"/>
+                                    <!-- Nombre y placa juntos: la placa distingue dos vehículos con el mismo nombre -->
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Nombre}" FontSize="15" FontWeight="Bold" TextTrimming="CharacterEllipsis" MaxWidth="120"
+                                                   VerticalAlignment="Center"/>
+                                        <Border Background="#FFD43B" BorderBrush="#0F1B2D" BorderThickness="1.2" CornerRadius="4"
+                                                Padding="7,1" Margin="10,0,0,0" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Placa}" FontSize="12" FontWeight="ExtraBold" Foreground="#0F1B2D"/>
+                                        </Border>
                                     </StackPanel>
                                 </DockPanel>
                             </Button>
