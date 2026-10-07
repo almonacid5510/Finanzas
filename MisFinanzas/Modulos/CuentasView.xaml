@@ -282,8 +282,12 @@
                                                 <ContentPresenter Grid.Column="3" Content="{Binding}" ContentTemplate="{StaticResource InsigniaEstado}" VerticalAlignment="Center"/>
                                                 <TextBlock Grid.Column="4" Text="{Binding CuotaEsteMes, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" FontSize="14" FontWeight="Bold"
                                                            HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                                                <Button Grid.Column="5" Content="Ver crédito" Click="BtnVerCredito_Click" Style="{StaticResource BotonEnlace}"
-                                                        HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                                <!-- Abre el crédito en su pantalla (mismo alto que los botones de editar/eliminar) -->
+                                                <Button Grid.Column="5" Content="Ver" Click="BtnVerCredito_Click" Style="{StaticResource BotonSecundario}"
+                                                        c:Ui.Icono="{StaticResource IcoCreditos}" Height="32" Padding="11,0" FontSize="12.5"
+                                                        Background="{StaticResource MoradoSuave}" Foreground="{StaticResource MoradoTexto}"
+                                                        BorderBrush="{StaticResource MoradoBorde}" HorizontalAlignment="Right" VerticalAlignment="Center"
+                                                        AutomationProperties.Name="Ver crédito" ToolTip="Ver el detalle del crédito"/>
                                             </Grid>
                                         </Border>
                                     </DataTemplate>
