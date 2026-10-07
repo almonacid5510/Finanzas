@@ -76,6 +76,7 @@
             <TextBlock Text="Cuentas del mes" Style="{StaticResource TituloPagina}"/>
             <TextBlock Text="Gastos fijos, compras y cuotas de crédito" Style="{StaticResource SubtituloPagina}"/>
         </StackPanel>
+        <Button x:Name="btnMesActual" Click="BtnMesActual_Click" Style="{StaticResource BotonMesActual}" HorizontalAlignment="Right"/>
         <StackPanel Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Top">
             <Border Style="{StaticResource CapsulaMes}">
                 <StackPanel Orientation="Horizontal">
@@ -86,8 +87,6 @@
                             AutomationProperties.Name="Mes siguiente" ToolTip="Mes siguiente"/>
                 </StackPanel>
             </Border>
-            <Button x:Name="btnMesActual" Content="Volver al mes actual" Click="BtnMesActual_Click" Style="{StaticResource BotonEnlace}"
-                    HorizontalAlignment="Right" Margin="0,4,4,0" Visibility="Collapsed"/>
         </StackPanel>
 
         <!-- ===== REGISTRAR GASTO (una fila) ===== -->

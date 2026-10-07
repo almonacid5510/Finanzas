@@ -62,8 +62,7 @@
                     </StackPanel>
                 </Border>
                 <!-- Mes (el resumen es siempre del mes en curso) -->
-                <Button x:Name="btnMesActual" Content="Volver al mes actual" Click="BtnMesActual_Click" Style="{StaticResource BotonEnlace}"
-                        VerticalAlignment="Center" Margin="0,0,14,0" Visibility="Collapsed"/>
+                <Button x:Name="btnMesActual" Click="BtnMesActual_Click" Style="{StaticResource BotonMesActual}" Margin="0,0,12,0"/>
                 <StackPanel>
                     <Border Style="{StaticResource CapsulaMes}">
                         <StackPanel Orientation="Horizontal">

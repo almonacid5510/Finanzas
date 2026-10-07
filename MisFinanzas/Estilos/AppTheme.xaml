@@ -596,6 +596,20 @@
             </Setter.Value>
         </Setter>
     </Style>
+    <!-- "Mes actual": vuelve al mes en curso; mismo alto y borde que la cápsula del mes -->
+    <Style x:Key="BotonMesActual" TargetType="Button" BasedOn="{StaticResource BotonSecundario}">
+        <Setter Property="Height" Value="46"/>
+        <Setter Property="Padding" Value="14,0"/>
+        <Setter Property="BorderBrush" Value="{StaticResource Borde}"/>
+        <Setter Property="Foreground" Value="{StaticResource Azul}"/>
+        <Setter Property="c:Ui.Icono" Value="{StaticResource IcoCalendario}"/>
+        <Setter Property="Content" Value="Mes actual"/>
+        <Setter Property="ToolTip" Value="Volver al mes en curso"/>
+        <Setter Property="AutomationProperties.Name" Value="Volver al mes actual"/>
+        <Setter Property="VerticalAlignment" Value="Top"/>
+        <Setter Property="Visibility" Value="Collapsed"/>
+    </Style>
+
     <Style x:Key="CapsulaMes" TargetType="Border">
         <Setter Property="Background" Value="White"/>
         <Setter Property="BorderBrush" Value="{StaticResource Borde}"/>
