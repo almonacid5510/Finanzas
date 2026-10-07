@@ -7,214 +7,153 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:MisFinanzas"
-             xmlns:controles="clr-namespace:MisFinanzas.Controles"
-             Background="#F0F2F5">
+             xmlns:m="clr-namespace:MisFinanzas.Modulos"
+             xmlns:c="clr-namespace:MisFinanzas.Controles">
+
   <UserControl.Resources>
-    <!-- Ícono de caja fuerte (vectorial), mismo dibujo que en el menú lateral -->
-    <Geometry x:Key="IconoCajaFuerte">M5,3 H19 A2,2 0 0 1 21,5 V17 A2,2 0 0 1 19,19 H5 A2,2 0 0 1 3,17 V5 A2,2 0 0 1 5,3 Z M8.5,11 A3.5,3.5 0 1 1 15.5,11 A3.5,3.5 0 1 1 8.5,11 Z M12,11 L14,9 M6,7 V9 M6,13 V15 M7,19 V21 M17,19 V21</Geometry>
-  </UserControl.Resources>
+    <m:EstiloInversionConverter x:Key="EstiloInversion"/>
 
-  <Grid>
-	<ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" controles:ScrollPagina.Activo="True">
-    <Grid Margin="18,12,18,18">
-		<Grid.RowDefinitions>
-			<RowDefinition Height="Auto"/>
-			<RowDefinition Height="Auto"/>
-			<RowDefinition Height="Auto"/>
-			<RowDefinition Height="*"/>
-		</Grid.RowDefinitions>
-
-		<StackPanel Grid.Row="0" Margin="0,0,0,14">
-			<TextBlock Text="Mis Inversiones" Style="{StaticResource PageTitle}"/>
-			<Rectangle Height="4" Width="60" Fill="#2ECC71" HorizontalAlignment="Left" Margin="2,5,0,0" RadiusX="2" RadiusY="2"/>
-		</StackPanel>
-
-		<Border Grid.Row="1" Background="#2D3748" CornerRadius="12" Padding="20" Margin="0,0,0,14">
-			<Grid>
-				<StackPanel>
-					<TextBlock Text="TOTAL INVERTIDO" FontSize="12" FontWeight="Bold" Foreground="#A0AEC0"/>
-					<TextBlock x:Name="lblTotalNegocio" Text="$ 0" FontSize="32" FontWeight="Black" Foreground="#2ECC71"/>
-				</StackPanel>
-				<Viewbox Width="44" Height="44" HorizontalAlignment="Right" VerticalAlignment="Center">
-					<Path Data="{StaticResource IconoCajaFuerte}" Stroke="#4A5568" StrokeThickness="1.6"
-					      StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Width="24" Height="24"/>
-				</Viewbox>
-			</Grid>
-		</Border>
-
-		<Border Grid.Row="2" Style="{StaticResource Card}" Margin="0,0,0,14">
-			<StackPanel>
-				<StackPanel Orientation="Horizontal" Margin="0,0,0,16">
-					<TextBlock Text="&#xE710;" FontFamily="Segoe MDL2 Assets" FontSize="15" Foreground="#2ECC71" VerticalAlignment="Center" Margin="0,0,8,0"/>
-					<TextBlock Text="Registrar nueva inversión" FontSize="15" FontWeight="Bold" Foreground="#2D3748" VerticalAlignment="Center"/>
-				</StackPanel>
-				<Grid>
-					<Grid.ColumnDefinitions>
-						<ColumnDefinition Width="2*"/>
-						<ColumnDefinition Width="16"/>
-						<ColumnDefinition Width="*"/>
-						<ColumnDefinition Width="16"/>
-						<ColumnDefinition Width="Auto"/>
-					</Grid.ColumnDefinitions>
-					<Grid.RowDefinitions>
-						<RowDefinition Height="Auto"/>
-						<RowDefinition Height="Auto"/>
-					</Grid.RowDefinitions>
-
-					<TextBlock Grid.Row="0" Grid.Column="0" Text="NOMBRE DE LA INVERSIÓN" Style="{StaticResource FieldLabel}"/>
-					<TextBox   Grid.Row="1" Grid.Column="0" x:Name="txtDescNegocio" Style="{StaticResource ModernInput}"/>
-
-					<TextBlock Grid.Row="0" Grid.Column="2" Text="MONTO INICIAL ($)" Style="{StaticResource FieldLabel}"/>
-					<TextBox   Grid.Row="1" Grid.Column="2" x:Name="txtInversionNegocio" Style="{StaticResource ModernInputNumeric}" local:NumeroHelper.EsMoneda="True"/>
-
-					<Button Grid.Row="1" Grid.Column="4" Content="AGREGAR" Click="BtnAgregar_Click"
-                            Style="{StaticResource PrimaryButton}" Background="#2ECC71" MinWidth="120"/>
-				</Grid>
-			</StackPanel>
-		</Border>
-
-		<!-- Tarjetas de inversión (mismo esquema que las metas de ahorro) -->
-		<ScrollViewer Grid.Row="3" VerticalScrollBarVisibility="Auto">
-			<ItemsControl x:Name="icListaNegocios">
-				<ItemsControl.ItemsPanel>
-					<ItemsPanelTemplate>
-						<UniformGrid Columns="2" VerticalAlignment="Top"/>
-					</ItemsPanelTemplate>
-				</ItemsControl.ItemsPanel>
-				<ItemsControl.ItemTemplate>
-					<DataTemplate>
-						<Border Background="White" CornerRadius="12" Padding="15" Margin="5" Height="160">
-							<Border.Effect>
-								<DropShadowEffect BlurRadius="10" Opacity="0.05" ShadowDepth="1"/>
-							</Border.Effect>
-							<Grid>
-								<Button Content="✕" Click="BtnEliminar_Click"
-										HorizontalAlignment="Right" VerticalAlignment="Top"
-										Background="Transparent" BorderThickness="0" Foreground="#E53E3E" Margin="0,-5,-5,0"
-										Panel.ZIndex="10" Cursor="Hand" ToolTip="Eliminar inversión"/>
-
-								<Grid>
-									<Grid.ColumnDefinitions>
-										<ColumnDefinition Width="*"/>
-										<ColumnDefinition Width="90"/>
-									</Grid.ColumnDefinitions>
-
-									<!-- Columna izquierda: datos y abono -->
-									<StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,5,0">
-										<TextBlock Text="{Binding Descripcion}" FontWeight="Bold" Foreground="#2D3748" FontSize="15" TextTrimming="CharacterEllipsis" Margin="0,0,0,6"/>
-
-										<TextBlock Text="Total invertido:" FontSize="10" Foreground="#718096"/>
-										<TextBlock Text="{Binding Costo, StringFormat='{}{0:C0}'}" FontWeight="Bold" Foreground="#27AE60" FontSize="16"/>
-										<TextBlock Text="{Binding Fecha, StringFormat='Desde el {0:dd/MM/yyyy}'}" FontSize="10" Foreground="#A0AEC0" Margin="0,2,0,10"/>
-
-										<Grid>
-											<Grid.ColumnDefinitions>
-												<ColumnDefinition Width="*"/>
-												<ColumnDefinition Width="Auto"/>
-											</Grid.ColumnDefinitions>
-											<TextBox Height="34" HorizontalAlignment="Stretch"
-													 local:NumeroHelper.EsMoneda="True"
-													 Style="{StaticResource ModernInput}" Margin="0,0,6,0"/>
-											<Button Grid.Column="1" Click="BtnAbonar_Click"
-													Height="34" Cursor="Hand" Foreground="White" FontWeight="Bold" FontSize="11">
-												<Button.Template>
-													<ControlTemplate TargetType="Button">
-														<Border x:Name="b" Background="#27AE60" CornerRadius="8" Padding="12,0">
-															<StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-																<TextBlock Text="&#xE710;" FontFamily="Segoe MDL2 Assets" FontSize="11" Margin="0,0,5,0" VerticalAlignment="Center"/>
-																<TextBlock Text="ABONAR" VerticalAlignment="Center"/>
-															</StackPanel>
-														</Border>
-														<ControlTemplate.Triggers>
-															<Trigger Property="IsMouseOver" Value="True">
-																<Setter TargetName="b" Property="Background" Value="#229954"/>
-															</Trigger>
-															<Trigger Property="IsPressed" Value="True">
-																<Setter TargetName="b" Property="Background" Value="#1E8449"/>
-															</Trigger>
-														</ControlTemplate.Triggers>
-													</ControlTemplate>
-												</Button.Template>
-											</Button>
-										</Grid>
-									</StackPanel>
-
-									<!-- Columna derecha: caja fuerte -->
-									<Border Grid.Column="1" Width="70" Height="70" CornerRadius="35" Background="#F0FFF4"
-											HorizontalAlignment="Center" VerticalAlignment="Center">
-										<Viewbox Width="36" Height="36">
-											<Path Data="{StaticResource IconoCajaFuerte}" Stroke="#27AE60" StrokeThickness="1.6"
-											      StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Width="24" Height="24"/>
-										</Viewbox>
-									</Border>
-								</Grid>
-							</Grid>
-						</Border>
-					</DataTemplate>
-				</ItemsControl.ItemTemplate>
-			</ItemsControl>
-		</ScrollViewer>
-	</Grid>
-    </ScrollViewer>
-
-    <controles:Toast x:Name="toast" Panel.ZIndex="50"/>
-
-    <!-- ===== MODAL DE CONFIRMACIÓN DE ELIMINACIÓN ===== -->
-    <Grid x:Name="OverlayConfirm" Background="#66000000" Visibility="Collapsed" Panel.ZIndex="100">
-        <Border Background="White" CornerRadius="16" Width="400" Padding="28"
-                HorizontalAlignment="Center" VerticalAlignment="Center">
-            <Border.Effect>
-                <DropShadowEffect BlurRadius="30" Direction="270" Opacity="0.3" ShadowDepth="6"/>
-            </Border.Effect>
+    <!-- Tarjeta de cada inversión: el color y el ícono rotan según su posición -->
+    <DataTemplate DataType="{x:Type m:Movimiento}">
+        <Border Style="{StaticResource Card}" Padding="20,18">
             <StackPanel>
-                <Border Width="56" Height="56" Background="#FFF5F5" CornerRadius="28" HorizontalAlignment="Center" Margin="0,0,0,16">
-                    <TextBlock Text="&#xE74D;" FontFamily="Segoe MDL2 Assets" FontSize="24" Foreground="#E53E3E"
-                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                </Border>
-                <TextBlock Text="Eliminar inversión" FontSize="18" FontWeight="Bold" Foreground="#2D3748" HorizontalAlignment="Center"/>
-                <TextBlock FontSize="13" Foreground="#718096" TextWrapping="Wrap" TextAlignment="Center" Margin="0,8,0,22">
-                    <Run Text="¿Seguro que deseas eliminar la inversión "/><Run x:Name="runNombreMov" FontWeight="Bold" Foreground="#2D3748"/><Run Text="? Esta acción no se puede deshacer."/>
-                </TextBlock>
+                <DockPanel>
+                    <Button DockPanel.Dock="Right" Click="BtnEliminar_Click" Style="{StaticResource BotonIconoPeligro}" c:Ui.Icono="{StaticResource IcoEliminar}"
+                            VerticalAlignment="Top" AutomationProperties.Name="Eliminar inversión" ToolTip="Eliminar inversión"/>
+                    <Border DockPanel.Dock="Left" Width="42" Height="42" CornerRadius="10" Margin="0,0,12,0"
+                            Background="{Binding Converter={StaticResource EstiloInversion}, ConverterParameter=fondo}">
+                        <c:Icono Tamano="20" HorizontalAlignment="Center"
+                                 Geometria="{Binding Converter={StaticResource EstiloInversion}, ConverterParameter=icono}"
+                                 Foreground="{Binding Converter={StaticResource EstiloInversion}, ConverterParameter=color}"/>
+                    </Border>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="{Binding Descripcion}" FontSize="16" FontWeight="Bold" TextTrimming="CharacterEllipsis"/>
+                        <TextBlock Text="{Binding Fecha, StringFormat='Desde el {0:dd/MM/yyyy}'}" Style="{StaticResource TextoSecundario}"/>
+                    </StackPanel>
+                </DockPanel>
+                <TextBlock Text="Total invertido" Style="{StaticResource TextoSecundario}" FontSize="13" Margin="0,14,0,0"/>
+                <TextBlock Text="{Binding Costo, StringFormat='{}{0:C0}'}" FontSize="26" FontWeight="ExtraBold" Foreground="{StaticResource VerdeTexto}" Margin="0,0,0,12"/>
+                <!-- El campo y el botón comparten la grilla: BtnAbonar_Click busca el campo ahí -->
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="12"/>
-                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <Button Grid.Column="0" Content="Cancelar" Click="ConfirmCancelar_Click"
-                            Height="42" Cursor="Hand" Foreground="#4A5568" FontWeight="SemiBold" FontSize="13">
-                        <Button.Template>
-                            <ControlTemplate TargetType="Button">
-                                <Border x:Name="b" Background="#EDF2F7" CornerRadius="10">
-                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                </Border>
-                                <ControlTemplate.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter TargetName="b" Property="Background" Value="#E2E8F0"/>
-                                    </Trigger>
-                                </ControlTemplate.Triggers>
-                            </ControlTemplate>
-                        </Button.Template>
-                    </Button>
-                    <Button Grid.Column="2" Content="Eliminar" Click="ConfirmEliminar_Click"
-                            Height="42" Cursor="Hand" Foreground="White" FontWeight="Bold" FontSize="13">
-                        <Button.Template>
-                            <ControlTemplate TargetType="Button">
-                                <Border x:Name="b" Background="#E53E3E" CornerRadius="10">
-                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                        <TextBlock Text="&#xE74D;" FontFamily="Segoe MDL2 Assets" FontSize="13" Margin="0,0,7,0" VerticalAlignment="Center"/>
-                                        <ContentPresenter VerticalAlignment="Center"/>
-                                    </StackPanel>
-                                </Border>
-                                <ControlTemplate.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter TargetName="b" Property="Background" Value="#C53030"/>
-                                    </Trigger>
-                                </ControlTemplate.Triggers>
-                            </ControlTemplate>
-                        </Button.Template>
-                    </Button>
+                    <TextBox Style="{StaticResource ModernInputNumeric}" local:NumeroHelper.EsMoneda="True" c:Ui.Pista="$ 0" Margin="0,0,8,0"
+                             AutomationProperties.Name="Valor del abono"/>
+                    <Button Grid.Column="1" Content="Abonar" Click="BtnAbonar_Click" Style="{StaticResource BotonVerde}"/>
                 </Grid>
+            </StackPanel>
+        </Border>
+    </DataTemplate>
+
+    <!-- Última tarjeta: sugerencia para agregar otra inversión -->
+    <DataTemplate DataType="{x:Type m:SugerenciaInversion}">
+        <ContentControl Style="{StaticResource TarjetaPunteada}" MinHeight="196">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                <c:Icono Geometria="{StaticResource IcoMasCirculo}" Tamano="24" Foreground="{StaticResource Texto2}" HorizontalAlignment="Center"/>
+                <TextBlock Text="Diversifica tu portafolio" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource Texto2}" HorizontalAlignment="Center" Margin="0,8,0,2"/>
+                <TextBlock Text="Usa el formulario de arriba para sumar otra inversión" Style="{StaticResource TextoSecundario}" TextAlignment="Center" TextWrapping="Wrap"/>
+            </StackPanel>
+        </ContentControl>
+    </DataTemplate>
+  </UserControl.Resources>
+
+  <Grid>
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" c:ScrollPagina.Activo="True">
+      <StackPanel Margin="28,22,28,22">
+        <StackPanel Margin="0,0,0,14">
+            <TextBlock Text="Mis inversiones" Style="{StaticResource TituloPagina}"/>
+            <TextBlock Text="Dónde tienes tu dinero trabajando" Style="{StaticResource SubtituloPagina}"/>
+        </StackPanel>
+
+        <!-- ===== TOTAL + NUEVA INVERSIÓN ===== -->
+        <Grid Margin="0,0,0,14">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*" MinWidth="300"/>
+                <ColumnDefinition Width="14"/>
+                <ColumnDefinition Width="2.05*"/>
+            </Grid.ColumnDefinitions>
+            <Border Style="{StaticResource TarjetaOscura}" Padding="20,18">
+                <StackPanel>
+                    <TextBlock Text="TOTAL INVERTIDO" Style="{StaticResource EtiquetaSeccion}" Foreground="{StaticResource TextoMenu}"/>
+                    <TextBlock x:Name="lblTotalNegocio" FontSize="32" FontWeight="ExtraBold" Foreground="#6CE9A6" Margin="0,6,0,12"/>
+                    <!-- Distribución por inversión -->
+                    <Grid x:Name="barraDistribucion" Height="9"/>
+                    <ItemsControl x:Name="icDistribucion" Margin="0,10,0,0">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,14,2">
+                                    <Border Width="9" Height="9" CornerRadius="2" Background="{Binding Color}" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                    <TextBlock FontSize="12.5" Foreground="{StaticResource TextoMenu}">
+                                        <Run Text="{Binding Nombre, Mode=OneWay}"/> <Run Text="{Binding PorcentajeTexto, Mode=OneWay}"/>
+                                    </TextBlock>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+
+            <Border Grid.Column="2" Style="{StaticResource Card}" Padding="20,18">
+                <StackPanel>
+                    <TextBlock Text="Registrar nueva inversión" Style="{StaticResource TituloTarjeta}" Margin="0,0,0,10"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="10"/>
+                            <ColumnDefinition Width="0.6*"/>
+                            <ColumnDefinition Width="10"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Label Content="Nombre de la inversión" Target="{Binding ElementName=txtDescNegocio}" Style="{StaticResource Etiqueta}"/>
+                        <TextBox Grid.Row="1" x:Name="txtDescNegocio" Style="{StaticResource ModernInput}" c:Ui.Pista="Ej. CDT, fondo, acciones"/>
+                        <Label Grid.Column="2" Content="Monto inicial" Target="{Binding ElementName=txtInversionNegocio}" Style="{StaticResource Etiqueta}"/>
+                        <TextBox Grid.Row="1" Grid.Column="2" x:Name="txtInversionNegocio" Style="{StaticResource ModernInputNumeric}" local:NumeroHelper.EsMoneda="True" c:Ui.Pista="$ 0"/>
+                        <Button Grid.Row="1" Grid.Column="4" Content="Agregar" Click="BtnAgregar_Click" Style="{StaticResource BotonVerde}" c:Ui.Icono="{StaticResource IcoPlus}"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- ===== TARJETAS DE INVERSIÓN ===== -->
+        <ItemsControl x:Name="icListaNegocios">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <c:GrillaAdaptable Columnas="3" AnchoMinimo="280"/>
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+        </ItemsControl>
+      </StackPanel>
+    </ScrollViewer>
+
+    <c:Toast x:Name="toast" Panel.ZIndex="50"/>
+
+    <!-- ===== CONFIRMACIÓN DE ELIMINACIÓN ===== -->
+    <Grid x:Name="OverlayConfirm" Background="#660F1B2D" Visibility="Collapsed" Panel.ZIndex="100">
+        <Border Background="White" CornerRadius="16" Width="400" Padding="26" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <StackPanel>
+                <Border Width="48" Height="48" Background="{StaticResource RojoSuave}" CornerRadius="12" HorizontalAlignment="Left" Margin="0,0,0,14">
+                    <c:Icono Geometria="{StaticResource IcoEliminar}" Tamano="20" Foreground="{StaticResource Rojo}" HorizontalAlignment="Center"/>
+                </Border>
+                <TextBlock Text="Eliminar inversión" FontSize="18" FontWeight="Bold"/>
+                <TextBlock FontSize="13.5" Foreground="{StaticResource Texto2}" TextWrapping="Wrap" Margin="0,6,0,20">
+                    <Run Text="¿Seguro que deseas eliminar "/><Run x:Name="runNombreMov" FontWeight="Bold" Foreground="{StaticResource Texto}"/><Run Text="? Esta acción no se puede deshacer."/>
+                </TextBlock>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="Cancelar" Click="ConfirmCancelar_Click" Style="{StaticResource BotonSecundario}" IsCancel="True"/>
+                    <Button Content="Eliminar" Click="ConfirmEliminar_Click" Style="{StaticResource Boton}" Background="{StaticResource Rojo}"
+                            c:Ui.Icono="{StaticResource IcoEliminar}" Margin="10,0,0,0"/>
+                </StackPanel>
             </StackPanel>
         </Border>
     </Grid>

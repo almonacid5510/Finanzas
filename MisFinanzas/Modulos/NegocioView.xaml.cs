@@ -21,7 +21,12 @@ namespace MisFinanzas.Modulos
         {
             InitializeComponent();
 
-            icListaNegocios.ItemsSource = ListaMovimientos;
+            // Las inversiones y, al final, la tarjeta que invita a sumar otra
+            icListaNegocios.ItemsSource = new System.Windows.Data.CompositeCollection
+            {
+                new System.Windows.Data.CollectionContainer { Collection = ListaMovimientos },
+                new SugerenciaInversion()
+            };
 
             // EVENTO CRUCIAL: Cada vez que entres a la pestaña, se recargan los datos del disco
             this.Loaded += (s, e) => CargarMovimientosDesdeBD();
@@ -131,6 +136,7 @@ namespace MisFinanzas.Modulos
                     db.SaveChanges();
                 }
                 ListaMovimientos.Remove(movimiento);
+                icListaNegocios.Items.Refresh();
                 ActualizarTotal();
                 toast.Show("Inversión eliminada");
             }
@@ -190,6 +196,68 @@ namespace MisFinanzas.Modulos
             // Total invertido entre todas las inversiones
             decimal total = ListaMovimientos.Sum(m => m.Costo);
             lblTotalNegocio.Text = total.ToString("C0");
+            MostrarDistribucion(total);
         }
+
+        // Colores de cada inversión en la barra (mismo orden que las tarjetas), en tono claro sobre fondo oscuro
+        private static readonly string[] ColoresDistribucion = { "#3CCB8F", "#A9C5FF", "#C3B1F7", "#F5B963" };
+
+        // Barra de distribución: qué porcentaje del total tiene cada inversión
+        private void MostrarDistribucion(decimal total)
+        {
+            var partes = ListaMovimientos.Select((m, i) => new FilaDistribucion
+            {
+                Nombre = m.Descripcion,
+                Monto = m.Costo,
+                Porcentaje = total > 0 ? (double)(m.Costo / total) : 0,
+                Color = ColoresDistribucion[i % ColoresDistribucion.Length]
+            }).Where(p => p.Monto > 0).ToList();
+
+            icDistribucion.ItemsSource = partes;
+            barraDistribucion.Children.Clear();
+            barraDistribucion.ColumnDefinitions.Clear();
+            for (int i = 0; i < partes.Count; i++)
+            {
+                barraDistribucion.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength((double)partes[i].Monto, GridUnitType.Star) });
+                var parte = new Border
+                {
+                    Background = (System.Windows.Media.Brush)new System.Windows.Media.BrushConverter().ConvertFromString(partes[i].Color)!,
+                    CornerRadius = new CornerRadius(i == 0 ? 5 : 0, i == partes.Count - 1 ? 5 : 0, i == partes.Count - 1 ? 5 : 0, i == 0 ? 5 : 0),
+                    Margin = new Thickness(0, 0, i == partes.Count - 1 ? 0 : 2, 0),
+                    ToolTip = $"{partes[i].Nombre}: {partes[i].Monto:C0}"
+                };
+                Grid.SetColumn(parte, i);
+                barraDistribucion.Children.Add(parte);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Color e ícono de cada tarjeta de inversión según su posición en la lista (se repiten cada 4).
+    /// ConverterParameter: "fondo", "color" o "icono".
+    /// </summary>
+    public class EstiloInversionConverter : System.Windows.Data.IValueConverter
+    {
+        private static readonly (string Fondo, string Color, string Icono)[] Estilos =
+        {
+            ("VerdeSuave", "Verde", "IcoBanco"), ("AzulSuave", "Azul", "IcoCelular"),
+            ("MoradoSuave", "Morado", "IcoGrafico"), ("NaranjaSuave", "NaranjaTexto", "IcoInversiones"),
+        };
+
+        public object? Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            int i = Math.Max(0, NegocioView.ListaMovimientos.IndexOf(value as Movimiento ?? new Movimiento()));
+            var e = Estilos[i % Estilos.Length];
+            var clave = (parameter as string) switch { "fondo" => e.Fondo, "icono" => e.Icono, _ => e.Color };
+            return Application.Current.TryFindResource(clave);
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture) =>
+            throw new NotSupportedException();
+    }
+
+    /// <summary>Marcador de la tarjeta "Diversifica tu portafolio" al final de la lista.</summary>
+    public class SugerenciaInversion
+    {
     }
 }
