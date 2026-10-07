@@ -25,6 +25,9 @@ namespace MisFinanzas.Modulos
             this.Loaded += (s, e) => CargarVehiculos();
         }
 
+        // Vehículo que se muestra a la derecha
+        private int _seleccionadoId;
+
         private void CargarVehiculos()
         {
             using (var db = new AppDbContext())
@@ -48,8 +51,33 @@ namespace MisFinanzas.Modulos
 
                     // 4. Notificamos por si acaso
                     v.NotificarCambioTotal();
+                    v.PropertyChanged += Vehiculo_PropertyChanged;
                 }
             }
+            Seleccionar(listaVehiculos.FirstOrDefault(v => v.Id == _seleccionadoId) ?? listaVehiculos.FirstOrDefault());
+        }
+
+        // El total del encabezado sigue a los gastos que se registran en el detalle
+        private void Vehiculo_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(Vehiculo.TotalInvertido)) ActualizarTotalGeneral();
+        }
+
+        private void ActualizarTotalGeneral() =>
+            runCapitalTotal.Text = NumeroHelper.Moneda(listaVehiculos.Sum(v => v.TotalInvertido));
+
+        // Muestra el detalle del vehículo a la derecha (sin cambiar de pantalla)
+        private void Seleccionar(Vehiculo? vehiculo)
+        {
+            foreach (var v in listaVehiculos) v.Seleccionado = v == vehiculo;
+            _seleccionadoId = vehiculo?.Id ?? 0;
+
+            pnlDetalle.DataContext = vehiculo;
+            contDetalle.Content = vehiculo == null ? null : new DetalleVehiculoView(vehiculo);
+            pnlDetalle.Visibility = vehiculo == null ? Visibility.Collapsed : Visibility.Visible;
+            lblSinDetalle.Visibility = vehiculo == null ? Visibility.Visible : Visibility.Collapsed;
+            lblSinVehiculos.Visibility = listaVehiculos.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+            ActualizarTotalGeneral();
         }
 
         private void BtnAgregarVehiculo_Click(object sender, RoutedEventArgs e)
@@ -74,9 +102,12 @@ namespace MisFinanzas.Modulos
 
                     // ObservableCollection se encarga de actualizar la UI sola
                     listaVehiculos.Add(nuevo);
+                    nuevo.PropertyChanged += Vehiculo_PropertyChanged;
+                    Seleccionar(nuevo);
 
                     txtNombreVehiculo.Clear();
                     txtPlaca.Clear();
+                    toast.Show("Vehículo registrado");
                 }
                 catch (Exception ex)
                 {
@@ -90,7 +121,6 @@ namespace MisFinanzas.Modulos
 
         private void BtnEliminarVehiculo_Click(object sender, RoutedEventArgs e)
         {
-            e.Handled = true; // evita que se dispare el click de la tarjeta (abrir detalle)
             var boton = sender as Button;
             _vehiculoPendienteEliminar = boton?.DataContext as Vehiculo;
 
@@ -126,6 +156,7 @@ namespace MisFinanzas.Modulos
                     db.SaveChanges();
                 }
                 listaVehiculos.Remove(vehiculo);
+                Seleccionar(listaVehiculos.FirstOrDefault());
                 toast.Show("Vehículo eliminado");
             }
             catch (Exception ex)
@@ -148,20 +179,10 @@ namespace MisFinanzas.Modulos
             }
         }
 
-        private void TarjetaVehiculo_Click(object sender, MouseButtonEventArgs e)
+        // Clic en un vehículo de la lista: muestra su detalle a la derecha
+        private void TarjetaVehiculo_Click(object sender, RoutedEventArgs e)
         {
-            var border = sender as Border;
-            var vehiculoSeleccionado = border?.DataContext as Vehiculo;
-
-            if (vehiculoSeleccionado != null)
-            {
-                var detalleView = new DetalleVehiculoView(vehiculoSeleccionado.Id);
-                var mainWindow = Window.GetWindow(this) as MainWindow;
-                if (mainWindow != null)
-                {
-                    mainWindow.ContenedorPrincipal.Content = detalleView;
-                }
-            }
+            if (((FrameworkElement)sender).DataContext is Vehiculo vehiculo) Seleccionar(vehiculo);
         }
     }
 }

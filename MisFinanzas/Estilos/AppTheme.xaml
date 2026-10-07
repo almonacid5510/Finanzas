@@ -392,6 +392,8 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="pista" Text="dd/mm/aaaa" Foreground="{StaticResource GrisPista}" Margin="13,0,0,0"
+                                       VerticalAlignment="Center" IsHitTestVisible="False" Visibility="Collapsed"/>
                             <DatePickerTextBox x:Name="PART_TextBox" Grid.Column="0"
                                                Style="{StaticResource DatePickerTextBoxStyle}"
                                                BorderThickness="0" Background="Transparent"
@@ -402,6 +404,13 @@
                         </Grid>
                     </Border>
                     <ControlTemplate.Triggers>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="SelectedDate" Value="{x:Null}"/>
+                                <Condition Property="IsKeyboardFocusWithin" Value="False"/>
+                            </MultiTrigger.Conditions>
+                            <Setter TargetName="pista" Property="Visibility" Value="Visible"/>
+                        </MultiTrigger>
                         <Trigger Property="IsKeyboardFocusWithin" Value="True">
                             <Setter TargetName="OuterBorder" Property="BorderBrush" Value="{StaticResource Azul}"/>
                             <Setter TargetName="OuterBorder" Property="BorderThickness" Value="1.5"/>

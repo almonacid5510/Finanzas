@@ -32,11 +32,22 @@ namespace MisFinanzas.Modulos
         {
             get => Gastos.Sum(g => g.Valor);
         }
+        // Para mostrar en el detalle: cuántos registros y fecha del último gasto
+        [NotMapped] public int Registros => Gastos.Count;
+        [NotMapped] public string UltimoGasto => Gastos.Count == 0 ? "—" : Gastos.Max(g => g.Fecha).ToString("dd/MM/yyyy");
+
+        // Vehículo elegido en la lista (solo pantalla)
+        private bool _seleccionado;
+        [NotMapped]
+        public bool Seleccionado { get => _seleccionado; set { _seleccionado = value; OnPropertyChanged(); } }
+
         // Método para forzar a la interfaz a actualizarse
         public void NotificarCambioTotal()
         {
             // Esta línea es la que envía la señal a la interfaz XAML
             OnPropertyChanged(nameof(TotalInvertido));
+            OnPropertyChanged(nameof(Registros));
+            OnPropertyChanged(nameof(UltimoGasto));
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;

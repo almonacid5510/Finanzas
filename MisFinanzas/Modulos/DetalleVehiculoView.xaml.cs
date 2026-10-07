@@ -17,28 +17,35 @@ namespace MisFinanzas.Modulos
         public Vehiculo VehiculoActual { get; set; }
 
         public DetalleVehiculoView(int vehiculoId)
+            : this(CargarVehiculo(vehiculoId))
+        {
+        }
+
+        /// <summary>
+        /// Detalle de un vehículo de la lista de la pantalla de Vehículos: se usa el mismo objeto,
+        /// así su total en la lista se actualiza al registrar o eliminar gastos.
+        /// </summary>
+        public DetalleVehiculoView(Vehiculo vehiculo)
         {
             InitializeComponent();
-
-            using (var db = new AppDbContext())
-            {
-                this.VehiculoActual = db.Vehiculos.FirstOrDefault(v => v.Id == vehiculoId)
-                                      ?? new Vehiculo { Nombre = "Vehículo no encontrado" };
-            }
+            VehiculoActual = vehiculo;
 
             if (this.VehiculoActual.Gastos == null)
                 this.VehiculoActual.Gastos = new ObservableCollection<GastoVehiculo>();
 
-            // --- AGREGA ESTO AQUÍ ---
-            // Cada vez que se agregue un gasto a la lista, avisamos que el TotalInvertido cambió
-            this.VehiculoActual.Gastos.CollectionChanged += (s, e) =>
-            {
-                VehiculoActual.NotificarCambioTotal();
-            };
-
+            // Cada cambio en los gastos llama a NotificarCambioTotal() (cargar, agregar, editar, eliminar)
             this.DataContext = VehiculoActual;
             CargarGastos();
         }
+
+        private static Vehiculo CargarVehiculo(int vehiculoId)
+        {
+            using var db = new AppDbContext();
+            return db.Vehiculos.FirstOrDefault(v => v.Id == vehiculoId) ?? new Vehiculo { Nombre = "Vehículo no encontrado" };
+        }
+
+        private void ActualizarVacio() =>
+            lblSinRegistros.Visibility = VehiculoActual.Gastos.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
 
         private void CargarGastos()
         {
@@ -59,6 +66,7 @@ namespace MisFinanzas.Modulos
 
             // Notificar a la interfaz que el total cambió al cargar los gastos
             VehiculoActual.NotificarCambioTotal();
+            ActualizarVacio();
         }
 
         private void BtnAgregarGasto_Click(object sender, RoutedEventArgs e)
@@ -69,7 +77,7 @@ namespace MisFinanzas.Modulos
             {
                 Concepto = txtConcepto.Text,
                 Valor = valor,
-                Fecha = DateTime.Now,
+                Fecha = dpFecha.SelectedDate ?? DateTime.Now, // vacía = hoy (como antes)
                 VehiculoId = VehiculoActual.Id
             };
 
@@ -86,6 +94,8 @@ namespace MisFinanzas.Modulos
 
                 txtConcepto.Clear();
                 txtValor.Clear();
+                dpFecha.SelectedDate = null;
+                ActualizarVacio();
             }
             catch (Exception ex)
             {
@@ -167,6 +177,7 @@ namespace MisFinanzas.Modulos
                 }
                 VehiculoActual.Gastos.Remove(gasto);
                 VehiculoActual.NotificarCambioTotal();
+                ActualizarVacio();
                 toast.Show("Registro eliminado");
             }
             catch (Exception ex)
@@ -186,17 +197,6 @@ namespace MisFinanzas.Modulos
             else
             {
                 OverlayConfirm.Visibility = Visibility.Collapsed;
-            }
-        }
-
-        private void BtnRegresar_Click(object sender, RoutedEventArgs e)
-        {
-            var mainWindow = Window.GetWindow(this) as MainWindow;
-            if (mainWindow != null)
-            {
-                // Al crear un "new", forzamos a que se ejecute el constructor 
-                // y el evento Loaded que configuramos arriba.
-                mainWindow.ContenedorPrincipal.Content = new VehiculosView();
             }
         }
     }
