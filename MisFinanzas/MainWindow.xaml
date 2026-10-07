@@ -8,7 +8,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:MisFinanzas"
         xmlns:c="clr-namespace:MisFinanzas.Controles"
-        Title="Gestor de Finanzas Personal" Icon="pack://application:,,,/Recursos/app.ico" Height="800" Width="1360" MinWidth="900" MinHeight="560"
+        Title="Gestor de Finanzas Personal" Icon="pack://application:,,,/MisFinanzas;component/Recursos/app.ico" Height="800" Width="1360" MinWidth="900" MinHeight="560"
         Background="{StaticResource Fondo}" WindowStartupLocation="CenterScreen"
         FontFamily="{StaticResource FuenteApp}" FontSize="13" Foreground="{StaticResource Texto}"
         Typography.NumeralAlignment="Tabular"
