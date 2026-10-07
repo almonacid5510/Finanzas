@@ -431,34 +431,6 @@ namespace MisFinanzas.Modulos
             }
         }
 
-        // Guarda el monto real pagado cuando se termina de editar
-        private void TxtMontoPagado_LostFocus(object sender, RoutedEventArgs e)
-        {
-            var tb = (TextBox)sender;
-            if (tb.DataContext is not CuentaMes cuentaMes || !cuentaMes.Pagada) return;
-
-            if (!NumeroHelper.TryParseMoneda(tb.Text, out var monto) || monto < 0)
-            {
-                tb.Text = cuentaMes.MontoPagadoTexto; // valor inválido: se restaura
-                return;
-            }
-            if (monto == cuentaMes.MontoPagado) return;
-
-            try
-            {
-                using (var db = new AppDbContext())
-                {
-                    CuentasMensuales.MarcarPagada(db, cuentaMes.Cuenta.Id, cuentaMes.Mes, true, monto);
-                }
-                cuentaMes.MontoPagado = monto;
-                toast.Show($"Pago real de \"{cuentaMes.Descripcion}\" actualizado");
-            }
-            catch (Exception ex)
-            {
-                MisFinanzas.Controles.Aviso.Mostrar("Error al guardar el monto pagado: " + ex.Message);
-            }
-        }
-
         // Método para actualizar el total apenas marcas el CheckBox
         private void CheckBox_Click(object sender, RoutedEventArgs e)
         {

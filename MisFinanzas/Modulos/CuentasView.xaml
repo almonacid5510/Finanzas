@@ -182,14 +182,12 @@
                                 <ColumnDefinition Width="104"/>
                                 <ColumnDefinition Width="96"/>
                                 <ColumnDefinition Width="104"/>
-                                <ColumnDefinition Width="124"/>
                                 <ColumnDefinition Width="84"/>
                             </Grid.ColumnDefinitions>
                             <TextBlock Grid.Column="1" Text="Concepto" Style="{StaticResource EncabezadoTabla}"/>
                             <TextBlock Grid.Column="2" Text="Vence" Style="{StaticResource EncabezadoTabla}"/>
                             <TextBlock Grid.Column="3" Text="Estado" Style="{StaticResource EncabezadoTabla}"/>
                             <TextBlock Grid.Column="4" Text="Valor" Style="{StaticResource EncabezadoTabla}" HorizontalAlignment="Right"/>
-                            <TextBlock Grid.Column="5" Text="Pagado real" Style="{StaticResource EncabezadoTabla}" HorizontalAlignment="Right"/>
                         </Grid>
                         <Border Style="{StaticResource LineaTabla}" Margin="0,8,0,0"/>
 
@@ -207,7 +205,6 @@
                                                 <ColumnDefinition Width="104"/>
                                                 <ColumnDefinition Width="96"/>
                                                 <ColumnDefinition Width="104"/>
-                                                <ColumnDefinition Width="124"/>
                                                 <ColumnDefinition Width="84"/>
                                             </Grid.ColumnDefinitions>
                                             <CheckBox IsChecked="{Binding Pagada, UpdateSourceTrigger=PropertyChanged}" Click="CheckBox_Click"
@@ -235,36 +232,7 @@
                                             <ContentPresenter Grid.Column="3" Content="{Binding}" ContentTemplate="{StaticResource InsigniaEstado}" VerticalAlignment="Center"/>
                                             <TextBlock Grid.Column="4" Text="{Binding Venta, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" FontSize="14" FontWeight="Bold"
                                                        HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                                            <!-- Monto real pagado: editable solo cuando el gasto está pagado -->
-                                            <Grid Grid.Column="5" HorizontalAlignment="Right" VerticalAlignment="Center">
-                                                <TextBlock Text="—" Foreground="{StaticResource Texto2}" HorizontalAlignment="Right" Margin="0,0,14,0">
-                                                    <TextBlock.Style>
-                                                        <Style TargetType="TextBlock">
-                                                            <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding Pagada}" Value="True">
-                                                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </TextBlock.Style>
-                                                </TextBlock>
-                                                <TextBox Text="{Binding MontoPagadoTexto, Mode=OneWay}" LostFocus="TxtMontoPagado_LostFocus"
-                                                         local:NumeroHelper.EsMoneda="True" Width="112" ToolTip="Cuánto pagaste realmente este mes"
-                                                         AutomationProperties.Name="Pagado real">
-                                                    <TextBox.Style>
-                                                        <Style TargetType="TextBox" BasedOn="{StaticResource EditInput}">
-                                                            <Setter Property="Visibility" Value="Collapsed"/>
-                                                            <Setter Property="TextAlignment" Value="Right"/>
-                                                            <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding Pagada}" Value="True">
-                                                                    <Setter Property="Visibility" Value="Visible"/>
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </TextBox.Style>
-                                                </TextBox>
-                                            </Grid>
-                                            <StackPanel Grid.Column="6" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                            <StackPanel Grid.Column="5" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
                                                 <Button Click="BtnEditar_Click" Style="{StaticResource BotonIcono}" c:Ui.Icono="{StaticResource IcoEditar}"
                                                         AutomationProperties.Name="Editar gasto" ToolTip="Editar gasto"/>
                                                 <Button Click="BtnEliminar_Click" Style="{StaticResource BotonIconoPeligro}" c:Ui.Icono="{StaticResource IcoEliminar}"
@@ -291,7 +259,6 @@
                                                     <ColumnDefinition Width="104"/>
                                                     <ColumnDefinition Width="96"/>
                                                     <ColumnDefinition Width="104"/>
-                                                    <ColumnDefinition Width="124"/>
                                                     <ColumnDefinition Width="84"/>
                                                 </Grid.ColumnDefinitions>
                                                 <CheckBox IsChecked="{Binding Pagado, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding PuedeMarcar}"
@@ -315,8 +282,7 @@
                                                 <ContentPresenter Grid.Column="3" Content="{Binding}" ContentTemplate="{StaticResource InsigniaEstado}" VerticalAlignment="Center"/>
                                                 <TextBlock Grid.Column="4" Text="{Binding CuotaEsteMes, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" FontSize="14" FontWeight="Bold"
                                                            HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                                                <TextBlock Grid.Column="5" Text="—" Foreground="{StaticResource Texto2}" HorizontalAlignment="Right" Margin="0,0,14,0" VerticalAlignment="Center"/>
-                                                <Button Grid.Column="6" Content="Ver crédito" Click="BtnVerCredito_Click" Style="{StaticResource BotonEnlace}"
+                                                <Button Grid.Column="5" Content="Ver crédito" Click="BtnVerCredito_Click" Style="{StaticResource BotonEnlace}"
                                                         HorizontalAlignment="Right" VerticalAlignment="Center"/>
                                             </Grid>
                                         </Border>
