@@ -5,6 +5,7 @@
 // ============================================================
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
+using System.Linq;
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
@@ -30,6 +31,33 @@ namespace MisFinanzas.Modulos
             {
                 CargarDatosGlobal();
             }
+
+            // Muestra el crédito que estaba seleccionado (o el primero)
+            var marcado = ListaCreditosPersistente.FirstOrDefault(c => c.VerDetalle) ?? ListaCreditosPersistente.FirstOrDefault();
+            Seleccionar(marcado?.Id ?? 0);
+        }
+
+        // "Deuda total $ X · N créditos activos"
+        private void ActualizarEncabezado()
+        {
+            var activos = ListaCreditosPersistente.Where(c => !c.Saldado).ToList();
+            lblResumenDeuda.Inlines.Clear();
+            lblResumenDeuda.Inlines.Add(new System.Windows.Documents.Run("Deuda total "));
+            lblResumenDeuda.Inlines.Add(new System.Windows.Documents.Run(NumeroHelper.Moneda(ListaCreditosPersistente.Sum(c => Math.Max(0, c.Disponible))))
+            {
+                FontWeight = FontWeights.Bold,
+                Foreground = (System.Windows.Media.Brush)FindResource("Rojo")
+            });
+            lblResumenDeuda.Inlines.Add(new System.Windows.Documents.Run(
+                $" · {activos.Count} {(activos.Count == 1 ? "crédito activo" : "créditos activos")}"));
+        }
+
+        // Muestra u oculta el formulario de nuevo crédito
+        private void BtnNuevoCredito_Click(object sender, RoutedEventArgs e)
+        {
+            bool abrir = pnlNuevoCredito.Visibility != Visibility.Visible;
+            pnlNuevoCredito.Visibility = abrir ? Visibility.Visible : Visibility.Collapsed;
+            if (abrir) txtNombreCredito.Focus();
         }
 
         private void BtnAgregarCredito_Click(object sender, RoutedEventArgs e)
@@ -58,8 +86,11 @@ namespace MisFinanzas.Modulos
                         db.SaveChanges();
                     }
 
-                    // Refrescamos la lista global
+                    // Refrescamos la lista global y mostramos el crédito nuevo
                     CargarDatosGlobal();
+                    Seleccionar(ListaCreditosPersistente.Count > 0 ? ListaCreditosPersistente.Max(c => c.Id) : 0);
+                    pnlNuevoCredito.Visibility = Visibility.Collapsed;
+                    toast.Show("Crédito registrado");
 
                     // Limpiar campos
                     txtNombreCredito.Clear();
@@ -73,20 +104,24 @@ namespace MisFinanzas.Modulos
             }
         }
 
-        /// <summary>Muestra el detalle de un crédito (desde "Ver crédito" en otras pantallas).</summary>
+        /// <summary>Muestra el detalle de un crédito (también desde "Ver crédito" en otras pantallas).</summary>
         public void Seleccionar(int creditoId)
         {
-            foreach (var c in ListaCreditosPersistente) c.VerDetalle = c.Id == creditoId;
+            var elegido = ListaCreditosPersistente.FirstOrDefault(c => c.Id == creditoId) ?? ListaCreditosPersistente.FirstOrDefault();
+            foreach (var c in ListaCreditosPersistente)
+            {
+                c.VerDetalle = c == elegido;
+                if (c != elegido) c.Editando = false;
+            }
+            detalleCredito.Content = elegido;
+            lblSinCreditos.Visibility = elegido == null ? Visibility.Visible : Visibility.Collapsed;
+            ActualizarEncabezado();
         }
 
-        // Clic en el resumen: despliega el detalle de ese crédito y recoge los demás
-        private void Resumen_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        // Clic en un crédito de la lista: muestra su detalle a la derecha
+        private void Resumen_Click(object sender, RoutedEventArgs e)
         {
-            if (((FrameworkElement)sender).DataContext is not Credito credito) return;
-            bool abrir = !credito.VerDetalle;
-            foreach (var c in ListaCreditosPersistente)
-                if (c != credito && !c.Editando) c.VerDetalle = false;
-            if (!credito.Editando) credito.VerDetalle = abrir;
+            if (((FrameworkElement)sender).DataContext is Credito credito) Seleccionar(credito.Id);
         }
 
         // Un solo botón alterna entre Editar (✎) y Guardar (✔)
@@ -109,6 +144,7 @@ namespace MisFinanzas.Modulos
                 // Estaba en edición -> guardar y volver a solo lectura
                 ActualizarCreditoEnBD(creditoEditado);
                 creditoEditado.Editando = false;
+                ActualizarEncabezado();
                 toast.Show("Cambios guardados correctamente");
             }
         }
@@ -173,6 +209,7 @@ namespace MisFinanzas.Modulos
 
                 if (ListaCreditosPersistente.Contains(credito))
                     ListaCreditosPersistente.Remove(credito);
+                Seleccionar(ListaCreditosPersistente.FirstOrDefault()?.Id ?? 0);
 
                 toast.Show("Crédito eliminado");
             }
@@ -200,7 +237,9 @@ namespace MisFinanzas.Modulos
         private void BtnPagarCuota_Click(object sender, RoutedEventArgs e)
         {
             if (((Button)sender).DataContext is not Credito credito) return;
-            if (RegistrarCuota(credito, true) is PagoCredito pago)
+            var pago = RegistrarCuota(credito, true);
+            ActualizarEncabezado();
+            if (pago != null)
                 toast.Show(credito.Saldado
                     ? "¡Última cuota pagada! Crédito saldado"
                     : $"Cuota pagada: {pago.Interes:C0} a intereses y {pago.Capital:C0} a capital");
@@ -210,6 +249,7 @@ namespace MisFinanzas.Modulos
         {
             if (((Button)sender).DataContext is not Credito credito) return;
             RegistrarCuota(credito, false);
+            ActualizarEncabezado();
             toast.Show($"Pago deshecho. Saldo {credito.Disponible:C0}");
         }
 
@@ -231,6 +271,7 @@ namespace MisFinanzas.Modulos
                     pago = Amortizacion.Abonar(db, credito.Id, monto);
                 }
                 Recargar(credito);
+                ActualizarEncabezado();
                 txt.Clear();
                 toast.Show(credito.Saldado
                     ? "¡Crédito saldado!"
@@ -254,6 +295,7 @@ namespace MisFinanzas.Modulos
                     Amortizacion.Deshacer(db, pago.Id);
                 }
                 Recargar(credito);
+                ActualizarEncabezado();
                 toast.Show($"Pago deshecho. Saldo {credito.Disponible:C0}");
             }
             catch (Exception ex)

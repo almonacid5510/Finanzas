@@ -30,6 +30,7 @@ namespace MisFinanzas.Modulos
         public int MesesReducidos { get; set; }     // cuánto bajó el plazo restante (para deshacer)
 
         public string NombreMes => DateTime.TryParse(Mes + "-01", out var m) ? Periodo.Nombre(m) : Mes;
+        public string NombreMesCorto => DateTime.TryParse(Mes + "-01", out var m) ? Amortizacion.MesCorto(m) : Mes;
         public bool EsAbono => Tipo == Amortizacion.TipoAbono;
     }
 
@@ -39,6 +40,7 @@ namespace MisFinanzas.Modulos
         public int Numero { get; set; }
         public DateTime Mes { get; set; }
         public string NombreMes => Periodo.Nombre(Mes);
+        public string NombreMesCorto => Amortizacion.MesCorto(Mes);
         public decimal SaldoInicial { get; set; }
         public decimal Cuota { get; set; }
         public decimal Interes { get; set; }
@@ -54,6 +56,13 @@ namespace MisFinanzas.Modulos
     {
         public const string TipoCuota = "Cuota";
         public const string TipoAbono = "Abono";
+
+        /// <summary>"Oct 2026" (para tablas).</summary>
+        public static string MesCorto(DateTime mes)
+        {
+            var m = mes.ToString("MMM").TrimEnd('.');
+            return (m.Length > 0 ? char.ToUpper(m[0]) + m.Substring(1) : m) + " " + mes.Year;
+        }
 
         // Tope del plan, para cuotas que no alcanzan a cubrir los intereses
         public const int MaximoCuotas = 600;

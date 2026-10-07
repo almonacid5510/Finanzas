@@ -37,4 +37,17 @@ namespace MisFinanzas.Controles
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) =>
             throw new NotSupportedException();
     }
+
+    /// <summary>Un valor numérico como ancho proporcional de columna (GridLength con *), para barras divididas.</summary>
+    public class EstrellaConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            double v = System.Convert.ToDouble(value, CultureInfo.InvariantCulture);
+            return new System.Windows.GridLength(Math.Max(0, v), System.Windows.GridUnitType.Star);
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) =>
+            throw new NotSupportedException();
+    }
 }

@@ -13,6 +13,7 @@
 
     <!-- Convertidores de presentación -->
     <c:AnilloConverter x:Key="Anillo"/>
+    <c:EstrellaConverter x:Key="Estrella"/>
     <BooleanToVisibilityConverter x:Key="BoolAVisible"/>
 
     <!-- ==================== TIPOGRAFÍA ==================== -->

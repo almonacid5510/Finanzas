@@ -126,13 +126,23 @@ namespace MisFinanzas.Modulos
         }
 
         [NotMapped] public decimal InteresesPorPagar => Plan.Sum(f => f.Interes);
+        // Mes en que termina según el plan ("ago 2031")
+        [NotMapped]
+        public string MesFinCorto
+        {
+            get
+            {
+                var plan = Plan;
+                return Saldado || plan.Count == 0 || CuotaNoCubreIntereses ? string.Empty : Amortizacion.MesCorto(plan[^1].Mes).ToLower();
+            }
+        }
 
         private void AvisarCalculos()
         {
             foreach (var n in new[] { nameof(Saldado), nameof(EstadoTexto), nameof(EstadoFondo), nameof(EstadoColor), nameof(PuedePagar), nameof(PuedeMarcar),nameof(TasaMensualTexto),nameof(CapitalPagado), nameof(Progreso), nameof(ProgresoTexto),
                                       nameof(InteresesPagados), nameof(TotalPagado), nameof(InteresProximo), nameof(CapitalProximo),
                                       nameof(CuotaEsteMes), nameof(CuotaPagadaEsteMes), nameof(CuotasRestantes),
-                                      nameof(CuotaNoCubreIntereses), nameof(FinEstimado), nameof(InteresesPorPagar), nameof(Plan) })
+                                      nameof(CuotaNoCubreIntereses), nameof(FinEstimado), nameof(InteresesPorPagar), nameof(MesFinCorto), nameof(Plan) })
                 OnPropertyChanged(n);
         }
 
