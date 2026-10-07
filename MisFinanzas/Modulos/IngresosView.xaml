@@ -140,7 +140,7 @@
                                         <TextBlock Text="{Binding Categoria}" Style="{StaticResource TextoChip}" Foreground="{Binding ColorCategoria}"/>
                                     </Border>
                                     <TextBlock Grid.Column="2" Text="{Binding Frecuencia}" Style="{StaticResource TextoSecundario}" VerticalAlignment="Center" Margin="12,0,0,0"/>
-                                    <TextBlock Grid.Column="3" Text="{Binding Venta, StringFormat='{}{0:C0}'}" FontSize="13.5" FontWeight="Bold"
+                                    <TextBlock Grid.Column="3" Text="{Binding Venta, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" FontSize="13.5" FontWeight="Bold"
                                                Foreground="{StaticResource VerdeTexto}" TextAlignment="Right" VerticalAlignment="Center"/>
                                     <Button Grid.Column="4" Click="BtnEliminarIngreso_Click" Style="{StaticResource BotonIconoPeligro}" HorizontalAlignment="Right"
                                             c:Ui.Icono="{StaticResource IcoEliminar}" AutomationProperties.Name="Eliminar ingreso" ToolTip="Eliminar desde este mes"/>
@@ -227,13 +227,13 @@
                                     <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                         <TextBlock Text="{Binding NombreMostrar}" FontSize="15" FontWeight="Bold" TextTrimming="CharacterEllipsis"/>
                                         <TextBlock FontSize="13.5" Margin="0,2,0,0">
-                                            <Run Text="{Binding MontoActual, StringFormat='{}{0:C0}', Mode=OneWay}" FontWeight="Bold" Foreground="{StaticResource VerdeTexto}"/>
+                                            <Run Text="{Binding MontoActual, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}', Mode=OneWay}" FontWeight="Bold" Foreground="{StaticResource VerdeTexto}"/>
                                             <Run Text="de" Foreground="{StaticResource Texto2}"/>
-                                            <Run Text="{Binding MontoObjetivo, StringFormat='{}{0:C0}', Mode=OneWay}" Foreground="{StaticResource Texto2}"/>
+                                            <Run Text="{Binding MontoObjetivo, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}', Mode=OneWay}" Foreground="{StaticResource Texto2}"/>
                                         </TextBlock>
                                         <TextBlock Style="{StaticResource TextoSecundario}" Margin="0,2,0,0">
                                             <Run Text="Te faltan"/>
-                                            <Run Text="{Binding Faltante, StringFormat='{}{0:C0}', Mode=OneWay}"/>
+                                            <Run Text="{Binding Faltante, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}', Mode=OneWay}"/>
                                         </TextBlock>
                                     </StackPanel>
                                     <!-- Abono: el campo y el botón comparten la misma grilla (BtnAbonarMeta_Click busca el campo ahí) -->

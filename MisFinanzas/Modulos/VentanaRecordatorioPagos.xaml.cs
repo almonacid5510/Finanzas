@@ -21,6 +21,15 @@ namespace MisFinanzas.Modulos
             InitializeComponent();
             CuentasPendientes = new ObservableCollection<CuentaMes>(cuentas);
             icCuentasPendientes.ItemsSource = CuentasPendientes;
+            ActualizarResumen();
+        }
+
+        // "Tienes N pago(s) pendiente(s)" y el total vencido
+        private void ActualizarResumen()
+        {
+            int n = CuentasPendientes.Count;
+            lblTitulo.Text = n == 1 ? "Tienes 1 pago pendiente" : $"Tienes {n} pagos pendientes";
+            runTotalVencido.Text = NumeroHelper.Moneda(CuentasPendientes.Sum(c => c.Venta));
         }
 
         private void BtnPagar_Click(object sender, RoutedEventArgs e)
@@ -40,6 +49,8 @@ namespace MisFinanzas.Modulos
 
                     // Remover visualmente de la lista de pendientes
                     CuentasPendientes.Remove(cuenta);
+                    ActualizarResumen();
+                    MainWindow.Actual?.VerificarVencimientosCuentas();
                     
                     // Si ya no quedan cuentas, cerramos la ventana
                     if (CuentasPendientes.Count == 0)
@@ -57,6 +68,16 @@ namespace MisFinanzas.Modulos
         private void BtnCerrar_Click(object sender, RoutedEventArgs e)
         {
             this.Close();
+        }
+
+        // Por ahora solo cierra el aviso: la app no guarda recordatorios programados.
+        // El aviso rojo del Dashboard sigue mostrando los vencidos hasta que se paguen.
+        private void BtnRecordarManana_Click(object sender, RoutedEventArgs e) => Close();
+
+        private void BtnIrACuentas_Click(object sender, RoutedEventArgs e)
+        {
+            Close();
+            MainWindow.Actual?.IrACuentas();
         }
 
         // Permite arrastrar la ventana sin barra de título nativa

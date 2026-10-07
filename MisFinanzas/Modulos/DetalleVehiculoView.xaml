@@ -27,7 +27,7 @@
             <Border Style="{StaticResource Recuadro}" Background="{StaticResource AzulSuave}">
                 <StackPanel>
                     <TextBlock Text="INVERSIÓN TOTAL" Style="{StaticResource EtiquetaSeccion}" FontSize="11.5" Foreground="#1D4FB8"/>
-                    <TextBlock Text="{Binding TotalInvertido, StringFormat='{}{0:C0}'}" FontSize="22" FontWeight="ExtraBold" Foreground="{StaticResource Azul}" Margin="0,2,0,0"/>
+                    <TextBlock Text="{Binding TotalInvertido, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" FontSize="22" FontWeight="ExtraBold" Foreground="{StaticResource Azul}" Margin="0,2,0,0"/>
                 </StackPanel>
             </Border>
             <Border Style="{StaticResource Recuadro}">
@@ -103,7 +103,7 @@
                             <TextBox Text="{Binding Concepto, UpdateSourceTrigger=LostFocus}" Style="{StaticResource EditInputInline}" Margin="0,0,10,0"
                                      AutomationProperties.Name="Concepto"/>
                             <TextBlock Grid.Column="1" Text="{Binding Fecha, StringFormat='{}{0:dd/MM/yyyy}'}" Foreground="{StaticResource Texto2}" VerticalAlignment="Center"/>
-                            <TextBlock Grid.Column="2" Text="{Binding Valor, StringFormat='{}{0:C0}'}" FontSize="14" FontWeight="Bold" Foreground="{StaticResource Azul}"
+                            <TextBlock Grid.Column="2" Text="{Binding Valor, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" FontSize="14" FontWeight="Bold" Foreground="{StaticResource Azul}"
                                        HorizontalAlignment="Right" VerticalAlignment="Center" Style="{StaticResource ViewStyle}"/>
                             <TextBox Grid.Column="2" Text="{Binding Valor, StringFormat='{}{0:N0}', UpdateSourceTrigger=LostFocus}" Style="{StaticResource EditInputInline}"
                                      TextAlignment="Right" AutomationProperties.Name="Valor"/>

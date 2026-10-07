@@ -81,6 +81,19 @@ namespace MisFinanzas.Modulos
         public string EstadoColor => Pagada ? "#075E46" : Vencida ? "#B42318" : "#93370D";
         public string FondoFila => Vencida ? "#FFF8F7" : "Transparent";
 
+        /// <summary>Mes del vencimiento en corto y mayúsculas ("OCT").</summary>
+        public string MesCortoVence => Vence.ToString("MMM").TrimEnd('.').ToUpperInvariant();
+
+        /// <summary>"Vence hoy", "Vencida hace 1 día", "Vencida hace 4 días" (para el aviso de pagos pendientes).</summary>
+        public string VencidaHace
+        {
+            get
+            {
+                int dias = (DateTime.Today - Vence).Days;
+                return dias <= 0 ? "Vence hoy" : dias == 1 ? "Vencida hace 1 día" : $"Vencida hace {dias} días";
+            }
+        }
+
         /// <summary>Cuánto falta para el vencimiento: "Hoy", "Mañana", "En 5 días", "Vencida".</summary>
         public string Falta
         {

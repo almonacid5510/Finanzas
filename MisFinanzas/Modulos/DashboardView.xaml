@@ -180,7 +180,7 @@
                                         <Border Width="11" Height="11" CornerRadius="3" Background="{Binding Color}" Margin="0,0,10,0" VerticalAlignment="Center"/>
                                         <TextBlock Grid.Column="1" Text="{Binding Nombre}" FontSize="13.5" TextTrimming="CharacterEllipsis"/>
                                         <TextBlock Grid.Column="2" Text="{Binding PorcentajeTexto}" FontSize="13.5" Foreground="{StaticResource Texto2}" TextAlignment="Right" Margin="0,0,14,0"/>
-                                        <TextBlock Grid.Column="3" Text="{Binding Monto, StringFormat='{}{0:C0}'}" FontSize="13.5" FontWeight="Bold"
+                                        <TextBlock Grid.Column="3" Text="{Binding Monto, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" FontSize="13.5" FontWeight="Bold"
                                                    Foreground="{Binding ColorMonto}" TextAlignment="Right" MinWidth="90"/>
                                     </Grid>
                                 </DataTemplate>
@@ -217,7 +217,7 @@
                                             <TextBlock Text="{Binding Titulo}" FontSize="13.5" FontWeight="SemiBold" Foreground="{Binding ColorTitulo}" TextTrimming="CharacterEllipsis"/>
                                             <TextBlock Text="{Binding Detalle}" FontSize="12.5" Foreground="{Binding ColorDetalle}" TextTrimming="CharacterEllipsis"/>
                                         </StackPanel>
-                                        <TextBlock Grid.Column="2" Text="{Binding Monto, StringFormat='{}{0:C0}'}" FontSize="13.5" FontWeight="Bold"
+                                        <TextBlock Grid.Column="2" Text="{Binding Monto, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" FontSize="13.5" FontWeight="Bold"
                                                    Foreground="{Binding ColorTitulo}" VerticalAlignment="Center"/>
                                     </Grid>
                                 </Border>
@@ -244,7 +244,7 @@
                                 <DataTemplate>
                                     <StackPanel Margin="0,0,0,10">
                                         <DockPanel>
-                                            <TextBlock DockPanel.Dock="Right" Text="{Binding Total, StringFormat='{}{0:C0}'}" FontSize="13.5" FontWeight="Bold"/>
+                                            <TextBlock DockPanel.Dock="Right" Text="{Binding Total, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" FontSize="13.5" FontWeight="Bold"/>
                                             <TextBlock Text="{Binding Nombre}" FontSize="13.5" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
                                         </DockPanel>
                                         <ProgressBar Style="{StaticResource Barra}" Value="{Binding Proporcion, Mode=OneWay}" Foreground="{Binding ColorBarra}" Margin="0,5,0,4"/>

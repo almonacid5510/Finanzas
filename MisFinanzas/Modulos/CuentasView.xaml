@@ -233,7 +233,7 @@
                                             </StackPanel>
                                             <TextBlock Grid.Column="2" Text="{Binding Vence, StringFormat='{}{0:dd/MM/yyyy}'}" FontSize="13.5" VerticalAlignment="Center"/>
                                             <ContentPresenter Grid.Column="3" Content="{Binding}" ContentTemplate="{StaticResource InsigniaEstado}" VerticalAlignment="Center"/>
-                                            <TextBlock Grid.Column="4" Text="{Binding Venta, StringFormat='{}{0:C0}'}" FontSize="14" FontWeight="Bold"
+                                            <TextBlock Grid.Column="4" Text="{Binding Venta, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" FontSize="14" FontWeight="Bold"
                                                        HorizontalAlignment="Right" VerticalAlignment="Center"/>
                                             <!-- Monto real pagado: editable solo cuando el gasto está pagado -->
                                             <Grid Grid.Column="5" HorizontalAlignment="Right" VerticalAlignment="Center">
@@ -306,14 +306,14 @@
                                                             <TextBlock Text="Créditos" Style="{StaticResource TextoChip}" Foreground="{StaticResource MoradoTexto}"/>
                                                         </Border>
                                                         <TextBlock FontSize="12.5" Foreground="{StaticResource Texto2}" VerticalAlignment="Center">
-                                                            <Run Text="Saldo"/> <Run Text="{Binding Disponible, StringFormat='{}{0:C0}', Mode=OneWay}"/>
+                                                            <Run Text="Saldo"/> <Run Text="{Binding Disponible, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}', Mode=OneWay}"/>
                                                         </TextBlock>
                                                     </StackPanel>
                                                 </StackPanel>
                                                 <TextBlock Grid.Column="2" Text="{Binding NombreMesActual}" FontSize="13.5" Foreground="{StaticResource Texto2}"
                                                            VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
                                                 <ContentPresenter Grid.Column="3" Content="{Binding}" ContentTemplate="{StaticResource InsigniaEstado}" VerticalAlignment="Center"/>
-                                                <TextBlock Grid.Column="4" Text="{Binding CuotaEsteMes, StringFormat='{}{0:C0}'}" FontSize="14" FontWeight="Bold"
+                                                <TextBlock Grid.Column="4" Text="{Binding CuotaEsteMes, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" FontSize="14" FontWeight="Bold"
                                                            HorizontalAlignment="Right" VerticalAlignment="Center"/>
                                                 <TextBlock Grid.Column="5" Text="—" Foreground="{StaticResource Texto2}" HorizontalAlignment="Right" Margin="0,0,14,0" VerticalAlignment="Center"/>
                                                 <Button Grid.Column="6" Content="Ver crédito" Click="BtnVerCredito_Click" Style="{StaticResource BotonEnlace}"
@@ -382,11 +382,11 @@
                                                 <TextBlock Text="{Binding Nombre}" FontSize="13.5" FontWeight="SemiBold" VerticalAlignment="Center"/>
                                                 <ProgressBar Grid.Column="1" Style="{StaticResource Barra}" Value="{Binding Proporcion, Mode=OneWay}"
                                                              Foreground="#F97066" Margin="10,0" VerticalAlignment="Center"/>
-                                                <TextBlock Grid.Column="2" Text="{Binding Ingresos, StringFormat='{}{0:C0}'}" Foreground="{StaticResource VerdeTexto}" HorizontalAlignment="Right"/>
-                                                <TextBlock Grid.Column="3" Text="{Binding Gastos, StringFormat='{}{0:C0}'}" FontWeight="Bold" HorizontalAlignment="Right"/>
-                                                <TextBlock Grid.Column="4" Text="{Binding Pagado, StringFormat='{}{0:C0}'}" Foreground="{StaticResource Texto2}" HorizontalAlignment="Right"/>
-                                                <TextBlock Grid.Column="5" Text="{Binding Pendiente, StringFormat='{}{0:C0}'}" Foreground="{StaticResource NaranjaTexto}" HorizontalAlignment="Right"/>
-                                                <TextBlock Grid.Column="6" Text="{Binding Balance, StringFormat='{}{0:C0}'}" FontWeight="Bold" Foreground="{Binding ColorBalance}" HorizontalAlignment="Right"/>
+                                                <TextBlock Grid.Column="2" Text="{Binding Ingresos, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" Foreground="{StaticResource VerdeTexto}" HorizontalAlignment="Right"/>
+                                                <TextBlock Grid.Column="3" Text="{Binding Gastos, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" FontWeight="Bold" HorizontalAlignment="Right"/>
+                                                <TextBlock Grid.Column="4" Text="{Binding Pagado, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" Foreground="{StaticResource Texto2}" HorizontalAlignment="Right"/>
+                                                <TextBlock Grid.Column="5" Text="{Binding Pendiente, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" Foreground="{StaticResource NaranjaTexto}" HorizontalAlignment="Right"/>
+                                                <TextBlock Grid.Column="6" Text="{Binding Balance, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" FontWeight="Bold" Foreground="{Binding ColorBalance}" HorizontalAlignment="Right"/>
                                             </Grid>
                                         </Button>
                                     </DataTemplate>
@@ -410,7 +410,7 @@
                                     </Border>
                                     <ProgressBar Grid.Column="1" Style="{StaticResource Barra}" Value="{Binding Proporcion, Mode=OneWay}"
                                                  Foreground="{Binding ColorBarra}" Margin="10,0" VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Column="2" Text="{Binding Total, StringFormat='{}{0:C0}'}" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Column="2" Text="{Binding Total, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Center"/>
                                 </Grid>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
@@ -461,9 +461,9 @@
                                                     </StackPanel>
                                                 </StackPanel>
                                                 <TextBlock Grid.Column="1" Text="{Binding ProximoVence, StringFormat='{}{0:dd/MM/yyyy}', TargetNullValue='—'}" Foreground="{StaticResource Texto2}" VerticalAlignment="Center"/>
-                                                <TextBlock Grid.Column="2" Text="{Binding Valor, StringFormat='{}{0:C0}'}" Foreground="{StaticResource Texto2}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                                                <TextBlock Grid.Column="3" Text="{Binding Prediccion, StringFormat='{}{0:C0}'}" FontWeight="Bold" Foreground="{StaticResource Azul}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                                                <TextBlock Grid.Column="4" Text="{Binding Proyeccion12, StringFormat='{}{0:C0}'}" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                                <TextBlock Grid.Column="2" Text="{Binding Valor, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" Foreground="{StaticResource Texto2}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                                <TextBlock Grid.Column="3" Text="{Binding Prediccion, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" FontWeight="Bold" Foreground="{StaticResource Azul}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                                <TextBlock Grid.Column="4" Text="{Binding Proyeccion12, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Center"/>
                                                 <TextBlock Grid.Column="5" Text="{Binding Tendencia}" FontSize="12.5" FontWeight="SemiBold" Foreground="{Binding ColorTendencia}"
                                                            HorizontalAlignment="Right" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
                                             </Grid>
@@ -506,10 +506,10 @@
                                                     <ColumnDefinition Width="124"/>
                                                 </Grid.ColumnDefinitions>
                                                 <TextBlock Text="{Binding Nombre}" FontWeight="SemiBold"/>
-                                                <TextBlock Grid.Column="1" Text="{Binding Ingresos, StringFormat='{}{0:C0}'}" Foreground="{StaticResource VerdeTexto}" HorizontalAlignment="Right"/>
-                                                <TextBlock Grid.Column="2" Text="{Binding Gastos, StringFormat='{}{0:C0}'}" HorizontalAlignment="Right"/>
-                                                <TextBlock Grid.Column="3" Text="{Binding Creditos, StringFormat='{}{0:C0}'}" Foreground="{StaticResource MoradoTexto}" HorizontalAlignment="Right"/>
-                                                <TextBlock Grid.Column="4" Text="{Binding Balance, StringFormat='{}{0:C0}'}" FontWeight="Bold" Foreground="{Binding ColorBalance}" HorizontalAlignment="Right"/>
+                                                <TextBlock Grid.Column="1" Text="{Binding Ingresos, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" Foreground="{StaticResource VerdeTexto}" HorizontalAlignment="Right"/>
+                                                <TextBlock Grid.Column="2" Text="{Binding Gastos, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" HorizontalAlignment="Right"/>
+                                                <TextBlock Grid.Column="3" Text="{Binding Creditos, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" Foreground="{StaticResource MoradoTexto}" HorizontalAlignment="Right"/>
+                                                <TextBlock Grid.Column="4" Text="{Binding Balance, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" FontWeight="Bold" Foreground="{Binding ColorBalance}" HorizontalAlignment="Right"/>
                                             </Grid>
                                         </Border>
                                     </DataTemplate>
@@ -544,7 +544,7 @@
                             <DataTemplate>
                                 <DockPanel Margin="0,4">
                                     <Border DockPanel.Dock="Left" Width="10" Height="10" CornerRadius="3" Background="{Binding ColorBarra}" Margin="0,0,10,0"/>
-                                    <TextBlock DockPanel.Dock="Right" Text="{Binding Total, StringFormat='{}{0:C0}'}" FontWeight="Bold"/>
+                                    <TextBlock DockPanel.Dock="Right" Text="{Binding Total, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" FontWeight="Bold"/>
                                     <TextBlock Text="{Binding Nombre}" FontSize="13.5" TextTrimming="CharacterEllipsis"/>
                                 </DockPanel>
                             </DataTemplate>

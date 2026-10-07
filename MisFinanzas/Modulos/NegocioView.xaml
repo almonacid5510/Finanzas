@@ -32,7 +32,7 @@
                     </StackPanel>
                 </DockPanel>
                 <TextBlock Text="Total invertido" Style="{StaticResource TextoSecundario}" FontSize="13" Margin="0,14,0,0"/>
-                <TextBlock Text="{Binding Costo, StringFormat='{}{0:C0}'}" FontSize="26" FontWeight="ExtraBold" Foreground="{StaticResource VerdeTexto}" Margin="0,0,0,12"/>
+                <TextBlock Text="{Binding Costo, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" FontSize="26" FontWeight="ExtraBold" Foreground="{StaticResource VerdeTexto}" Margin="0,0,0,12"/>
                 <!-- El campo y el botón comparten la grilla: BtnAbonar_Click busca el campo ahí -->
                 <Grid>
                     <Grid.ColumnDefinitions>

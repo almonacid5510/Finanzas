@@ -102,7 +102,7 @@
                         <TextBox Text="{Binding NombreCustom, UpdateSourceTrigger=PropertyChanged}" Width="200" Style="{StaticResource EditInputInline}"
                                  AutomationProperties.Name="Nombre del crédito"/>
                         <TextBlock Text="Monto original" Style="{StaticResource TextoSecundario}" FontSize="13" VerticalAlignment="Center" Margin="12,4,6,0"/>
-                        <TextBlock Text="{Binding Total, StringFormat='{}{0:C0}'}" Style="{StaticResource TextoSecundario}" FontSize="13" VerticalAlignment="Center" Margin="0,4,0,0"
+                        <TextBlock Text="{Binding Total, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" Style="{StaticResource TextoSecundario}" FontSize="13" VerticalAlignment="Center" Margin="0,4,0,0"
                                    Foreground="{StaticResource Texto}"/>
                         <TextBox Text="{Binding Total, StringFormat='{}{0:N0}', UpdateSourceTrigger=LostFocus}" Width="130" Style="{StaticResource EditInputInline}"
                                  AutomationProperties.Name="Monto original"/>
@@ -114,7 +114,7 @@
                     <Border Style="{StaticResource Recuadro}">
                         <StackPanel>
                             <TextBlock Text="SALDO QUE DEBES" Style="{StaticResource EtiquetaSeccion}" FontSize="11.5"/>
-                            <TextBlock Text="{Binding Disponible, StringFormat='{}{0:C0}'}" FontSize="20" FontWeight="ExtraBold" Foreground="{StaticResource Rojo}"
+                            <TextBlock Text="{Binding Disponible, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" FontSize="20" FontWeight="ExtraBold" Foreground="{StaticResource Rojo}"
                                        Margin="0,2,0,0" Style="{StaticResource ViewStyle}"/>
                             <TextBox Text="{Binding Disponible, StringFormat='{}{0:N0}', UpdateSourceTrigger=LostFocus}" Style="{StaticResource EditInputInline}"
                                      AutomationProperties.Name="Saldo que debes"/>
@@ -123,7 +123,7 @@
                     <Border Style="{StaticResource Recuadro}">
                         <StackPanel>
                             <TextBlock Text="CUOTA MENSUAL" Style="{StaticResource EtiquetaSeccion}" FontSize="11.5"/>
-                            <TextBlock Text="{Binding CuotaMensual, StringFormat='{}{0:C0}'}" FontSize="20" FontWeight="ExtraBold" Foreground="{StaticResource Azul}"
+                            <TextBlock Text="{Binding CuotaMensual, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" FontSize="20" FontWeight="ExtraBold" Foreground="{StaticResource Azul}"
                                        Margin="0,2,0,0" Style="{StaticResource ViewStyle}"/>
                             <TextBox Text="{Binding CuotaMensual, StringFormat='{}{0:N0}', UpdateSourceTrigger=LostFocus}" Style="{StaticResource EditInputInline}"
                                      AutomationProperties.Name="Cuota mensual"/>
@@ -132,7 +132,7 @@
                     <Border Style="{StaticResource Recuadro}">
                         <StackPanel>
                             <TextBlock Text="TASA E.A." Style="{StaticResource EtiquetaSeccion}" FontSize="11.5"/>
-                            <TextBlock Margin="0,2,0,0" Style="{StaticResource ViewStyle}">
+                            <TextBlock Margin="0,2,0,0" Style="{StaticResource ViewStyle}" TextWrapping="Wrap">
                                 <Run Text="{Binding TasaEA, StringFormat='{}{0} %', Mode=OneWay}" FontSize="20" FontWeight="ExtraBold"/>
                                 <Run Text="{Binding TasaMensualTexto, Mode=OneWay}" FontSize="12" Foreground="{StaticResource Texto2}"/>
                             </TextBlock>
@@ -142,7 +142,7 @@
                     <Border Style="{StaticResource Recuadro}">
                         <StackPanel>
                             <TextBlock Text="PLAZO RESTANTE" Style="{StaticResource EtiquetaSeccion}" FontSize="11.5"/>
-                            <TextBlock Margin="0,2,0,0" Style="{StaticResource ViewStyle}">
+                            <TextBlock Margin="0,2,0,0" Style="{StaticResource ViewStyle}" TextWrapping="Wrap">
                                 <Run Text="{Binding CuotasRestantes, StringFormat='{}{0} meses', Mode=OneWay}" FontSize="20" FontWeight="ExtraBold"/>
                                 <Run Text="{Binding MesFinCorto, Mode=OneWay}" FontSize="12" Foreground="{StaticResource Texto2}"/>
                             </TextBlock>
@@ -165,14 +165,14 @@
                         </DockPanel>
                         <ProgressBar Style="{StaticResource Barra}" Value="{Binding Progreso, Mode=OneWay}" Margin="0,7,0,7"/>
                         <TextBlock Style="{StaticResource TextoSecundario}" TextWrapping="Wrap">
-                            <Run Text="Capital pagado"/> <Run Text="{Binding CapitalPagado, StringFormat='{}{0:C0}', Mode=OneWay}" FontWeight="Bold" Foreground="{StaticResource Texto}"/>
-                            <Run Text="· Intereses pagados"/> <Run Text="{Binding InteresesPagados, StringFormat='{}{0:C0}', Mode=OneWay}" FontWeight="Bold" Foreground="{StaticResource Texto}"/>
-                            <Run Text="· Por pagar en intereses"/> <Run Text="{Binding InteresesPorPagar, StringFormat='{}{0:C0}', Mode=OneWay}" FontWeight="Bold" Foreground="{StaticResource NaranjaTexto}"/>
+                            <Run Text="Capital pagado"/> <Run Text="{Binding CapitalPagado, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}', Mode=OneWay}" FontWeight="Bold" Foreground="{StaticResource Texto}"/>
+                            <Run Text="· Intereses pagados"/> <Run Text="{Binding InteresesPagados, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}', Mode=OneWay}" FontWeight="Bold" Foreground="{StaticResource Texto}"/>
+                            <Run Text="· Por pagar en intereses"/> <Run Text="{Binding InteresesPorPagar, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}', Mode=OneWay}" FontWeight="Bold" Foreground="{StaticResource NaranjaTexto}"/>
                         </TextBlock>
                     </StackPanel>
                     <StackPanel Grid.Column="2" Style="{StaticResource SiNoSaldado}">
                         <DockPanel>
-                            <TextBlock DockPanel.Dock="Right" Text="{Binding CuotaMensual, StringFormat='{}{0:C0}'}" Style="{StaticResource TextoSecundario}"/>
+                            <TextBlock DockPanel.Dock="Right" Text="{Binding CuotaMensual, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" Style="{StaticResource TextoSecundario}"/>
                             <TextBlock Text="Próxima cuota" FontSize="13.5" FontWeight="Bold"/>
                         </DockPanel>
                         <!-- Barra dividida: intereses (naranja) y capital (verde) -->
@@ -185,9 +185,9 @@
                             <Border Grid.Column="1" Background="{StaticResource Verde}" CornerRadius="0,4,4,0"/>
                         </Grid>
                         <TextBlock Style="{StaticResource TextoSecundario}" TextWrapping="Wrap">
-                            <Run Text="{Binding InteresProximo, StringFormat='{}{0:C0}', Mode=OneWay}" FontWeight="Bold" Foreground="{StaticResource NaranjaTexto}"/>
+                            <Run Text="{Binding InteresProximo, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}', Mode=OneWay}" FontWeight="Bold" Foreground="{StaticResource NaranjaTexto}"/>
                             <Run Text="a intereses ·"/>
-                            <Run Text="{Binding CapitalProximo, StringFormat='{}{0:C0}', Mode=OneWay}" FontWeight="Bold" Foreground="{StaticResource VerdeTexto}"/>
+                            <Run Text="{Binding CapitalProximo, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}', Mode=OneWay}" FontWeight="Bold" Foreground="{StaticResource VerdeTexto}"/>
                             <Run Text="a capital"/>
                         </TextBlock>
                     </StackPanel>
@@ -208,7 +208,7 @@
                                 <c:Icono Geometria="{StaticResource IcoCheck}" Tamano="14" Grosor="2.5" Foreground="{StaticResource Verde}" Margin="0,0,7,0"/>
                                 <TextBlock FontSize="13" Foreground="{StaticResource VerdeTexto}" VerticalAlignment="Center">
                                     <Run Text="Cuota de"/> <Run Text="{Binding NombreMesActual, Mode=OneWay}"/> <Run Text="pagada:"/>
-                                    <Run Text="{Binding CuotaEsteMes, StringFormat='{}{0:C0}', Mode=OneWay}" FontWeight="Bold"/>
+                                    <Run Text="{Binding CuotaEsteMes, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}', Mode=OneWay}" FontWeight="Bold"/>
                                 </TextBlock>
                                 <Button Content="Deshacer" Click="BtnDeshacerCuota_Click" Style="{StaticResource BotonEnlace}" Foreground="{StaticResource Rojo}"
                                         Margin="10,0,0,0" VerticalAlignment="Center"/>
@@ -275,9 +275,9 @@
                                                             <TextBlock Text="Abono" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource MoradoTexto}"/>
                                                         </Border>
                                                     </StackPanel>
-                                                    <TextBlock Grid.Column="1" Text="{Binding Monto, StringFormat='{}{0:C0}'}" Style="{StaticResource Celda}"/>
-                                                    <TextBlock Grid.Column="2" Text="{Binding Capital, StringFormat='{}{0:C0}'}" Style="{StaticResource Celda}" Foreground="{StaticResource VerdeTexto}"/>
-                                                    <TextBlock Grid.Column="3" Text="{Binding SaldoNuevo, StringFormat='{}{0:C0}'}" Style="{StaticResource Celda}" FontWeight="Bold"/>
+                                                    <TextBlock Grid.Column="1" Text="{Binding Monto, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" Style="{StaticResource Celda}"/>
+                                                    <TextBlock Grid.Column="2" Text="{Binding Capital, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" Style="{StaticResource Celda}" Foreground="{StaticResource VerdeTexto}"/>
+                                                    <TextBlock Grid.Column="3" Text="{Binding SaldoNuevo, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" Style="{StaticResource Celda}" FontWeight="Bold"/>
                                                     <Button Grid.Column="4" Click="BtnDeshacerPago_Click" Style="{StaticResource BotonFlecha}" Width="26" Height="26"
                                                             Foreground="{StaticResource Rojo}" c:Ui.Icono="{StaticResource IcoX}" HorizontalAlignment="Right"
                                                             Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
@@ -333,9 +333,9 @@
                                                     </Grid.ColumnDefinitions>
                                                     <TextBlock Text="{Binding Numero}" Style="{StaticResource Celda}" HorizontalAlignment="Left" Foreground="{StaticResource Texto2}"/>
                                                     <TextBlock Grid.Column="1" Text="{Binding NombreMesCorto}" Style="{StaticResource Celda}" HorizontalAlignment="Left"/>
-                                                    <TextBlock Grid.Column="2" Text="{Binding Interes, StringFormat='{}{0:C0}'}" Style="{StaticResource Celda}" Foreground="{StaticResource NaranjaTexto}"/>
-                                                    <TextBlock Grid.Column="3" Text="{Binding Capital, StringFormat='{}{0:C0}'}" Style="{StaticResource Celda}" Foreground="{StaticResource VerdeTexto}"/>
-                                                    <TextBlock Grid.Column="4" Text="{Binding SaldoFinal, StringFormat='{}{0:C0}'}" Style="{StaticResource Celda}" FontWeight="Bold"/>
+                                                    <TextBlock Grid.Column="2" Text="{Binding Interes, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" Style="{StaticResource Celda}" Foreground="{StaticResource NaranjaTexto}"/>
+                                                    <TextBlock Grid.Column="3" Text="{Binding Capital, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" Style="{StaticResource Celda}" Foreground="{StaticResource VerdeTexto}"/>
+                                                    <TextBlock Grid.Column="4" Text="{Binding SaldoFinal, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" Style="{StaticResource Celda}" FontWeight="Bold"/>
                                                 </Grid>
                                             </Border>
                                         </DataTemplate>
@@ -432,10 +432,10 @@
                                     </Border>
                                     <TextBlock Text="{Binding NombreCustom}" FontSize="15" FontWeight="Bold" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
                                 </DockPanel>
-                                <TextBlock Text="{Binding Disponible, StringFormat='{}{0:C0}'}" FontSize="20" FontWeight="ExtraBold" Foreground="{StaticResource Rojo}" Margin="0,6,0,8"/>
+                                <TextBlock Text="{Binding Disponible, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" FontSize="20" FontWeight="ExtraBold" Foreground="{StaticResource Rojo}" Margin="0,6,0,8"/>
                                 <ProgressBar Style="{StaticResource Barra}" Value="{Binding Progreso, Mode=OneWay}" Height="6"/>
                                 <TextBlock Style="{StaticResource TextoSecundario}" Margin="0,6,0,0">
-                                    <Run Text="{Binding ProgresoTexto, Mode=OneWay}"/><Run Text=" pagado · cuota "/><Run Text="{Binding CuotaMensual, StringFormat='{}{0:C0}', Mode=OneWay}"/>
+                                    <Run Text="{Binding ProgresoTexto, Mode=OneWay}"/><Run Text=" pagado · cuota "/><Run Text="{Binding CuotaMensual, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}', Mode=OneWay}"/>
                                 </TextBlock>
                             </StackPanel>
                         </Button>
