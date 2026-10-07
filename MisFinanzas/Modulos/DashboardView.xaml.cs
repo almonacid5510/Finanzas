@@ -355,7 +355,7 @@ namespace MisFinanzas.Modulos
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error al marcar el pago: " + ex.Message);
+                MisFinanzas.Controles.Aviso.Mostrar("Error al marcar el pago: " + ex.Message);
             }
         }
 

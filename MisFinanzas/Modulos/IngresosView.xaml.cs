@@ -52,7 +52,7 @@ namespace MisFinanzas.Modulos
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error al cargar: {ex.Message}");
+                MisFinanzas.Controles.Aviso.Mostrar($"Error al cargar: {ex.Message}");
             }
         }
 
@@ -76,7 +76,7 @@ namespace MisFinanzas.Modulos
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error al cargar salario: {ex.Message}");
+                MisFinanzas.Controles.Aviso.Mostrar($"Error al cargar salario: {ex.Message}");
             }
         }
 
@@ -132,7 +132,7 @@ namespace MisFinanzas.Modulos
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Error al guardar salario: {ex.Message}");
+                    MisFinanzas.Controles.Aviso.Mostrar($"Error al guardar salario: {ex.Message}");
                 }
             }
         }
@@ -182,7 +182,7 @@ namespace MisFinanzas.Modulos
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Error crítico al guardar: {ex.Message}");
+                    MisFinanzas.Controles.Aviso.Mostrar($"Error crítico al guardar: {ex.Message}");
                 }
             }
         }
@@ -257,7 +257,7 @@ namespace MisFinanzas.Modulos
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error al eliminar la meta de la base de datos: {ex.Message}");
+                MisFinanzas.Controles.Aviso.Mostrar($"Error al eliminar la meta de la base de datos: {ex.Message}");
             }
         }
 
@@ -301,7 +301,7 @@ namespace MisFinanzas.Modulos
                         icMetas.Items.Refresh();
                         ActualizarAhorroAcumulado();
                     }
-                    catch (Exception ex) { MessageBox.Show(ex.Message); }
+                    catch (Exception ex) { MisFinanzas.Controles.Aviso.Mostrar(ex.Message); }
                 }
             }
         }
@@ -341,7 +341,7 @@ namespace MisFinanzas.Modulos
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error al cargar otros ingresos: {ex.Message}");
+                MisFinanzas.Controles.Aviso.Mostrar($"Error al cargar otros ingresos: {ex.Message}");
             }
         }
 
@@ -351,7 +351,7 @@ namespace MisFinanzas.Modulos
                 !NumeroHelper.TryParseMoneda(txtValorIngreso.Text, out decimal valor) ||
                 cbFrecuenciaIngreso.SelectedItem is not string frecuencia)
             {
-                MessageBox.Show("Por favor, ingresa una descripción y un valor válido.");
+                MisFinanzas.Controles.Aviso.Mostrar("Por favor, ingresa una descripción y un valor válido.");
                 return;
             }
 
@@ -380,7 +380,7 @@ namespace MisFinanzas.Modulos
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error al guardar el ingreso: {ex.Message}");
+                MisFinanzas.Controles.Aviso.Mostrar($"Error al guardar el ingreso: {ex.Message}");
             }
         }
 
@@ -399,7 +399,7 @@ namespace MisFinanzas.Modulos
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error al eliminar el ingreso: {ex.Message}");
+                MisFinanzas.Controles.Aviso.Mostrar($"Error al eliminar el ingreso: {ex.Message}");
             }
         }
 

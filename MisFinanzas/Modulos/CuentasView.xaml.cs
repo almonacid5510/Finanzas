@@ -81,7 +81,7 @@ namespace MisFinanzas.Modulos
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error al cargar cuentas: " + ex.Message);
+                MisFinanzas.Controles.Aviso.Mostrar("Error al cargar cuentas: " + ex.Message);
             }
         }
 
@@ -114,7 +114,7 @@ namespace MisFinanzas.Modulos
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error al cargar las cuentas del mes: " + ex.Message);
+                MisFinanzas.Controles.Aviso.Mostrar("Error al cargar las cuentas del mes: " + ex.Message);
             }
             lblSinGastos.Visibility = _cuentasDelMes.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
             ActualizarTotal();
@@ -179,7 +179,7 @@ namespace MisFinanzas.Modulos
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error al cargar el historial: " + ex.Message);
+                MisFinanzas.Controles.Aviso.Mostrar("Error al cargar el historial: " + ex.Message);
             }
         }
 
@@ -194,7 +194,7 @@ namespace MisFinanzas.Modulos
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error al calcular la proyección: " + ex.Message);
+                MisFinanzas.Controles.Aviso.Mostrar("Error al calcular la proyección: " + ex.Message);
             }
         }
 
@@ -274,7 +274,7 @@ namespace MisFinanzas.Modulos
                 cbDiaPago.SelectedItem is not int dia ||
                 cbFrecuencia.SelectedItem is not string frecuencia)
             {
-                MessageBox.Show("Por favor, ingresa una descripción, un valor válido y el día de pago.");
+                MisFinanzas.Controles.Aviso.Mostrar("Por favor, ingresa una descripción, un valor válido y el día de pago.");
                 return;
             }
             int mesDelAnio = cbMesAnual.SelectedIndex + 1;
@@ -333,7 +333,7 @@ namespace MisFinanzas.Modulos
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error al guardar el gasto: " + ex.Message);
+                MisFinanzas.Controles.Aviso.Mostrar("Error al guardar el gasto: " + ex.Message);
                 return;
             }
 
@@ -420,7 +420,7 @@ namespace MisFinanzas.Modulos
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error al eliminar: " + ex.Message);
+                MisFinanzas.Controles.Aviso.Mostrar("Error al eliminar: " + ex.Message);
             }
         }
 
@@ -448,7 +448,7 @@ namespace MisFinanzas.Modulos
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error al guardar el monto pagado: " + ex.Message);
+                MisFinanzas.Controles.Aviso.Mostrar("Error al guardar el monto pagado: " + ex.Message);
             }
         }
 
@@ -482,7 +482,7 @@ namespace MisFinanzas.Modulos
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error al guardar el pago: " + ex.Message);
+                MisFinanzas.Controles.Aviso.Mostrar("Error al guardar el pago: " + ex.Message);
             }
 
             // 3. Recalculamos el total de la pantalla automáticamente

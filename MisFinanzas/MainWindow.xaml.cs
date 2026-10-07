@@ -91,7 +91,7 @@ namespace MisFinanzas
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error crítico de BD: {ex.Message}. Verifica tu modelo de datos.");
+                MisFinanzas.Controles.Aviso.Mostrar($"Error crítico de BD: {ex.Message}. Verifica tu modelo de datos.");
             }
         }
 
@@ -118,7 +118,7 @@ namespace MisFinanzas
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error crítico al cargar datos iniciales: {ex.Message}");
+                MisFinanzas.Controles.Aviso.Mostrar($"Error crítico al cargar datos iniciales: {ex.Message}");
             }
         }
 

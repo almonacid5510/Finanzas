@@ -111,7 +111,7 @@ namespace MisFinanzas.Modulos
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Error: {ex.Message}");
+                    MisFinanzas.Controles.Aviso.Mostrar($"Error: {ex.Message}");
                 }
             }
         }
@@ -161,7 +161,7 @@ namespace MisFinanzas.Modulos
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error al eliminar: {ex.Message}");
+                MisFinanzas.Controles.Aviso.Mostrar($"Error al eliminar: {ex.Message}");
             }
         }
 

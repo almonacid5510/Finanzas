@@ -60,7 +60,7 @@ namespace MisFinanzas.Modulos
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Error al procesar el pago: {ex.Message}");
+                    MisFinanzas.Controles.Aviso.Mostrar($"Error al procesar el pago: {ex.Message}");
                 }
             }
         }

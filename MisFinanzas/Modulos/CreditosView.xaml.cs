@@ -100,7 +100,7 @@ namespace MisFinanzas.Modulos
                     txtTasaEA.Clear();       
                     txtPlazo.Clear();
                 }
-                catch (Exception ex) { MessageBox.Show("Error al guardar: " + ex.Message); }
+                catch (Exception ex) { MisFinanzas.Controles.Aviso.Mostrar("Error al guardar: " + ex.Message); }
             }
         }
 
@@ -161,7 +161,7 @@ namespace MisFinanzas.Modulos
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error al guardar en la base de datos: " + ex.Message);
+                MisFinanzas.Controles.Aviso.Mostrar("Error al guardar en la base de datos: " + ex.Message);
             }
         }
 
@@ -215,7 +215,7 @@ namespace MisFinanzas.Modulos
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error al eliminar: " + ex.Message);
+                MisFinanzas.Controles.Aviso.Mostrar("Error al eliminar: " + ex.Message);
             }
         }
 
@@ -260,7 +260,7 @@ namespace MisFinanzas.Modulos
 
             if (!NumeroHelper.TryParseMoneda(txt.Text, out var monto) || monto <= 0)
             {
-                MessageBox.Show("Ingresa un valor válido para el abono.");
+                MisFinanzas.Controles.Aviso.Mostrar("Ingresa un valor válido para el abono.");
                 return;
             }
             try
@@ -279,7 +279,7 @@ namespace MisFinanzas.Modulos
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error al registrar el abono: " + ex.Message);
+                MisFinanzas.Controles.Aviso.Mostrar("Error al registrar el abono: " + ex.Message);
             }
         }
 
@@ -300,7 +300,7 @@ namespace MisFinanzas.Modulos
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error al deshacer el pago: " + ex.Message);
+                MisFinanzas.Controles.Aviso.Mostrar("Error al deshacer el pago: " + ex.Message);
             }
         }
 
@@ -325,7 +325,7 @@ namespace MisFinanzas.Modulos
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error al guardar el pago: " + ex.Message);
+                MisFinanzas.Controles.Aviso.Mostrar("Error al guardar el pago: " + ex.Message);
                 Recargar(credito);
                 return null;
             }

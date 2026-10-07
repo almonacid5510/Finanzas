@@ -51,7 +51,7 @@ namespace MisFinanzas.Modulos
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error al cargar datos desde la base de datos: {ex.Message}");
+                MisFinanzas.Controles.Aviso.Mostrar($"Error al cargar datos desde la base de datos: {ex.Message}");
             }
         }
 
@@ -90,12 +90,12 @@ namespace MisFinanzas.Modulos
                 catch (Exception ex)
                 {
                     string detalle = ex.InnerException != null ? $"\nDetalle: {ex.InnerException.Message}" : "";
-                    MessageBox.Show($"Error al guardar: {ex.Message}{detalle}");
+                    MisFinanzas.Controles.Aviso.Mostrar($"Error al guardar: {ex.Message}{detalle}");
                 }
             }
             else
             {
-                MessageBox.Show("Por favor, ingresa el nombre y un monto válido.");
+                MisFinanzas.Controles.Aviso.Mostrar("Por favor, ingresa el nombre y un monto válido.");
             }
         }
 
@@ -142,7 +142,7 @@ namespace MisFinanzas.Modulos
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error al eliminar de la base de datos: {ex.Message}");
+                MisFinanzas.Controles.Aviso.Mostrar($"Error al eliminar de la base de datos: {ex.Message}");
             }
         }
 
@@ -187,7 +187,7 @@ namespace MisFinanzas.Modulos
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error al registrar el abono: {ex.Message}");
+                MisFinanzas.Controles.Aviso.Mostrar($"Error al registrar el abono: {ex.Message}");
             }
         }
 
