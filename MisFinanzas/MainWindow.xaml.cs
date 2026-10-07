@@ -7,6 +7,7 @@ using System;
 using System.Linq;
 using System.Windows;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using Microsoft.EntityFrameworkCore;
 using MisFinanzas.Modulos;
 
@@ -14,9 +15,9 @@ namespace MisFinanzas
 {
     public partial class MainWindow : Window
     {
-        // Ancho para el que está dibujado el diseño. Si la ventana es más angosta, todo se reduce
-        // proporcionalmente (hasta ZoomMinimo); por debajo de eso, las grillas pasan a menos columnas.
-        private const double AnchoDiseno = 1430;
+        // Ancho para el que está dibujado el diseño (contenido de ~1220 + menú cerrado). Si la ventana es más
+        // angosta, todo se reduce proporcionalmente (hasta ZoomMinimo); por debajo, las grillas pasan a menos columnas.
+        private const double AnchoDiseno = 1290;
         private const double ZoomMinimo = 0.8;
 
         public MainWindow()
@@ -47,6 +48,25 @@ namespace MisFinanzas
             double ancho = e.NewSize.Width - 16;
             double zoom = Math.Clamp(ancho / AnchoDiseno, ZoomMinimo, 1.0);
             Raiz.LayoutTransform = new ScaleTransform(zoom, zoom);
+        }
+
+        // --- Menú lateral desplegable: solo íconos; al pasar el mouse se extiende sobre el contenido ---
+        private const double MenuCerrado = 68;
+        private const double MenuAbierto = 210;
+
+        private void Sidebar_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e) => AnimarMenu(abierto: true);
+        private void Sidebar_MouseLeave(object sender, System.Windows.Input.MouseEventArgs e) => AnimarMenu(abierto: false);
+
+        private void AnimarMenu(bool abierto)
+        {
+            var duracion = new Duration(TimeSpan.FromMilliseconds(180));
+            var suave = new QuadraticEase { EasingMode = EasingMode.EaseInOut };
+            DoubleAnimation A(double hasta) => new DoubleAnimation(hasta, duracion) { EasingFunction = suave };
+
+            Sidebar.BeginAnimation(WidthProperty, A(abierto ? MenuAbierto : MenuCerrado));
+            panelNombreApp.BeginAnimation(OpacityProperty, A(abierto ? 1 : 0));
+            refCerrado.BeginAnimation(OpacityProperty, A(abierto ? 0 : 1));
+            sombraMenu.BeginAnimation(System.Windows.Media.Effects.DropShadowEffect.OpacityProperty, A(abierto ? 0.28 : 0));
         }
 
         // Marca visualmente el botón de navegación activo y limpia los demás
@@ -118,6 +138,7 @@ namespace MisFinanzas
                 }
                 lblVencidas.Text = vencidas.ToString();
                 insigniaVencidas.Visibility = vencidas > 0 ? Visibility.Visible : Visibility.Collapsed;
+                NavState.SetTieneAlerta(btnNavCuentas, vencidas > 0);
                 btnNavCuentas.ToolTip = vencidas > 0 ? $"{vencidas} pago(s) vencido(s)" : null;
             }
             catch (Exception ex)

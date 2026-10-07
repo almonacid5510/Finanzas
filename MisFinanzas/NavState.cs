@@ -22,5 +22,12 @@ namespace MisFinanzas
 
         public static bool GetIsActive(DependencyObject element)
             => (bool)element.GetValue(IsActiveProperty);
+
+        // Punto rojo sobre el ícono cuando hay algo pendiente (se ve con el menú cerrado)
+        public static readonly DependencyProperty TieneAlertaProperty =
+            DependencyProperty.RegisterAttached("TieneAlerta", typeof(bool), typeof(NavState), new PropertyMetadata(false));
+
+        public static void SetTieneAlerta(DependencyObject element, bool value) => element.SetValue(TieneAlertaProperty, value);
+        public static bool GetTieneAlerta(DependencyObject element) => (bool)element.GetValue(TieneAlertaProperty);
     }
 }

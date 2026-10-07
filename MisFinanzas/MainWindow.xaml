@@ -27,14 +27,26 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border x:Name="bd" Background="Transparent" CornerRadius="10" Padding="14,0">
-                            <DockPanel>
-                                <c:Icono DockPanel.Dock="Left" Geometria="{Binding Tag, RelativeSource={RelativeSource TemplatedParent}}"
-                                         Tamano="18" Foreground="{TemplateBinding Foreground}" Margin="0,0,13,0"/>
-                                <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
+                        <!-- El fondo sigue el ancho del menú; el contenido tiene ancho fijo y se recorta al cerrarlo -->
+                        <Border x:Name="bd" Background="Transparent" CornerRadius="10" Padding="15,0" ClipToBounds="True">
+                            <DockPanel Width="160" HorizontalAlignment="Left">
+                                <Grid DockPanel.Dock="Left" Margin="0,0,14,0" VerticalAlignment="Center">
+                                    <c:Icono Geometria="{Binding Tag, RelativeSource={RelativeSource TemplatedParent}}"
+                                             Tamano="18" Foreground="{TemplateBinding Foreground}"/>
+                                    <!-- Punto rojo de pendientes: solo con el menú cerrado (abierto se ve el contador) -->
+                                    <Ellipse x:Name="punto" Width="9" Height="9" Fill="#F04438" Stroke="{StaticResource Oscuro}" StrokeThickness="1.5"
+                                             HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-4,-5,0" Visibility="Collapsed"
+                                             Opacity="{Binding Opacity, ElementName=refCerrado}"/>
+                                </Grid>
+                                <!-- El nombre aparece al desplegar el menú -->
+                                <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Stretch"
+                                                  Opacity="{Binding Opacity, ElementName=panelNombreApp}"/>
                             </DockPanel>
                         </Border>
                         <ControlTemplate.Triggers>
+                            <Trigger Property="local:NavState.TieneAlerta" Value="True">
+                                <Setter TargetName="punto" Property="Visibility" Value="Visible"/>
+                            </Trigger>
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter TargetName="bd" Property="Background" Value="#1A2A40"/>
                                 <Setter Property="Foreground" Value="White"/>
@@ -57,31 +69,44 @@
     <!-- Raíz con zoom: el diseño se dibuja a 1430 de ancho y se reduce si la ventana es más angosta -->
     <Grid x:Name="Raiz">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="210"/>
+            <!-- Espacio del menú cerrado; al desplegarse pasa por encima del contenido -->
+            <ColumnDefinition Width="68"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <!-- ============ MENÚ LATERAL ============ -->
-        <Border Background="{StaticResource Oscuro}">
-            <DockPanel Margin="14,22,14,18">
+        <!-- Opacidad que se anima al revés que los nombres (1 = menú cerrado) -->
+        <Rectangle x:Name="refCerrado" Visibility="Hidden" Width="0" Opacity="1"/>
+
+        <!-- ============ MENÚ LATERAL DESPLEGABLE ============ -->
+        <Border x:Name="Sidebar" Grid.ColumnSpan="2" Width="68" HorizontalAlignment="Left" Panel.ZIndex="100"
+                Background="{StaticResource Oscuro}" ClipToBounds="True"
+                MouseEnter="Sidebar_MouseEnter" MouseLeave="Sidebar_MouseLeave">
+            <Border.Effect>
+                <DropShadowEffect x:Name="sombraMenu" BlurRadius="24" Direction="0" Opacity="0" ShadowDepth="4"/>
+            </Border.Effect>
+            <DockPanel Margin="10,22,10,18">
                 <!-- Logo -->
                 <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="6,0,0,24">
                     <Border Width="36" Height="36" CornerRadius="9" Background="{StaticResource Verde}">
                         <c:Icono Geometria="{StaticResource IcoLogo}" Tamano="19" Foreground="White" HorizontalAlignment="Center"/>
                     </Border>
-                    <StackPanel Margin="11,0,0,0" VerticalAlignment="Center">
+                    <StackPanel x:Name="panelNombreApp" Margin="12,0,0,0" VerticalAlignment="Center" Opacity="0">
                         <TextBlock Text="Mis Finanzas" FontSize="15" FontWeight="Bold" Foreground="White"/>
                         <TextBlock Text="Gestor personal" FontSize="12" Foreground="#9AA6B6"/>
                     </StackPanel>
                 </StackPanel>
 
                 <!-- Pie: autoría -->
-                <TextBlock DockPanel.Dock="Bottom" Text="© 2026 Juan Almonacid" FontSize="12" Foreground="#9AA6B6" Margin="6,0,0,0"/>
+                <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal">
+                    <TextBlock Text="©" FontSize="13" Foreground="#9AA6B6" Width="48" TextAlignment="Center"/>
+                    <TextBlock Text="2026 Juan Almonacid" FontSize="12" Foreground="#9AA6B6" VerticalAlignment="Center"
+                               Opacity="{Binding Opacity, ElementName=panelNombreApp}"/>
+                </StackPanel>
 
                 <StackPanel>
-                    <Button x:Name="btnNavDashboard" Content="Dashboard" Tag="{StaticResource IcoDashboard}"
+                    <Button x:Name="btnNavDashboard" Content="Dashboard" ToolTip="Dashboard" Tag="{StaticResource IcoDashboard}"
                             Click="NavDashboard_Click" Style="{StaticResource NavButtonStyle}"/>
-                    <Button x:Name="btnNavIngresos" Content="Ingresos y ahorro" Tag="{StaticResource IcoIngresos}"
+                    <Button x:Name="btnNavIngresos" Content="Ingresos y ahorro" ToolTip="Ingresos y ahorro" Tag="{StaticResource IcoIngresos}"
                             Click="NavIngresos_Click" Style="{StaticResource NavButtonStyle}"/>
                     <Button x:Name="btnNavCuentas" Tag="{StaticResource IcoCuentas}" AutomationProperties.Name="Cuentas"
                             Click="NavCuentas_Click" Style="{StaticResource NavButtonStyle}">
@@ -95,11 +120,11 @@
                             <TextBlock Text="Cuentas" VerticalAlignment="Center"/>
                         </DockPanel>
                     </Button>
-                    <Button x:Name="btnNavCreditos" Content="Créditos" Tag="{StaticResource IcoCreditos}"
+                    <Button x:Name="btnNavCreditos" Content="Créditos" ToolTip="Créditos" Tag="{StaticResource IcoCreditos}"
                             Click="NavCreditos_Click" Style="{StaticResource NavButtonStyle}"/>
-                    <Button x:Name="btnNavVehiculo" Content="Vehículos" Tag="{StaticResource IcoVehiculos}"
+                    <Button x:Name="btnNavVehiculo" Content="Vehículos" ToolTip="Vehículos" Tag="{StaticResource IcoVehiculos}"
                             Click="NavVehiculo_Click" Style="{StaticResource NavButtonStyle}"/>
-                    <Button x:Name="btnNavNegocio" Content="Inversiones" Tag="{StaticResource IcoInversiones}"
+                    <Button x:Name="btnNavNegocio" Content="Inversiones" ToolTip="Inversiones" Tag="{StaticResource IcoInversiones}"
                             Click="NavNegocio_Click" Style="{StaticResource NavButtonStyle}"/>
                 </StackPanel>
             </DockPanel>
