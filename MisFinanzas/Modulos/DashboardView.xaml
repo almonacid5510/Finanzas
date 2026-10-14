@@ -1,107 +1,327 @@
+<!--
+    Proyecto: Mis Finanzas
+    Autoria: Juan Almonacid
+    Copyright (c) 2026 Juan Almonacid. Todos los derechos reservados.
+-->
 <UserControl x:Class="MisFinanzas.Modulos.DashboardView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             Background="#F0F2F5"
-             Loaded="UserControl_Loaded">
-    <Grid Margin="25">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
+             xmlns:c="clr-namespace:MisFinanzas.Controles"
+             Loaded="UserControl_Loaded" Unloaded="UserControl_Unloaded">
 
-        <TextBlock Text="Resumen Financiero" FontSize="28" FontWeight="Bold" Foreground="#1A202C" Margin="10,0,0,20"/>
+    <UserControl.Resources>
+        <!-- Ícono en recuadro de color de cada indicador -->
+        <Style x:Key="CajaIcono" TargetType="Border">
+            <Setter Property="Width" Value="30"/>
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="HorizontalAlignment" Value="Right"/>
+            <Setter Property="VerticalAlignment" Value="Top"/>
+        </Style>
 
-        <UniformGrid Grid.Row="1" Columns="4" VerticalAlignment="Top" Margin="0,0,0,20">
-
-            <Border Background="White" CornerRadius="15" Margin="6" Padding="15,20" BorderBrush="#E2E8F0" BorderThickness="1">
-                <Border.Effect>
-                    <DropShadowEffect BlurRadius="8" Opacity="0.03" ShadowDepth="1"/>
-                </Border.Effect>
-                <StackPanel>
-                    <TextBlock Text="TOTAL INGRESOS" FontSize="11" FontWeight="Bold" Foreground="#718096"/>
-                    <TextBlock x:Name="lblDashIngresos" Text="$ 0" FontSize="22" FontWeight="Black" Foreground="#2F855A" Margin="0,10,0,0"/>
-                </StackPanel>
-            </Border>
-
-            <Border Background="White" CornerRadius="15" Margin="6" Padding="15,20" BorderBrush="#E2E8F0" BorderThickness="1">
-                <Border.Effect>
-                    <DropShadowEffect BlurRadius="8" Opacity="0.03" ShadowDepth="1"/>
-                </Border.Effect>
-                <StackPanel>
-                    <TextBlock Text="GASTOS Y COMPROMISOS" FontSize="11" FontWeight="Bold" Foreground="#718096"/>
-                    <TextBlock x:Name="lblDashGastos" Text="$ 0" FontSize="22" FontWeight="Black" Foreground="#E53E3E" Margin="0,10,0,0"/>
-                </StackPanel>
-            </Border>
-
-            <Border Background="White" CornerRadius="15" Margin="6" Padding="15,20" BorderBrush="#E2E8F0" BorderThickness="1">
-                <Border.Effect>
-                    <DropShadowEffect BlurRadius="8" Opacity="0.03" ShadowDepth="1"/>
-                </Border.Effect>
-                <StackPanel>
-                    <TextBlock Text="DISPONIBLE / NETO" FontSize="11" FontWeight="Bold" Foreground="#718096"/>
-                    <TextBlock x:Name="lblDashBalance" Text="$ 0" FontSize="22" FontWeight="Black" Foreground="#4A5568" Margin="0,10,0,0"/>
-                </StackPanel>
-            </Border>
-
-            <Border Background="White" CornerRadius="15" Margin="6" Padding="15,20" BorderBrush="#E2E8F0" BorderThickness="1">
-                <Border.Effect>
-                    <DropShadowEffect BlurRadius="8" Opacity="0.03" ShadowDepth="1"/>
-                </Border.Effect>
-                <StackPanel>
-                    <TextBlock Text="INVERSION VEHICULOS" FontSize="11" FontWeight="Bold" Foreground="#718096"/>
-                    <TextBlock x:Name="lblDashMoto" Text="$ 0" FontSize="22" FontWeight="Black" Foreground="#2B6CB0" Margin="0,10,0,0"/>
-                </StackPanel>
-            </Border>
-        </UniformGrid>
-
-        <TextBlock Grid.Row="2" Text="PROGRESO DE MIS METAS" FontSize="14" FontWeight="Bold" Foreground="#4A5568" Margin="10,15,0,10"/>
-
-        <ScrollViewer Grid.Row="3" VerticalScrollBarVisibility="Auto">
-            <ItemsControl x:Name="icMetasCirculares">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <WrapPanel Orientation="Horizontal" HorizontalAlignment="Left"/>
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <Border Background="White" CornerRadius="15" Padding="20" Margin="10" Width="200" Height="190">
-                            <Border.Effect>
-                                <DropShadowEffect BlurRadius="10" Opacity="0.05" ShadowDepth="2"/>
-                            </Border.Effect>
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="*"/>
-                                    <RowDefinition Height="Auto"/>
-                                </Grid.RowDefinitions>
-
-                                <TextBlock Text="{Binding Nombre}" FontSize="14" FontWeight="Bold" Foreground="#2D3748" HorizontalAlignment="Center"/>
-
-                                <StackPanel Grid.Row="1" VerticalAlignment="Center" Margin="0,10">
-                                    <ProgressBar Value="{Binding Progreso, Mode=OneWay}" Height="12" Maximum="100" Minimum="0" Background="#EDF2F7" Foreground="#319795">
-                                        <ProgressBar.Template>
-                                            <ControlTemplate TargetType="ProgressBar">
-                                                <Grid x:Name="TemplateRoot" SnapsToDevicePixels="true">
-                                                    <Border Background="{TemplateBinding Background}" CornerRadius="6"/>
-                                                    <Decorator x:Name="PART_Track" HorizontalAlignment="Left">
-                                                        <Border x:Name="PART_Indicator" Background="{TemplateBinding Foreground}" CornerRadius="6"/>
-                                                    </Decorator>
-                                                </Grid>
-                                            </ControlTemplate>
-                                        </ProgressBar.Template>
-                                    </ProgressBar>
-                                    <TextBlock Text="{Binding Progreso, StringFormat={}{0:F0}%}" FontSize="16" FontWeight="Black" Foreground="#2D3748" HorizontalAlignment="Center" Margin="0,8,0,0"/>
-                                </StackPanel>
-
-                                <TextBlock Grid.Row="2" Text="{Binding MontoActual, StringFormat='{}{0:C0}'}" FontSize="13" FontWeight="SemiBold" Foreground="#718096" HorizontalAlignment="Center"/>
-                            </Grid>
+        <!-- Tarjeta clicable de la fila inferior -->
+        <Style x:Key="TarjetaBoton" TargetType="Button">
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bd" Background="White" BorderBrush="{StaticResource Borde}" BorderThickness="1"
+                                CornerRadius="14" Padding="18,14">
+                            <ContentPresenter/>
                         </Border>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-        </ScrollViewer>
-    </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="BorderBrush" Value="#B9C2CF"/>
+                            </Trigger>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="bd" Property="BorderBrush" Value="{StaticResource Texto}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+  <Grid>
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" c:ScrollPagina.Activo="True">
+      <StackPanel Margin="28,22,28,22">
+
+        <!-- ===== ENCABEZADO ===== -->
+        <DockPanel Margin="0,0,0,14">
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Top">
+                <!-- Salud financiera -->
+                <Border x:Name="cardSaludFinanciera" CornerRadius="16" Padding="12,6" Margin="0,0,12,0"
+                        VerticalAlignment="Center" Background="{StaticResource VerdeSuave}">
+                    <StackPanel Orientation="Horizontal">
+                        <c:Icono x:Name="icoSalud" Geometria="{StaticResource IcoCheck}" Tamano="14" Grosor="2.5"
+                                 Foreground="{StaticResource VerdeTexto}" Margin="0,0,7,0"/>
+                        <TextBlock x:Name="txtMensajeSalud" Text="Finanzas saludables" FontSize="12.5" FontWeight="SemiBold"
+                                   Foreground="{StaticResource VerdeTexto}"/>
+                    </StackPanel>
+                </Border>
+                <!-- Mes (el resumen es siempre del mes en curso) -->
+                <Button x:Name="btnMesActual" Click="BtnMesActual_Click" Style="{StaticResource BotonMesActual}" Margin="0,0,12,0"/>
+                <StackPanel>
+                    <Border Style="{StaticResource CapsulaMes}">
+                        <StackPanel Orientation="Horizontal">
+                            <Button Style="{StaticResource BotonFlecha}" c:Ui.Icono="{StaticResource IcoIzquierda}" Click="BtnMesAnterior_Click"
+                                    AutomationProperties.Name="Mes anterior" ToolTip="Mes anterior"/>
+                            <TextBlock x:Name="lblPeriodo" Width="150" TextAlignment="Center" FontSize="15" FontWeight="Bold"
+                                       VerticalAlignment="Center"/>
+                            <Button Style="{StaticResource BotonFlecha}" c:Ui.Icono="{StaticResource IcoDerecha}" Click="BtnMesSiguiente_Click"
+                                    AutomationProperties.Name="Mes siguiente" ToolTip="Mes siguiente"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </StackPanel>
+            <StackPanel>
+                <TextBlock Text="Resumen financiero" Style="{StaticResource TituloPagina}"/>
+                <TextBlock x:Name="lblSubtitulo" Text="Así va tu mes, de un vistazo" Style="{StaticResource SubtituloPagina}"/>
+            </StackPanel>
+        </DockPanel>
+
+        <!-- ===== AVISO DE PAGOS VENCIDOS (antes era una ventana al abrir la app) ===== -->
+        <Border x:Name="bannerVencidos" Background="{StaticResource RojoSuave}" BorderBrush="{StaticResource RojoBorde}"
+                BorderThickness="1" CornerRadius="12" Padding="14,9" Margin="0,0,0,14" Visibility="Collapsed">
+            <DockPanel>
+                <Border DockPanel.Dock="Left" Width="32" Height="32" CornerRadius="8" Background="#FEE4E2" Margin="0,0,12,0">
+                    <c:Icono Geometria="{StaticResource IcoAlerta}" Tamano="16" Foreground="{StaticResource Rojo}" HorizontalAlignment="Center"/>
+                </Border>
+                <Button x:Name="btnMarcarPagado" DockPanel.Dock="Right" Style="{StaticResource BotonVerde}" Height="36"
+                        c:Ui.Icono="{StaticResource IcoCheck}" Content="Marcar pagado" Click="BtnMarcarPagado_Click"/>
+                <Button x:Name="lnkVencidos" DockPanel.Dock="Right" Style="{StaticResource BotonEnlace}" Content="Ver cuentas" Margin="0,0,18,0"
+                        VerticalAlignment="Center" Click="LnkVencidos_Click"/>
+                <TextBlock x:Name="lblVencidos" FontSize="13.5" Foreground="#7A271A" VerticalAlignment="Center"
+                           TextTrimming="CharacterEllipsis"/>
+            </DockPanel>
+        </Border>
+
+        <!-- ===== INDICADORES ===== -->
+        <c:GrillaAdaptable Columnas="4" AnchoMinimo="220" Margin="0,0,0,14">
+            <Border Style="{StaticResource Card}" Padding="18,16">
+                <Grid>
+                    <Border Style="{StaticResource CajaIcono}" Background="{StaticResource VerdeSuave}">
+                        <c:Icono Geometria="{StaticResource IcoSube}" Tamano="16" Foreground="{StaticResource Verde}" HorizontalAlignment="Center"/>
+                    </Border>
+                    <StackPanel>
+                        <TextBlock Text="INGRESOS" Style="{StaticResource EtiquetaSeccion}" Margin="0,7,0,0"/>
+                        <TextBlock x:Name="lblDashIngresos" Style="{StaticResource CifraKpi}" Foreground="{StaticResource VerdeTexto}" Margin="0,16,0,2"/>
+                        <TextBlock Text="Salario + otros ingresos" Style="{StaticResource TextoSecundario}"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+            <Border Style="{StaticResource Card}" Padding="18,16">
+                <Grid>
+                    <Border Style="{StaticResource CajaIcono}" Background="{StaticResource RojoSuave}">
+                        <c:Icono Geometria="{StaticResource IcoBaja}" Tamano="16" Foreground="{StaticResource Rojo}" HorizontalAlignment="Center"/>
+                    </Border>
+                    <StackPanel>
+                        <TextBlock Text="GASTOS DEL MES" Style="{StaticResource EtiquetaSeccion}" Margin="0,7,0,0"/>
+                        <TextBlock x:Name="lblDashGastos" Style="{StaticResource CifraKpi}" Foreground="{StaticResource Rojo}" Margin="0,16,0,2"/>
+                        <TextBlock x:Name="lblDashPendiente" Style="{StaticResource TextoSecundario}"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+            <Border Style="{StaticResource TarjetaOscura}" Padding="18,16">
+                <!-- Misma disposición que las demás: el "% libre" ocupa el lugar del ícono -->
+                <Grid>
+                    <TextBlock x:Name="lblPorcentajeLibre" Height="30" Padding="0,7,0,0" HorizontalAlignment="Right" VerticalAlignment="Top"
+                               FontSize="12.5" FontWeight="Bold" Foreground="#6CE9A6"/>
+                    <StackPanel>
+                        <TextBlock Text="DISPONIBLE" Style="{StaticResource EtiquetaSeccion}" Foreground="{StaticResource TextoMenu}" Margin="0,7,0,0"/>
+                        <TextBlock x:Name="lblDashBalance" Style="{StaticResource CifraKpi}" Foreground="White" Margin="0,16,0,2"/>
+                        <TextBlock Text="Ingresos menos gastos" Style="{StaticResource TextoSecundario}" Foreground="{StaticResource TextoMenu}"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+            <Border Style="{StaticResource Card}" Padding="18,16">
+                <Grid>
+                    <Border Style="{StaticResource CajaIcono}" Background="{StaticResource AzulSuave}">
+                        <c:Icono Geometria="{StaticResource IcoVehiculos}" Relleno="{StaticResource IcoVehiculosRelleno}" Tamano="19" Grosor="1.5"
+                                 Foreground="{StaticResource Azul}" HorizontalAlignment="Center"/>
+                    </Border>
+                    <StackPanel>
+                        <TextBlock Text="VEHÍCULOS" Style="{StaticResource EtiquetaSeccion}" Margin="0,7,0,0"/>
+                        <TextBlock x:Name="lblDashMoto" Style="{StaticResource CifraKpi}" Foreground="{StaticResource Azul}" Margin="0,16,0,2"/>
+                        <TextBlock x:Name="lblDashVehiculosDetalle" Style="{StaticResource TextoSecundario}"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </c:GrillaAdaptable>
+
+        <!-- ===== FILA CENTRAL ===== -->
+        <c:GrillaAdaptable Columnas="3" AnchoMinimo="300" Margin="0,0,0,14">
+
+            <!-- Por pagar este mes -->
+            <Border Style="{StaticResource Card}">
+                <StackPanel>
+                    <DockPanel Margin="0,0,0,12">
+                        <Button DockPanel.Dock="Right" Content="Ver todo" Click="BtnVerCuentas_Click" Style="{StaticResource BotonSecundario}"
+                                c:Ui.Icono="{StaticResource IcoCuentas}" Height="30" Padding="10,0" FontSize="12.5" VerticalAlignment="Center" Margin="0,-6,0,-6"
+                                Background="{StaticResource AzulSuave}" Foreground="{StaticResource Azul}" BorderBrush="#C9D7F8"
+                                AutomationProperties.Name="Ver todas las cuentas" ToolTip="Ir a Cuentas del mes"/>
+                        <TextBlock Text="Por pagar este mes" Style="{StaticResource TituloTarjeta}"/>
+                    </DockPanel>
+                    <TextBlock x:Name="lblSinProximas" Text="No tienes pagos pendientes este mes." Style="{StaticResource TextoSecundario}" Visibility="Collapsed"/>
+                    <ItemsControl x:Name="icProximasFechas">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Background="{Binding Fondo}" BorderBrush="{Binding Borde}" BorderThickness="1" CornerRadius="10"
+                                        Padding="12,8" Margin="0,0,0,8">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="40"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Dia}" FontSize="17" FontWeight="ExtraBold" Foreground="{Binding ColorDia}" HorizontalAlignment="Center"/>
+                                            <TextBlock Text="{Binding MesCorto}" FontSize="11" FontWeight="Bold" Foreground="{StaticResource Texto2}" HorizontalAlignment="Center"/>
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="1" Margin="12,0,8,0" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Titulo}" FontSize="13.5" FontWeight="SemiBold" Foreground="{Binding ColorTitulo}" TextTrimming="CharacterEllipsis"/>
+                                            <TextBlock Text="{Binding Detalle}" FontSize="12.5" Foreground="{Binding ColorDetalle}" TextTrimming="CharacterEllipsis"/>
+                                        </StackPanel>
+                                        <TextBlock Grid.Column="2" Text="{Binding Monto, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" FontSize="13.5" FontWeight="Bold"
+                                                   Foreground="{Binding ColorTitulo}" VerticalAlignment="Center"/>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+
+            <!-- ¿A dónde va tu ingreso? -->
+            <Border Style="{StaticResource Card}">
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Top" Text="¿A dónde va tu ingreso?" Style="{StaticResource TituloTarjeta}" Margin="0,0,0,14"/>
+                    <!-- Proyección del mes siguiente -->
+                    <Border DockPanel.Dock="Bottom" Style="{StaticResource Recuadro}" Margin="0,14,0,0">
+                        <DockPanel>
+                            <c:Icono DockPanel.Dock="Left" Geometria="{StaticResource IcoGrafico}" Tamano="14" Foreground="{StaticResource Texto2}"
+                                     VerticalAlignment="Top" Margin="0,2,8,0"/>
+                            <TextBlock x:Name="lblProyeccionSiguiente" FontSize="12.5" Foreground="{StaticResource Texto2}" TextWrapping="Wrap"/>
+                        </DockPanel>
+                    </Border>
+                    <StackPanel>
+                        <!-- Barra apilada: cada parte es un gasto o lo disponible -->
+                        <Grid x:Name="barraIngreso" Height="14" Margin="0,0,0,14"/>
+                        <TextBlock x:Name="lblSinIngresoDistribucion" Text="Registra tu salario para ver cómo se reparte."
+                                   Style="{StaticResource TextoSecundario}" Visibility="Collapsed"/>
+                        <ItemsControl x:Name="icDistribucion">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <!-- Tooltip: en los abonos a metas dice cuándo y cuánto fue cada uno -->
+                                    <Grid Margin="0,0,0,9" Background="Transparent" ToolTip="{Binding ToolTipFila}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="56"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Border Width="11" Height="11" CornerRadius="3" Background="{Binding Color}" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Column="1" Text="{Binding Nombre}" FontSize="13.5" TextTrimming="CharacterEllipsis"/>
+                                        <TextBlock Grid.Column="2" Text="{Binding PorcentajeTexto}" FontSize="13.5" Foreground="{StaticResource Texto2}" TextAlignment="Right" Margin="0,0,14,0"/>
+                                        <TextBlock Grid.Column="3" Text="{Binding Monto, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" FontSize="13.5" FontWeight="Bold"
+                                                   Foreground="{Binding ColorMonto}" TextAlignment="Right" MinWidth="90"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </DockPanel>
+            </Border>
+
+            <!-- Comparado con el mes anterior: en qué se gasta más o menos -->
+            <Border Style="{StaticResource Card}">
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Top" x:Name="lblTituloComparacion" Text="Comparado con el mes anterior" Style="{StaticResource TituloTarjeta}" Margin="0,0,0,12"/>
+                    <!-- Resumen del cambio total -->
+                    <Border DockPanel.Dock="Top" x:Name="cajaCambioTotal" Style="{StaticResource Recuadro}" Margin="0,0,0,12">
+                        <StackPanel>
+                            <TextBlock x:Name="lblCambioTotal" FontSize="22" FontWeight="ExtraBold"/>
+                            <TextBlock x:Name="lblCambioDetalle" Style="{StaticResource TextoSecundario}" TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Border>
+                    <Border DockPanel.Dock="Bottom" BorderBrush="{StaticResource Borde}" BorderThickness="0,1,0,0" Padding="0,10,0,0" Margin="0,8,0,0">
+                        <StackPanel>
+                            <DockPanel>
+                                <TextBlock DockPanel.Dock="Right" x:Name="lblTotalCategorias" FontSize="14" FontWeight="ExtraBold"/>
+                                <TextBlock Text="Gastos este mes" Style="{StaticResource TextoSecundario}" FontSize="13" VerticalAlignment="Center"/>
+                            </DockPanel>
+                            <DockPanel Margin="0,3,0,0">
+                                <TextBlock DockPanel.Dock="Right" x:Name="lblTotalAnterior" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource Texto2}"/>
+                                <TextBlock x:Name="lblNombreAnterior" Text="Mes anterior" Style="{StaticResource TextoSecundario}" FontSize="13" VerticalAlignment="Center"/>
+                            </DockPanel>
+                        </StackPanel>
+                    </Border>
+                    <StackPanel>
+                        <TextBlock x:Name="lblSinCategorias" Text="Sin gastos registrados en estos dos meses." Style="{StaticResource TextoSecundario}" Visibility="Collapsed"/>
+                        <!-- Cada categoría: lo de este mes y cuánto cambió -->
+                        <ItemsControl x:Name="icCategoriasMes">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="0,0,0,9">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Border Width="10" Height="10" CornerRadius="3" Background="{Binding ColorBarra}" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Column="1" Text="{Binding Nombre}" FontSize="13.5" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Column="2" Text="{Binding Total, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" FontSize="13.5" FontWeight="Bold"
+                                                   VerticalAlignment="Center" Margin="8,0,10,0"/>
+                                        <Border Grid.Column="3" Style="{StaticResource Chip}" Background="{Binding FondoCambio}" CornerRadius="10" MinWidth="92">
+                                            <TextBlock Text="{Binding TextoCambio}" Style="{StaticResource TextoChip}" Foreground="{Binding ColorCambio}" HorizontalAlignment="Center"/>
+                                        </Border>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </DockPanel>
+            </Border>
+        </c:GrillaAdaptable>
+
+        <!-- ===== ACCESOS: ahorro, inversiones y créditos ===== -->
+        <c:GrillaAdaptable Columnas="4" AnchoMinimo="220">
+            <Button Style="{StaticResource TarjetaBoton}" Click="TarjetaAhorro_Click" AutomationProperties.Name="Ver ahorro acumulado">
+                <StackPanel>
+                    <TextBlock Text="Ahorro acumulado" FontSize="13" FontWeight="Medium" Foreground="{StaticResource Texto2}"/>
+                    <TextBlock x:Name="lblAhorro" FontSize="20" FontWeight="ExtraBold" Foreground="{StaticResource VerdeTexto}" Margin="0,3,0,1"/>
+                    <TextBlock x:Name="lblAhorroDetalle" Style="{StaticResource TextoSecundario}" TextTrimming="CharacterEllipsis"/>
+                </StackPanel>
+            </Button>
+            <Button Style="{StaticResource TarjetaBoton}" Click="TarjetaInversiones_Click" AutomationProperties.Name="Ver inversiones">
+                <StackPanel>
+                    <TextBlock Text="Inversiones" FontSize="13" FontWeight="Medium" Foreground="{StaticResource Texto2}"/>
+                    <TextBlock x:Name="lblInversiones" FontSize="20" FontWeight="ExtraBold" Margin="0,3,0,1"/>
+                    <TextBlock x:Name="lblInversionesDetalle" Style="{StaticResource TextoSecundario}" TextTrimming="CharacterEllipsis"/>
+                </StackPanel>
+            </Button>
+            <Button Style="{StaticResource TarjetaBoton}" Click="TarjetaCreditos_Click" AutomationProperties.Name="Ver créditos">
+                <StackPanel>
+                    <TextBlock Text="Deuda en créditos" FontSize="13" FontWeight="Medium" Foreground="{StaticResource Texto2}"/>
+                    <TextBlock x:Name="lblDeuda" FontSize="20" FontWeight="ExtraBold" Foreground="{StaticResource Rojo}" Margin="0,3,0,6"/>
+                    <ProgressBar x:Name="barDeuda" Style="{StaticResource Barra}" Height="6"/>
+                </StackPanel>
+            </Button>
+            <!-- Lo que ya se ha pagado de los créditos (capital): el avance, no lo que falta -->
+            <Button Style="{StaticResource TarjetaBoton}" Click="TarjetaCreditos_Click" AutomationProperties.Name="Ver lo que ya has pagado">
+                <StackPanel>
+                    <TextBlock Text="Ya has pagado" FontSize="13" FontWeight="Medium" Foreground="{StaticResource Texto2}"/>
+                    <TextBlock x:Name="lblFinCredito" FontSize="20" FontWeight="ExtraBold" Foreground="{StaticResource VerdeTexto}" Margin="0,3,0,1"/>
+                    <TextBlock x:Name="lblFinCreditoDetalle" Style="{StaticResource TextoSecundario}" TextTrimming="CharacterEllipsis"/>
+                </StackPanel>
+            </Button>
+        </c:GrillaAdaptable>
+      </StackPanel>
+    </ScrollViewer>
+
+    <c:Toast x:Name="toast" Panel.ZIndex="50"/>
+  </Grid>
 </UserControl>

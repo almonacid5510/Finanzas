@@ -1,3 +1,8 @@
+﻿// ============================================================
+//  Proyecto: Mis Finanzas
+//  Autoria: Juan Almonacid
+//  Copyright (c) 2026 Juan Almonacid. Todos los derechos reservados.
+// ============================================================
 using System.Windows;
 
 [assembly: ThemeInfo(

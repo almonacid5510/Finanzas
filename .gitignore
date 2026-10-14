@@ -3,3 +3,7 @@ bin/
 obj/
 *.user
 *.suo
+
+# Salidas de publicacion e instalador (binarios generados)
+publish/
+Instalador/Salida/

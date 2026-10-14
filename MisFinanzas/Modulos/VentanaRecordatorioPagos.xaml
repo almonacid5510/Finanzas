@@ -1,0 +1,83 @@
+<!--
+    Proyecto: Mis Finanzas
+    Autoria: Juan Almonacid
+    Copyright (c) 2026 Juan Almonacid. Todos los derechos reservados.
+-->
+<Window x:Class="MisFinanzas.Modulos.VentanaRecordatorioPagos"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:c="clr-namespace:MisFinanzas.Controles"
+        Title="Pagos pendientes" Width="580" SizeToContent="Height"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent" ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner" ShowInTaskbar="False"
+        FontFamily="{StaticResource FuenteApp}" FontSize="13" Foreground="{StaticResource Texto}"
+        Typography.NumeralAlignment="Tabular">
+
+    <Border Background="White" CornerRadius="20" Margin="24" Padding="26,24" MouseLeftButtonDown="Marco_MouseLeftButtonDown">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="30" Direction="270" Opacity="0.25" ShadowDepth="8"/>
+        </Border.Effect>
+        <StackPanel>
+            <!-- Encabezado -->
+            <DockPanel Margin="0,0,0,18">
+                <Button DockPanel.Dock="Right" Click="BtnCerrar_Click" Style="{StaticResource BotonIcono}" c:Ui.Icono="{StaticResource IcoX}"
+                        Width="38" Height="38" Background="{StaticResource GrisSuave}" BorderBrush="Transparent" Foreground="{StaticResource Texto2}"
+                        VerticalAlignment="Top" IsCancel="True" AutomationProperties.Name="Cerrar" ToolTip="Cerrar"/>
+                <Border DockPanel.Dock="Left" Width="46" Height="46" CornerRadius="12" Background="#FEE4E2" Margin="0,0,16,0" VerticalAlignment="Top">
+                    <c:Icono Geometria="{StaticResource IcoAlerta}" Tamano="22" Foreground="{StaticResource Rojo}" HorizontalAlignment="Center"/>
+                </Border>
+                <StackPanel VerticalAlignment="Center">
+                    <TextBlock x:Name="lblTitulo" Text="Tienes pagos pendientes" FontSize="20" FontWeight="ExtraBold"/>
+                    <TextBlock Text="Estas cuentas vencen hoy o ya están vencidas." Style="{StaticResource TextoSecundario}" FontSize="13.5" Margin="0,2,0,0"/>
+                </StackPanel>
+            </DockPanel>
+
+            <!-- Cuentas vencidas -->
+            <ScrollViewer MaxHeight="320" VerticalScrollBarVisibility="Auto">
+                <ItemsControl x:Name="icCuentasPendientes">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Background="#FFF8F7" BorderBrush="{StaticResource RojoBorde}" BorderThickness="1" CornerRadius="12" Padding="16,12" Margin="0,0,0,10">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="46"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Vence, StringFormat='{}{0:dd}'}" FontSize="19" FontWeight="ExtraBold" Foreground="{StaticResource Rojo}" HorizontalAlignment="Center"/>
+                                        <TextBlock Text="{Binding MesCortoVence}" FontSize="11.5" FontWeight="Bold" Foreground="{StaticResource Texto2}" HorizontalAlignment="Center"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="1" Margin="12,0,10,0" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Descripcion}" FontSize="15" FontWeight="Bold" TextTrimming="CharacterEllipsis"/>
+                                        <TextBlock FontSize="12.5" Foreground="{StaticResource Rojo}" TextWrapping="Wrap">
+                                            <Run Text="{Binding VencidaHace, Mode=OneWay}"/><Run Text=" · "/><Run Text="{Binding Categoria, Mode=OneWay}"/>
+                                        </TextBlock>
+                                    </StackPanel>
+                                    <TextBlock Grid.Column="2" Text="{Binding Venta, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" FontSize="16" FontWeight="ExtraBold"
+                                               VerticalAlignment="Center" Margin="0,0,14,0"/>
+                                    <Button Grid.Column="3" Content="Pagado" Click="BtnPagar_Click" CommandParameter="{Binding}" Style="{StaticResource BotonVerde}"
+                                            c:Ui.Icono="{StaticResource IcoCheck}"
+                                            AutomationProperties.Name="{Binding Descripcion, StringFormat='Marcar {0} como pagado'}"/>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+
+            <!-- Pie -->
+            <DockPanel Margin="0,10,0,0">
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                    <Button Content="Recordar mañana" Click="BtnRecordarManana_Click" Style="{StaticResource BotonSecundario}"
+                            ToolTip="Cierra el aviso; volverá a mostrarse en el Dashboard"/>
+                    <Button Content="Ir a cuentas" Click="BtnIrACuentas_Click" Style="{StaticResource BotonOscuro}" Margin="10,0,0,0"/>
+                </StackPanel>
+                <TextBlock VerticalAlignment="Center" FontSize="14" Foreground="{StaticResource Texto2}">
+                    <Run Text="Total vencido"/> <Run x:Name="runTotalVencido" FontWeight="ExtraBold" Foreground="{StaticResource Texto}"/>
+                </TextBlock>
+            </DockPanel>
+        </StackPanel>
+    </Border>
+</Window>

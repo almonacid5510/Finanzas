@@ -1,4 +1,9 @@
-﻿using System;
+﻿// ============================================================
+//  Proyecto: Mis Finanzas
+//  Autoria: Juan Almonacid
+//  Copyright (c) 2026 Juan Almonacid. Todos los derechos reservados.
+// ============================================================
+using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
@@ -20,16 +25,8 @@ namespace MisFinanzas.Modulos
             this.Loaded += (s, e) => CargarVehiculos();
         }
 
-        private void UserControl_Loaded(object sender, RoutedEventArgs e)
-        {
-            CargarVehiculos();
-
-            // FORZAR NOTIFICACIÓN PARA TODOS
-            foreach (var v in listaVehiculos)
-            {
-                v.NotificarCambioTotal();
-            }
-        }
+        // Vehículo que se muestra a la derecha
+        private int _seleccionadoId;
 
         private void CargarVehiculos()
         {
@@ -54,12 +51,75 @@ namespace MisFinanzas.Modulos
 
                     // 4. Notificamos por si acaso
                     v.NotificarCambioTotal();
+                    v.PropertyChanged += Vehiculo_PropertyChanged;
                 }
             }
+            Seleccionar(listaVehiculos.FirstOrDefault(v => v.Id == _seleccionadoId) ?? listaVehiculos.FirstOrDefault());
+        }
+
+        // El total del encabezado sigue a los gastos que se registran en el detalle
+        private void Vehiculo_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(Vehiculo.TotalInvertido)) ActualizarTotalGeneral();
+        }
+
+        private void ActualizarTotalGeneral() =>
+            runCapitalTotal.Text = NumeroHelper.Moneda(listaVehiculos.Sum(v => v.TotalInvertido));
+
+        // Muestra el detalle del vehículo a la derecha (sin cambiar de pantalla)
+        private void Seleccionar(Vehiculo? vehiculo)
+        {
+            foreach (var v in listaVehiculos) v.Seleccionado = v == vehiculo;
+            _seleccionadoId = vehiculo?.Id ?? 0;
+
+            pnlDetalle.DataContext = vehiculo;
+            contDetalle.Content = vehiculo == null ? null : new DetalleVehiculoView(vehiculo) { PedirConfirmacion = PedirConfirmacion };
+            pnlDetalle.Visibility = vehiculo == null ? Visibility.Collapsed : Visibility.Visible;
+            lblSinDetalle.Visibility = vehiculo == null ? Visibility.Visible : Visibility.Collapsed;
+            lblSinVehiculos.Visibility = listaVehiculos.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+            ActualizarTotalGeneral();
+        }
+
+        // Vehículo que se está modificando en el formulario (null = se registra uno nuevo)
+        private Vehiculo? _editando;
+
+        // Carga el vehículo en el formulario para modificarlo
+        private void BtnEditarVehiculo_Click(object sender, RoutedEventArgs e)
+        {
+            if ((sender as Button)?.DataContext is not Vehiculo vehiculo) return;
+
+            _editando = vehiculo;
+            txtNombreVehiculo.Text = vehiculo.Nombre;
+            txtPlaca.Text = vehiculo.Placa;
+            cbTipoVehiculo.SelectedItem = cbTipoVehiculo.Items.OfType<ComboBoxItem>()
+                .FirstOrDefault(i => (string)i.Content == vehiculo.Tipo) ?? cbTipoVehiculo.Items[0];
+
+            lblTituloFormulario.Text = $"Editar \"{vehiculo.Nombre}\"";
+            btnGuardarVehiculo.Content = "Guardar";
+            btnCancelarEdicion.Visibility = Visibility.Visible;
+            txtNombreVehiculo.Focus();
+        }
+
+        private void BtnCancelarEdicion_Click(object sender, RoutedEventArgs e) => LimpiarFormulario();
+
+        private void LimpiarFormulario()
+        {
+            _editando = null;
+            txtNombreVehiculo.Clear();
+            txtPlaca.Clear();
+            cbTipoVehiculo.SelectedIndex = 0;
+            lblTituloFormulario.Text = "Registrar vehículo";
+            btnGuardarVehiculo.Content = "Registrar";
+            btnCancelarEdicion.Visibility = Visibility.Collapsed;
         }
 
         private void BtnAgregarVehiculo_Click(object sender, RoutedEventArgs e)
         {
+            if (_editando != null)
+            {
+                GuardarEdicion(_editando);
+                return;
+            }
             if (!string.IsNullOrWhiteSpace(txtNombreVehiculo.Text) && cbTipoVehiculo.SelectedItem != null)
             {
                 var nuevo = new Vehiculo
@@ -80,59 +140,131 @@ namespace MisFinanzas.Modulos
 
                     // ObservableCollection se encarga de actualizar la UI sola
                     listaVehiculos.Add(nuevo);
+                    nuevo.PropertyChanged += Vehiculo_PropertyChanged;
+                    Seleccionar(nuevo);
 
                     txtNombreVehiculo.Clear();
                     txtPlaca.Clear();
+                    toast.Show("Vehículo registrado");
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Error: {ex.Message}");
+                    MisFinanzas.Controles.Aviso.Mostrar($"Error: {ex.Message}");
                 }
             }
+        }
+
+        private void GuardarEdicion(Vehiculo vehiculo)
+        {
+            if (string.IsNullOrWhiteSpace(txtNombreVehiculo.Text))
+            {
+                MisFinanzas.Controles.Aviso.Mostrar("Escribe el alias del vehículo.");
+                return;
+            }
+            var nombre = txtNombreVehiculo.Text.Trim();
+            var tipo = (cbTipoVehiculo.SelectedItem as ComboBoxItem)?.Content.ToString() ?? vehiculo.Tipo;
+            var placa = txtPlaca.Text.ToUpper();
+
+            try
+            {
+                using (var db = new AppDbContext())
+                {
+                    var v = db.Vehiculos.Find(vehiculo.Id);
+                    if (v != null)
+                    {
+                        v.Nombre = nombre;
+                        v.Tipo = tipo;
+                        v.Placa = placa;
+                        db.SaveChanges();
+                    }
+                }
+                // Mismo objeto de la lista: la tarjeta y el detalle se actualizan solos
+                vehiculo.Nombre = nombre;
+                vehiculo.Tipo = tipo;
+                vehiculo.Placa = placa;
+                LimpiarFormulario();
+                toast.Show("Cambios guardados");
+            }
+            catch (Exception ex)
+            {
+                MisFinanzas.Controles.Aviso.Mostrar($"Error al guardar: {ex.Message}");
+            }
+        }
+
+        // Acción pendiente de confirmar (eliminar un vehículo o un registro del detalle)
+        private Action? _alConfirmar;
+
+        private void PedirConfirmacion(string titulo, string nombre, string final, Action alConfirmar)
+        {
+            txtTituloConfirm.Text = titulo;
+            runNombreConfirm.Text = nombre;
+            runFinalConfirm.Text = final;
+            _alConfirmar = alConfirmar;
+            MostrarOverlayConfirm(true);
         }
 
         private void BtnEliminarVehiculo_Click(object sender, RoutedEventArgs e)
         {
-            e.Handled = true;
-            var boton = sender as Button;
-            var vehiculoAEliminar = boton?.DataContext as Vehiculo;
+            if ((sender as Button)?.DataContext is Vehiculo vehiculo)
+                PedirConfirmacion("Eliminar vehículo", $"\"{vehiculo.Nombre}\"",
+                    " y todo su historial? Esta acción no se puede deshacer.", () => EliminarVehiculo(vehiculo));
+        }
 
-            if (vehiculoAEliminar != null)
+        private void ConfirmCancelar_Click(object sender, RoutedEventArgs e)
+        {
+            _alConfirmar = null;
+            MostrarOverlayConfirm(false);
+        }
+
+        private void ConfirmEliminar_Click(object sender, RoutedEventArgs e)
+        {
+            var accion = _alConfirmar;
+            MostrarOverlayConfirm(false);
+            _alConfirmar = null;
+            accion?.Invoke();
+        }
+
+        private void EliminarVehiculo(Vehiculo vehiculo)
+        {
+            try
             {
-                var resultado = MessageBox.Show($"¿Eliminar {vehiculoAEliminar.Nombre}?", "Confirmar", MessageBoxButton.YesNo);
-                if (resultado == MessageBoxResult.Yes)
+                using (var db = new AppDbContext())
                 {
-                    try
-                    {
-                        using (var db = new AppDbContext())
-                        {
-                            db.Vehiculos.Remove(vehiculoAEliminar);
-                            db.SaveChanges();
-                        }
-                        listaVehiculos.Remove(vehiculoAEliminar);
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show($"Error al eliminar: {ex.Message}");
-                    }
+                    // Se eliminan también sus gastos para no dejar registros huérfanos.
+                    // Un solo SaveChanges: o se borra todo o no se borra nada.
+                    db.GastosVehiculo.RemoveRange(db.GastosVehiculo.Where(g => g.VehiculoId == vehiculo.Id));
+                    db.Vehiculos.Remove(vehiculo);
+                    db.SaveChanges();
                 }
+                listaVehiculos.Remove(vehiculo);
+                if (_editando == vehiculo) LimpiarFormulario();
+                Seleccionar(listaVehiculos.FirstOrDefault());
+                toast.Show("Vehículo eliminado");
+            }
+            catch (Exception ex)
+            {
+                MisFinanzas.Controles.Aviso.Mostrar($"Error al eliminar: {ex.Message}");
             }
         }
 
-        private void TarjetaVehiculo_Click(object sender, MouseButtonEventArgs e)
+        private void MostrarOverlayConfirm(bool visible)
         {
-            var border = sender as Border;
-            var vehiculoSeleccionado = border?.DataContext as Vehiculo;
-
-            if (vehiculoSeleccionado != null)
+            if (visible)
             {
-                var detalleView = new DetalleVehiculoView(vehiculoSeleccionado.Id);
-                var mainWindow = Window.GetWindow(this) as MainWindow;
-                if (mainWindow != null)
-                {
-                    mainWindow.ContenedorPrincipal.Content = detalleView;
-                }
+                OverlayConfirm.Visibility = Visibility.Visible;
+                OverlayConfirm.BeginAnimation(OpacityProperty,
+                    new System.Windows.Media.Animation.DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(150)));
             }
+            else
+            {
+                OverlayConfirm.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        // Clic en un vehículo de la lista: muestra su detalle a la derecha
+        private void TarjetaVehiculo_Click(object sender, RoutedEventArgs e)
+        {
+            if (((FrameworkElement)sender).DataContext is Vehiculo vehiculo) Seleccionar(vehiculo);
         }
     }
 }

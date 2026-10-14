@@ -1,0 +1,36 @@
+<!--
+    Proyecto: Mis Finanzas
+    Autoria: Juan Almonacid
+    Copyright (c) 2026 Juan Almonacid. Todos los derechos reservados.
+-->
+<!-- Aviso con el estilo de la app (reemplaza al MessageBox gris de Windows). Uso: Aviso.Mostrar("...") -->
+<Window x:Class="MisFinanzas.Controles.Aviso"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:c="clr-namespace:MisFinanzas.Controles"
+        Title="Aviso" Width="460" SizeToContent="Height"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent" ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner" ShowInTaskbar="False"
+        FontFamily="{StaticResource FuenteApp}" FontSize="13" Foreground="{StaticResource Texto}">
+
+    <Border Background="White" CornerRadius="18" Margin="24" Padding="24,22" MouseLeftButtonDown="Marco_MouseLeftButtonDown">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="30" Direction="270" Opacity="0.25" ShadowDepth="8"/>
+        </Border.Effect>
+        <StackPanel>
+            <DockPanel>
+                <Border x:Name="cajaIcono" DockPanel.Dock="Left" Width="44" Height="44" CornerRadius="12"
+                        Background="{StaticResource NaranjaSuave}" Margin="0,0,16,0" VerticalAlignment="Top">
+                    <c:Icono x:Name="icono" Geometria="{StaticResource IcoAlerta}" Tamano="21"
+                             Foreground="{StaticResource NaranjaTexto}" HorizontalAlignment="Center"/>
+                </Border>
+                <StackPanel VerticalAlignment="Center">
+                    <TextBlock x:Name="lblTitulo" Text="Revisa los datos" FontSize="18" FontWeight="ExtraBold"/>
+                    <TextBlock x:Name="lblMensaje" FontSize="13.5" Foreground="{StaticResource Texto2}" TextWrapping="Wrap" Margin="0,4,0,0"/>
+                </StackPanel>
+            </DockPanel>
+            <Button Content="Entendido" Click="BtnAceptar_Click" Style="{StaticResource BotonOscuro}" HorizontalAlignment="Right"
+                    MinWidth="120" Margin="0,20,0,0" IsDefault="True" IsCancel="True"/>
+        </StackPanel>
+    </Border>
+</Window>

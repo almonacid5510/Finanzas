@@ -1,4 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
+// ============================================================
+//  Proyecto: Mis Finanzas
+//  Autoria: Juan Almonacid
+//  Copyright (c) 2026 Juan Almonacid. Todos los derechos reservados.
+// ============================================================
+using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Linq;
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
@@ -13,6 +20,8 @@ namespace MisFinanzas.Modulos
         public CreditosView()
         {
             InitializeComponent();
+            cbDiaPagoCredito.ItemsSource = Enumerable.Range(1, 31).ToList();
+            cbDiaPagoCredito.SelectedItem = DateTime.Today.Day;
 
             // 1. Vinculamos la lista persistente al control de esta pestaña
             // Asumiendo que tu ItemsControl en Créditos se llama 'icListaCreditos'
@@ -24,12 +33,46 @@ namespace MisFinanzas.Modulos
             {
                 CargarDatosGlobal();
             }
+
+            // Al entrar se ve solo la lista; el detalle se abre al elegir un crédito
+            Seleccionar(0);
+        }
+
+        // "Deuda total $ X · N créditos activos"
+        private void ActualizarEncabezado()
+        {
+            var activos = ListaCreditosPersistente.Where(c => !c.Saldado).ToList();
+            lblResumenDeuda.Inlines.Clear();
+            lblResumenDeuda.Inlines.Add(new System.Windows.Documents.Run("Deuda total "));
+            lblResumenDeuda.Inlines.Add(new System.Windows.Documents.Run(NumeroHelper.Moneda(ListaCreditosPersistente.Sum(c => Math.Max(0, c.Disponible))))
+            {
+                FontWeight = FontWeights.Bold,
+                Foreground = (System.Windows.Media.Brush)FindResource("Rojo")
+            });
+            lblResumenDeuda.Inlines.Add(new System.Windows.Documents.Run(
+                $" · {activos.Count} {(activos.Count == 1 ? "crédito activo" : "créditos activos")}"));
+
+            // Pagar, deshacer, editar el día de pago o eliminar cambian el punto rojo de cuotas vencidas
+            MainWindow.Actual?.VerificarVencimientosCuentas();
+        }
+
+        // Muestra u oculta el formulario de nuevo crédito
+        private void BtnNuevoCredito_Click(object sender, RoutedEventArgs e)
+        {
+            bool abrir = pnlNuevoCredito.Visibility != Visibility.Visible;
+            pnlNuevoCredito.Visibility = abrir ? Visibility.Visible : Visibility.Collapsed;
+            if (abrir) txtNombreCredito.Focus();
         }
 
         private void BtnAgregarCredito_Click(object sender, RoutedEventArgs e)
         {
-            if (decimal.TryParse(txtTotalCredito.Text, out decimal total) &&
-                decimal.TryParse(txtCuotaCredito.Text, out decimal cuota) &&
+            if (cbDiaPagoCredito.SelectedItem is not int diaPago)
+            {
+                MisFinanzas.Controles.Aviso.Mostrar("Elige el día del mes en que pagas la cuota.");
+                return;
+            }
+            if (NumeroHelper.TryParseMoneda(txtTotalCredito.Text, out decimal total) &&
+                NumeroHelper.TryParseMoneda(txtCuotaCredito.Text, out decimal cuota) &&
                 !string.IsNullOrWhiteSpace(txtNombreCredito.Text))
             {
                 try
@@ -38,14 +81,13 @@ namespace MisFinanzas.Modulos
                     {
                         var nuevo = new Credito
                         {
-                            // IMPORTANTE: Usamos NombreCustom que es el que tienes en el modelo y DB
                             NombreCustom = txtNombreCredito.Text,
-                            Tipo = txtNombreCredito.Text, // Llenamos ambos por si acaso
                             Total = total,
-                            Disponible = total - (decimal.TryParse(txtAbonoCredito.Text, out var a) ? a : 0),
+                            Disponible = total - (NumeroHelper.TryParseMoneda(txtAbonoCredito.Text, out var a) ? a : 0),
                             CuotaMensual = cuota,
                             TasaEA = double.TryParse(txtTasaEA.Text, out var t) ? t : 0,
                             PlazoMeses = int.TryParse(txtPlazo.Text, out var p) ? p : 0,
+                            DiaPago = diaPago,
                             Pagado = false,
                             Editando = false
                         };
@@ -54,72 +96,75 @@ namespace MisFinanzas.Modulos
                         db.SaveChanges();
                     }
 
-                    // Refrescamos la lista global
+                    // Refrescamos la lista global y mostramos el crédito nuevo
                     CargarDatosGlobal();
+                    Seleccionar(ListaCreditosPersistente.Count > 0 ? ListaCreditosPersistente.Max(c => c.Id) : 0);
+                    pnlNuevoCredito.Visibility = Visibility.Collapsed;
+                    toast.Show("Crédito registrado");
 
                     // Limpiar campos
                     txtNombreCredito.Clear();
                     txtTotalCredito.Clear();
                     txtCuotaCredito.Clear();
                     txtAbonoCredito.Clear(); 
-                    txtTasaEA.Clear();       
+                    txtTasaEA.Clear();
                     txtPlazo.Clear();
+                    cbDiaPagoCredito.SelectedItem = DateTime.Today.Day;
                 }
-                catch (Exception ex) { MessageBox.Show("Error al guardar: " + ex.Message); }
+                catch (Exception ex) { MisFinanzas.Controles.Aviso.Mostrar("Error al guardar: " + ex.Message); }
             }
         }
 
-        // Este es el método que hace la magia de la persistencia
-        private void GuardarCreditoEnBD(string nom, decimal cuota, decimal total, decimal pagado, decimal tasa, int meses)
+        /// <summary>
+        /// Muestra el detalle de un crédito (también desde "Ver crédito" en otras pantallas).
+        /// Con 0 (o un id que no existe) cierra el detalle y la lista ocupa todo el ancho.
+        /// </summary>
+        public void Seleccionar(int creditoId)
         {
-            try
+            var elegido = ListaCreditosPersistente.FirstOrDefault(c => c.Id == creditoId);
+            foreach (var c in ListaCreditosPersistente)
             {
-                using (var connection = DatabaseConfig.GetConnection())
-                {
-                    connection.Open();
-                    var command = connection.CreateCommand();
-
-                    command.CommandText = @"INSERT INTO Creditos (NombreCustom, MontoTotal, SaldoPendiente, Tasa, PlazoMeses, CuotaMensual) 
-                        VALUES (@nom, @total, @pendiente, @tasa, @meses, @cuota)";
-                    command.Parameters.AddWithValue("@cuota", cuota); // Ya recibes 'cuota' como parámetro en este método
-
-                    command.Parameters.AddWithValue("@nom", nom);
-                    command.Parameters.AddWithValue("@total", total);
-                    command.Parameters.AddWithValue("@pendiente", total - pagado);
-                    command.Parameters.AddWithValue("@tasa", tasa);
-                    command.Parameters.AddWithValue("@meses", meses);
-
-                    command.ExecuteNonQuery();
-                }
+                c.VerDetalle = c == elegido;
+                if (c != elegido) c.Editando = false;
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Error al guardar en la base de datos: " + ex.Message);
-            }
+            detalleCredito.Content = elegido;
+            pnlDetalle.Visibility = elegido == null ? Visibility.Collapsed : Visibility.Visible;
+            Grid.SetColumnSpan(pnlLista, elegido == null ? 3 : 1);
+            lblSinCreditos.Visibility = Visibility.Collapsed;
+            ActualizarEncabezado();
         }
 
-        private void BtnActivarEdicion_Click(object sender, RoutedEventArgs e) =>
-            ((Credito)((Button)sender).DataContext).Editando = true;
-
-        private void BtnGuardarEdicion_Click(object sender, RoutedEventArgs e)
+        // Clic en un crédito de la lista: abre su detalle; clic otra vez en el mismo, lo cierra
+        private void Resumen_Click(object sender, RoutedEventArgs e)
         {
-            // 1. Identificamos el crédito que se está editando
-            var boton = sender as Button;
-            var creditoEditado = boton?.DataContext as Credito;
+            if (((FrameworkElement)sender).DataContext is Credito credito)
+                Seleccionar(credito.VerDetalle && !credito.Editando ? 0 : credito.Id);
+        }
 
-            if (creditoEditado != null)
+        private void BtnCerrarDetalle_Click(object sender, RoutedEventArgs e) => Seleccionar(0);
+
+        // Un solo botón alterna entre Editar (✎) y Guardar (✔)
+        private void BtnToggleEdicion_Click(object sender, RoutedEventArgs e)
+        {
+            var creditoEditado = ((Button)sender).DataContext as Credito;
+            if (creditoEditado == null) return;
+
+            if (!creditoEditado.Editando)
             {
-                // 2. LLAMADA CRUCIAL: Guardamos los cambios en SQLite
-                // Pasamos el objeto completo que ya tiene el ID y los datos nuevos
+                // Estaba en solo lectura -> activar edición
+                creditoEditado.Editando = true;
+            }
+            else
+            {
+                // Aseguramos que el TextBox con foco confirme su valor (UpdateSourceTrigger=LostFocus)
+                var enfocado = System.Windows.Input.Keyboard.FocusedElement as System.Windows.Controls.TextBox;
+                enfocado?.GetBindingExpression(System.Windows.Controls.TextBox.TextProperty)?.UpdateSource();
+
+                // Estaba en edición -> guardar y volver a solo lectura
                 ActualizarCreditoEnBD(creditoEditado);
-
-                // 3. Cerramos el modo edición visual (lo que ya hacías)
                 creditoEditado.Editando = false;
-
-                // 4. Refrescamos la tabla para que se bloqueen los TextBox
-                icListaCreditos.Items.Refresh();
-
-                MessageBox.Show("Cambios guardados correctamente.");
+                ActualizarEncabezado();
+                toast.Show("Cambios guardados correctamente");
             }
         }
 
@@ -127,109 +172,202 @@ namespace MisFinanzas.Modulos
         {
             try
             {
-                using (var connection = DatabaseConfig.GetConnection())
+                using (var db = new AppDbContext())
                 {
-                    connection.Open();
-                    var command = connection.CreateCommand();
-
-                    // Usamos el ID para asegurar que editamos la fila correcta
-                    command.CommandText = @"UPDATE Creditos SET 
-                        NombreCustom = @nom, MontoTotal = @total, SaldoPendiente = @pendiente, 
-                        Tasa = @tasa, PlazoMeses = @meses, CuotaMensual = @cuota 
-                        WHERE Id = @id";
-                    command.Parameters.AddWithValue("@cuota", c.CuotaMensual);
-
-                    command.Parameters.AddWithValue("@nom", c.Tipo);
-                    command.Parameters.AddWithValue("@total", c.Total);
-                    command.Parameters.AddWithValue("@pendiente", c.Disponible);
-                    command.Parameters.AddWithValue("@tasa", (decimal)c.TasaEA);
-                    command.Parameters.AddWithValue("@meses", c.PlazoMeses);
-                    command.Parameters.AddWithValue("@id", c.Id);
-
-                    command.ExecuteNonQuery();
+                    db.Creditos.Update(c);
+                    db.SaveChanges();
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error al guardar en la base de datos: " + ex.Message);
+                MisFinanzas.Controles.Aviso.Mostrar("Error al guardar en la base de datos: " + ex.Message);
             }
         }
+
+        // Crédito pendiente de confirmar eliminación
+        private Credito? _creditoPendienteEliminar;
 
         private void BtnEliminar_Click(object sender, RoutedEventArgs e)
         {
-            // 1. Identificamos el crédito desde el botón
             var button = sender as Button;
-            var creditoAEliminar = button?.DataContext as Credito;
+            _creditoPendienteEliminar = button?.DataContext as Credito;
 
-            if (creditoAEliminar != null)
+            if (_creditoPendienteEliminar != null)
             {
-                // 2. Llamamos al método que tiene el MessageBox
-                EliminarCreditoGlobal(creditoAEliminar);
+                runNombreCredito.Text = $"\"{_creditoPendienteEliminar.NombreCustom}\"";
+                MostrarOverlayConfirm(true);
             }
         }
 
-        // Método de apoyo para la persistencia
-        private void EliminarCreditoDeBD(string nombre)
+        private void ConfirmCancelar_Click(object sender, RoutedEventArgs e)
         {
-            try
-            {
-                using (var connection = DatabaseConfig.GetConnection())
-                {
-                    connection.Open();
-                    var command = connection.CreateCommand();
-
-                    // Usamos NombreCustom porque es el campo parametrizable en tu DB
-                    command.CommandText = "DELETE FROM Creditos WHERE NombreCustom = @nom";
-                    command.Parameters.AddWithValue("@nom", nombre);
-
-                    command.ExecuteNonQuery();
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Error al borrar en base de datos: " + ex.Message);
-            }
+            _creditoPendienteEliminar = null;
+            MostrarOverlayConfirm(false);
         }
 
-        private void CargarCreditosDesdeBD()
+        private void ConfirmEliminar_Click(object sender, RoutedEventArgs e)
         {
+            var credito = _creditoPendienteEliminar;
+            MostrarOverlayConfirm(false);
+            _creditoPendienteEliminar = null;
+
+            if (credito == null) return;
+
             try
             {
-                using (var connection = DatabaseConfig.GetConnection())
+                using (var db = new AppDbContext())
                 {
-                    connection.Open();
-                    var command = connection.CreateCommand();
-
-                    // AGREGAMOS "Id" al principio de la consulta SQL
-                    command.CommandText = "SELECT Id, NombreCustom, MontoTotal, SaldoPendiente, Tasa, PlazoMeses, CuotaMensual FROM Creditos";
-
-                    using (var reader = command.ExecuteReader())
+                    var creditoDb = db.Creditos.Find(credito.Id);
+                    if (creditoDb != null)
                     {
-                        ListaCreditosPersistente.Clear();
-                        while (reader.Read())
-                        {
-                            ListaCreditosPersistente.Add(new Credito
-                            {
-                                // Ahora los índices coinciden con el SELECT de arriba
-                                Id = reader.GetInt32(0),          
-                                Tipo = reader.GetString(1),        
-                                Total = reader.GetDecimal(2),      
-                                Disponible = reader.GetDecimal(3), 
-                                TasaEA = reader.GetDouble(4),      
-                                PlazoMeses = reader.GetInt32(5),
-                                CuotaMensual = reader.GetDecimal(6), 
-                                Editando = false
-                            });
-                        }
+                        db.PagosCredito.RemoveRange(db.PagosCredito.Where(p => p.CreditoId == credito.Id));
+                        db.Creditos.Remove(creditoDb);
+                        db.SaveChanges();
                     }
                 }
+
+                if (ListaCreditosPersistente.Contains(credito))
+                    ListaCreditosPersistente.Remove(credito);
+                Seleccionar(0);
+
+                toast.Show("Crédito eliminado");
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error al cargar datos: " + ex.Message);
+                MisFinanzas.Controles.Aviso.Mostrar("Error al eliminar: " + ex.Message);
             }
         }
-        // En CreditosView.xaml.cs
+
+        private void MostrarOverlayConfirm(bool visible)
+        {
+            if (visible)
+            {
+                OverlayConfirm.Visibility = Visibility.Visible;
+                OverlayConfirm.BeginAnimation(OpacityProperty,
+                    new System.Windows.Media.Animation.DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(150)));
+            }
+            else
+            {
+                OverlayConfirm.Visibility = Visibility.Collapsed;
+            }
+        }
+        // --- PAGOS: cuota del mes, abono a capital y deshacer ---
+
+        private void BtnPagarCuota_Click(object sender, RoutedEventArgs e)
+        {
+            if (((Button)sender).DataContext is not Credito credito) return;
+            var pago = RegistrarCuota(credito, true);
+            ActualizarEncabezado();
+            if (pago != null)
+                toast.Show(credito.Saldado
+                    ? "¡Última cuota pagada! Crédito saldado"
+                    : $"Cuota pagada: {pago.Interes:C0} a intereses y {pago.Capital:C0} a capital");
+        }
+
+        private void BtnDeshacerCuota_Click(object sender, RoutedEventArgs e)
+        {
+            if (((Button)sender).DataContext is not Credito credito) return;
+            RegistrarCuota(credito, false);
+            ActualizarEncabezado();
+            toast.Show($"Pago deshecho. Saldo {credito.Disponible:C0}");
+        }
+
+        private void BtnAbonar_Click(object sender, RoutedEventArgs e)
+        {
+            var boton = (Button)sender;
+            if (boton.DataContext is not Credito credito || boton.Tag is not TextBox txt) return;
+
+            if (!NumeroHelper.TryParseMoneda(txt.Text, out var monto) || monto <= 0)
+            {
+                MisFinanzas.Controles.Aviso.Mostrar("Ingresa un valor válido para el abono.");
+                return;
+            }
+            try
+            {
+                PagoCredito pago;
+                using (var db = new AppDbContext())
+                {
+                    pago = Amortizacion.Abonar(db, credito.Id, monto);
+                }
+                Recargar(credito);
+                ActualizarEncabezado();
+                txt.Clear();
+                toast.Show(credito.Saldado
+                    ? "¡Crédito saldado!"
+                    : $"Abono de {pago.Capital:C0} a capital. Nuevo saldo {pago.SaldoNuevo:C0}");
+            }
+            catch (Exception ex)
+            {
+                MisFinanzas.Controles.Aviso.Mostrar("Error al registrar el abono: " + ex.Message);
+            }
+        }
+
+        // Deshace un pago del historial (cuota o abono)
+        private void BtnDeshacerPago_Click(object sender, RoutedEventArgs e)
+        {
+            var boton = (Button)sender;
+            if (boton.DataContext is not PagoCredito pago || boton.Tag is not Credito credito) return;
+            try
+            {
+                using (var db = new AppDbContext())
+                {
+                    Amortizacion.Deshacer(db, pago.Id);
+                }
+                Recargar(credito);
+                ActualizarEncabezado();
+                toast.Show($"Pago deshecho. Saldo {credito.Disponible:C0}");
+            }
+            catch (Exception ex)
+            {
+                MisFinanzas.Controles.Aviso.Mostrar("Error al deshacer el pago: " + ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Paga (o deshace) la cuota del mes en curso: reparte intereses y capital y baja el saldo.
+        /// La usan también Cuentas y el recordatorio de pagos. Devuelve el pago registrado.
+        /// </summary>
+        public static PagoCredito? RegistrarCuota(Credito credito, bool pagar)
+        {
+            try
+            {
+                PagoCredito? pago = null;
+                using (var db = new AppDbContext())
+                {
+                    if (pagar)
+                        pago = Amortizacion.PagarCuota(db, credito.Id, DateTime.Today);
+                    else if (Amortizacion.CuotaDelMes(db, credito.Id, DateTime.Today) is PagoCredito existente)
+                        Amortizacion.Deshacer(db, existente.Id);
+                }
+                Recargar(credito);
+                return pago;
+            }
+            catch (Exception ex)
+            {
+                MisFinanzas.Controles.Aviso.Mostrar("Error al guardar el pago: " + ex.Message);
+                Recargar(credito);
+                return null;
+            }
+        }
+
+        /// <summary>Copia en el objeto de pantalla lo que quedó en la BD (saldo, plazo, estado e historial).</summary>
+        public static void Recargar(Credito credito)
+        {
+            using var db = new AppDbContext();
+            var bd = db.Creditos.AsNoTracking().FirstOrDefault(c => c.Id == credito.Id);
+            if (bd == null) return;
+
+            credito.Disponible = bd.Disponible;
+            credito.PlazoMeses = bd.PlazoMeses;
+            credito.MesPagado = bd.MesPagado;
+            credito.Historial = HistorialDe(db.PagosCredito.Where(p => p.CreditoId == credito.Id).ToList());
+            credito.Pagado = credito.CuotaPagadaEsteMes != null;
+        }
+
+        // Del más reciente al más antiguo
+        private static List<PagoCredito> HistorialDe(IEnumerable<PagoCredito> pagos) =>
+            pagos.OrderByDescending(p => p.Fecha).ThenByDescending(p => p.Id).ToList();
+
         public static void CargarDatosGlobal()
         {
             try
@@ -237,6 +375,24 @@ namespace MisFinanzas.Modulos
                 using (var db = new AppDbContext())
                 {
                     var lista = db.Creditos.ToList();
+                    var pagos = db.PagosCredito.ToList();
+
+                    // La cuota cuenta como pagada solo si hay un pago registrado este mes:
+                    // al iniciar un mes nuevo, la cuota vuelve a quedar pendiente.
+                    var mesActual = Periodo.MesActual;
+                    bool cambios = false;
+                    foreach (var c in lista)
+                    {
+                        c.Historial = HistorialDe(pagos.Where(p => p.CreditoId == c.Id));
+                        bool pagado = c.CuotaPagadaEsteMes != null;
+                        if (c.Pagado != pagado || c.MesPagado != (pagado ? mesActual : string.Empty))
+                        {
+                            c.Pagado = pagado;
+                            c.MesPagado = pagado ? mesActual : string.Empty;
+                            cambios = true;
+                        }
+                    }
+                    if (cambios) db.SaveChanges();
 
                     // Usamos el Dispatcher para que la UI de "Cuentas" se entere
                     Application.Current.Dispatcher.Invoke(() =>
@@ -244,39 +400,15 @@ namespace MisFinanzas.Modulos
                         ListaCreditosPersistente.Clear();
                         foreach (var c in lista)
                         {
+                            c.Editando = false; // siempre inician en modo solo lectura
                             ListaCreditosPersistente.Add(c);
                         }
                     });
                 }
             }
-            catch (Exception ex) { /* ... */ }
-        }
-        // Método para eliminar de forma global
-        public static void EliminarCreditoGlobal(Credito credito)
-        {
-            if (credito == null) return;
-
-            var resultado = MessageBox.Show($"¿Estás seguro de que deseas eliminar el crédito '{credito.NombreCustom}'?",
-                                          "Confirmar eliminación",
-                                          MessageBoxButton.YesNo,
-                                          MessageBoxImage.Warning);
-
-            if (resultado == MessageBoxResult.Yes)
+            catch (Exception ex)
             {
-                using (var db = new AppDbContext())
-                {
-                    var creditoDb = db.Creditos.Find(credito.Id);
-                    if (creditoDb != null)
-                    {
-                        db.Creditos.Remove(creditoDb);
-                        db.SaveChanges();
-                    }
-                }
-
-                if (ListaCreditosPersistente.Contains(credito))
-                {
-                    ListaCreditosPersistente.Remove(credito);
-                }
+                System.Diagnostics.Debug.WriteLine("Error al cargar créditos: " + ex.Message);
             }
         }
     }
