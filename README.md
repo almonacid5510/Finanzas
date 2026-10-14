@@ -79,12 +79,17 @@ MisFinanzas/
 │   ├── EsquemaBD.cs            Actualización automática de la base de datos
 │   ├── CuentasMensuales.cs     Recurrencia de gastos e ingresos y pagos por mes
 │   ├── Amortizacion.cs         Cálculo de créditos (cuota fija)
+│   ├── GastoDiario.cs          Gastos del día a día e intérprete de frases ("gasté 25 mil en almuerzo")
 │   ├── Analisis.cs             Historial, predicción y proyección
 │   └── Etiquetas.cs            Categorías de gastos e ingresos con color
 ├── Periodo.cs                  Manejo del mes ("yyyy-MM")
 ├── NumeroHelper.cs             Formato y lectura de valores en pesos
 └── Recursos/app.ico            Ícono de la app
 Instalador/MisFinanzas.iss      Script de Inno Setup
+Herramientas/                   Scripts de mantenimiento (PowerShell)
+├── GenerarIcono.ps1            Regenera Recursos/app.ico
+├── AgregarEncabezados.ps1      Agrega el encabezado de autoría a .cs y .xaml
+└── RepararEncoding.ps1         Corrige tildes dañadas (mojibake) en .cs y .xaml
 ```
 
 Las pantallas usan *code-behind* (la lógica vive en el `.xaml.cs` de cada vista). Las listas que comparten varias pantallas (créditos, metas, vehículos) son colecciones estáticas, para que un cambio en una pantalla se refleje en las demás, por ejemplo en el Dashboard.

@@ -3,7 +3,7 @@
 # Deteccion sin literales acentuados: buscamos el char U+00C3 ('A tilde') que
 # es el marcador tipico del mojibake de tildes/enie en espanol.
 
-$root = "c:\Users\juandalmonacidl\Documents\MisFinanzas\MisFinanzas\MisFinanzas"
+$root = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot "..\MisFinanzas"))
 
 $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
 $latin1    = [System.Text.Encoding]::GetEncoding(1252)

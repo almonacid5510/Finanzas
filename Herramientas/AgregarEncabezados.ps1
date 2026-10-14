@@ -4,7 +4,7 @@
 #  Autor de la firma: Juan Almonacid
 # ============================================================
 
-$root  = "c:\Users\juandalmonacidl\Documents\MisFinanzas\MisFinanzas\MisFinanzas"
+$root  = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot "..\MisFinanzas"))
 $autor = "Juan Almonacid"
 $anio  = "2026"
 $proyecto = "Mis Finanzas"

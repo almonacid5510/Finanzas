@@ -120,6 +120,8 @@
                             <TextBlock Text="Cuentas" VerticalAlignment="Center"/>
                         </DockPanel>
                     </Button>
+                    <Button x:Name="btnNavDiario" Content="Día a día" ToolTip="Gastos del día a día" Tag="{StaticResource IcoDiario}"
+                            Click="NavDiario_Click" Style="{StaticResource NavButtonStyle}"/>
                     <Button x:Name="btnNavCreditos" Content="Créditos" ToolTip="Créditos" Tag="{StaticResource IcoCreditos}"
                             Click="NavCreditos_Click" Style="{StaticResource NavButtonStyle}"/>
                     <Button x:Name="btnNavVehiculo" Content="Vehículos" ToolTip="Vehículos" Tag="{StaticResource IcoVehiculos}"

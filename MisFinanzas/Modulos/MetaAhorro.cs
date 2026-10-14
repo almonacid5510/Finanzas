@@ -30,6 +30,18 @@ namespace MisFinanzas.Modulos
         [NotMapped]
         public decimal Faltante => System.Math.Max(0, MontoObjetivo - MontoActual);
 
+        // Cuánto se pasó del objetivo (0 si no lo ha superado)
+        [NotMapped]
+        public decimal Excedente => System.Math.Max(0, MontoActual - MontoObjetivo);
+
+        [NotMapped]
+        public bool Superada => MontoObjetivo > 0 && MontoActual > MontoObjetivo;
+
+        [NotMapped]
+        public string EstadoTexto => Superada
+            ? $"Superaste la meta por {NumeroHelper.Moneda(Excedente)}"
+            : $"Te faltan {NumeroHelper.Moneda(Faltante)}";
+
         [NotMapped]
         public string NombreMostrar => string.IsNullOrWhiteSpace(NombreCustom) ? Nombre : NombreCustom;
 
@@ -38,5 +50,15 @@ namespace MisFinanzas.Modulos
 
         [NotMapped]
         public double ProgresoStrokeOffsetSmall => 33.5 * (1 - (System.Math.Min(100.0, System.Math.Max(0.0, Progreso)) / 100.0));
+    }
+
+    /// <summary>Cada abono a una meta (cuándo y cuánto). MetaAhorro.MontoActual es la suma acumulada.</summary>
+    public class AbonoMeta
+    {
+        [Key]
+        public int Id { get; set; }
+        public int MetaId { get; set; }
+        public System.DateTime Fecha { get; set; } = System.DateTime.Now;
+        public decimal Monto { get; set; }
     }
 }

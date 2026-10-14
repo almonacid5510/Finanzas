@@ -65,7 +65,7 @@
             <!-- Registrar vehículo (abajo) -->
             <Border DockPanel.Dock="Bottom" Style="{StaticResource Card}" Padding="18,14" Margin="0,14,0,0">
                 <StackPanel>
-                    <TextBlock Text="Registrar vehículo" Style="{StaticResource TituloTarjeta}" Margin="0,0,0,8"/>
+                    <TextBlock x:Name="lblTituloFormulario" Text="Registrar vehículo" Style="{StaticResource TituloTarjeta}" Margin="0,0,0,8"/>
                     <Label Content="Alias" Target="{Binding ElementName=txtNombreVehiculo}" Style="{StaticResource Etiqueta}"/>
                     <TextBox x:Name="txtNombreVehiculo" Style="{StaticResource ModernInput}" c:Ui.Pista="Ej. Carro familiar" Margin="0,0,0,10"/>
                     <Grid>
@@ -86,8 +86,16 @@
                             <TextBox x:Name="txtPlaca" Style="{StaticResource ModernInput}" c:Ui.Pista="ABC123" CharacterCasing="Upper" MaxLength="7"/>
                         </StackPanel>
                     </Grid>
-                    <Button Content="Registrar" Click="BtnAgregarVehiculo_Click" Style="{StaticResource BotonAzul}"
-                            c:Ui.Icono="{StaticResource IcoPlus}" Margin="0,12,0,0"/>
+                    <Grid Margin="0,12,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Button x:Name="btnCancelarEdicion" Content="Cancelar" Click="BtnCancelarEdicion_Click" Style="{StaticResource BotonSecundario}"
+                                Margin="0,0,8,0" Visibility="Collapsed"/>
+                        <Button x:Name="btnGuardarVehiculo" Grid.Column="1" Content="Registrar" Click="BtnAgregarVehiculo_Click" Style="{StaticResource BotonAzul}"
+                                c:Ui.Icono="{StaticResource IcoPlus}"/>
+                    </Grid>
                 </StackPanel>
             </Border>
 
@@ -99,7 +107,22 @@
                                     AutomationProperties.Name="{Binding Nombre, StringFormat='Ver vehículo {0}'}">
                                 <DockPanel>
                                     <Border DockPanel.Dock="Left" Width="44" Height="44" CornerRadius="10" Background="{StaticResource AzulSuave}" Margin="0,0,12,0">
-                                        <c:Icono Geometria="{StaticResource IcoVehiculos}" Tamano="20" Foreground="{StaticResource Azul}" HorizontalAlignment="Center"/>
+                                        <!-- Ícono según el tipo: carro por defecto, moto si el tipo es "Moto" -->
+                                        <!-- Grosor 1.35 = trazo 1.8 del diseño original en 32×32 -->
+                                        <c:Icono Tamano="26" Grosor="1.35" Foreground="{StaticResource Azul}" HorizontalAlignment="Center">
+                                            <c:Icono.Style>
+                                                <Style TargetType="c:Icono" BasedOn="{StaticResource {x:Type c:Icono}}">
+                                                    <Setter Property="Geometria" Value="{StaticResource IcoVehiculos}"/>
+                                                    <Setter Property="Relleno" Value="{StaticResource IcoVehiculosRelleno}"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Tipo}" Value="Moto">
+                                                            <Setter Property="Geometria" Value="{StaticResource IcoMoto}"/>
+                                                            <Setter Property="Relleno" Value="{StaticResource IcoMotoRelleno}"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </c:Icono.Style>
+                                        </c:Icono>
                                     </Border>
                                     <!-- Nombre y placa juntos: la placa distingue dos vehículos con el mismo nombre -->
                                     <!-- El nombre ocupa siempre el mismo ancho: así todas las placas quedan alineadas -->
@@ -131,6 +154,9 @@
                     <Button DockPanel.Dock="Right" Content="Eliminar" Click="BtnEliminarVehiculo_Click" Style="{StaticResource BotonPeligro}" Height="36"
                             c:Ui.Icono="{StaticResource IcoEliminar}" VerticalAlignment="Top"
                             AutomationProperties.Name="Eliminar vehículo"/>
+                    <Button DockPanel.Dock="Right" Content="Editar" Click="BtnEditarVehiculo_Click" Style="{StaticResource BotonSecundario}" Height="36"
+                            c:Ui.Icono="{StaticResource IcoEditar}" VerticalAlignment="Top" Margin="0,0,8,0"
+                            AutomationProperties.Name="Editar vehículo"/>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                         <TextBlock Text="{Binding Nombre}" FontSize="22" FontWeight="ExtraBold" VerticalAlignment="Center"/>
                         <!-- Placa con estilo de placa colombiana -->
@@ -150,16 +176,16 @@
 
     <c:Toast x:Name="toast" Panel.ZIndex="50"/>
 
-    <!-- ===== CONFIRMACIÓN DE ELIMINACIÓN ===== -->
+    <!-- ===== CONFIRMACIÓN DE ELIMINACIÓN (vehículo o registro del detalle) ===== -->
     <Grid x:Name="OverlayConfirm" Background="#660F1B2D" Visibility="Collapsed" Panel.ZIndex="100">
         <Border Background="White" CornerRadius="16" Width="400" Padding="26" HorizontalAlignment="Center" VerticalAlignment="Center">
             <StackPanel>
                 <Border Width="48" Height="48" Background="{StaticResource RojoSuave}" CornerRadius="12" HorizontalAlignment="Left" Margin="0,0,0,14">
                     <c:Icono Geometria="{StaticResource IcoEliminar}" Tamano="20" Foreground="{StaticResource Rojo}" HorizontalAlignment="Center"/>
                 </Border>
-                <TextBlock Text="Eliminar vehículo" FontSize="18" FontWeight="Bold"/>
+                <TextBlock x:Name="txtTituloConfirm" FontSize="18" FontWeight="Bold"/>
                 <TextBlock FontSize="13.5" Foreground="{StaticResource Texto2}" TextWrapping="Wrap" Margin="0,6,0,20">
-                    <Run Text="¿Seguro que deseas eliminar "/><Run x:Name="runNombreVehiculo" FontWeight="Bold" Foreground="{StaticResource Texto}"/><Run Text=" y todo su historial? Esta acción no se puede deshacer."/>
+                    <Run Text="¿Seguro que deseas eliminar "/><Run x:Name="runNombreConfirm" FontWeight="Bold" Foreground="{StaticResource Texto}"/><Run x:Name="runFinalConfirm"/>
                 </TextBlock>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                     <Button Content="Cancelar" Click="ConfirmCancelar_Click" Style="{StaticResource BotonSecundario}" IsCancel="True"/>

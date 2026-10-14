@@ -72,7 +72,7 @@ namespace MisFinanzas
         // Marca visualmente el botón de navegación activo y limpia los demás
         private void SetActiveNav(System.Windows.Controls.Button activo)
         {
-            foreach (var btn in new[] { btnNavDashboard, btnNavIngresos, btnNavCuentas, btnNavCreditos, btnNavVehiculo, btnNavNegocio })
+            foreach (var btn in new[] { btnNavDashboard, btnNavIngresos, btnNavCuentas, btnNavDiario, btnNavCreditos, btnNavVehiculo, btnNavNegocio })
             {
                 NavState.SetIsActive(btn, btn == activo);
             }
@@ -140,6 +140,13 @@ namespace MisFinanzas
                 insigniaVencidas.Visibility = vencidas > 0 ? Visibility.Visible : Visibility.Collapsed;
                 NavState.SetTieneAlerta(btnNavCuentas, vencidas > 0);
                 btnNavCuentas.ToolTip = vencidas > 0 ? $"{vencidas} pago(s) vencido(s)" : null;
+
+                // Punto rojo en Créditos: cuotas que pasaron su día de pago sin pagarse
+                int cuotasVencidas;
+                using (var db = new AppDbContext())
+                    cuotasVencidas = db.Creditos.AsEnumerable().Count(c => c.CuotaVencidaHoy());
+                NavState.SetTieneAlerta(btnNavCreditos, cuotasVencidas > 0);
+                btnNavCreditos.ToolTip = cuotasVencidas > 0 ? $"{cuotasVencidas} cuota(s) de crédito vencida(s)" : "Créditos";
             }
             catch (Exception ex)
             {
@@ -151,6 +158,7 @@ namespace MisFinanzas
         private void NavDashboard_Click(object sender, RoutedEventArgs e) { ContenedorPrincipal.Content = new DashboardView(); SetActiveNav(btnNavDashboard); }
         private void NavIngresos_Click(object sender, RoutedEventArgs e) { ContenedorPrincipal.Content = new IngresosView(); SetActiveNav(btnNavIngresos); }
         private void NavCuentas_Click(object sender, RoutedEventArgs e) { ContenedorPrincipal.Content = new CuentasView(); SetActiveNav(btnNavCuentas); }
+        private void NavDiario_Click(object sender, RoutedEventArgs e) { ContenedorPrincipal.Content = new GastosDiariosView(); SetActiveNav(btnNavDiario); }
         private void NavCreditos_Click(object sender, RoutedEventArgs e) { ContenedorPrincipal.Content = new CreditosView(); SetActiveNav(btnNavCreditos); }
         private void NavVehiculo_Click(object sender, RoutedEventArgs e) { ContenedorPrincipal.Content = new VehiculosView(); SetActiveNav(btnNavVehiculo); }
         private void NavNegocio_Click(object sender, RoutedEventArgs e) { ContenedorPrincipal.Content = new NegocioView(); SetActiveNav(btnNavNegocio); }

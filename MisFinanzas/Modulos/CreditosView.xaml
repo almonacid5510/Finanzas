@@ -109,6 +109,21 @@
                                    Foreground="{StaticResource Texto}"/>
                         <TextBox Text="{Binding Total, StringFormat='{}{0:N0}', UpdateSourceTrigger=LostFocus}" Width="130" Style="{StaticResource EditInputInline}"
                                  AutomationProperties.Name="Monto original"/>
+                        <TextBlock Text="· Pago" Style="{StaticResource TextoSecundario}" FontSize="13" VerticalAlignment="Center" Margin="8,4,6,0"/>
+                        <TextBlock Text="{Binding DiaPagoTexto}" FontSize="13" VerticalAlignment="Center" Margin="0,4,0,0" Foreground="{StaticResource Texto}">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock" BasedOn="{StaticResource TextoSecundario}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Editando}" Value="True">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                        <!-- En edición: el día (1 a 31) -->
+                        <TextBox Text="{Binding DiaPago, UpdateSourceTrigger=LostFocus}" Width="60" Style="{StaticResource EditInputInline}"
+                                 AutomationProperties.Name="Día de pago" ToolTip="Día del mes en que pagas la cuota (1 a 31)"/>
                     </WrapPanel>
                 </DockPanel>
 
@@ -395,6 +410,8 @@
                         <ColumnDefinition Width="8"/>
                         <ColumnDefinition Width="80"/>
                         <ColumnDefinition Width="8"/>
+                        <ColumnDefinition Width="90"/>
+                        <ColumnDefinition Width="8"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
@@ -413,7 +430,10 @@
                     <TextBox Grid.Row="1" Grid.Column="8" x:Name="txtTasaEA" Style="{StaticResource ModernInputNumeric}" c:Ui.Pista="0"/>
                     <Label Grid.Column="10" Content="Meses" Target="{Binding ElementName=txtPlazo}" Style="{StaticResource Etiqueta}"/>
                     <TextBox Grid.Row="1" Grid.Column="10" x:Name="txtPlazo" Style="{StaticResource ModernInputNumeric}" c:Ui.Pista="0"/>
-                    <StackPanel Grid.Row="1" Grid.Column="12" Orientation="Horizontal">
+                    <Label Grid.Column="12" Content="Día de pago" Target="{Binding ElementName=cbDiaPagoCredito}" Style="{StaticResource Etiqueta}"/>
+                    <ComboBox Grid.Row="1" Grid.Column="12" x:Name="cbDiaPagoCredito" Style="{StaticResource ModernCombo}" MaxDropDownHeight="300"
+                              ToolTip="Día del mes en que pagas la cuota"/>
+                    <StackPanel Grid.Row="1" Grid.Column="14" Orientation="Horizontal">
                         <Button Content="Cancelar" Click="BtnNuevoCredito_Click" Style="{StaticResource BotonSecundario}" Margin="0,0,8,0"/>
                         <Button Content="Agregar" Click="BtnAgregarCredito_Click" Style="{StaticResource BotonMorado}" c:Ui.Icono="{StaticResource IcoPlus}"/>
                     </StackPanel>
@@ -426,7 +446,8 @@
             <ItemsControl x:Name="icListaCreditos" Margin="0,0,0,12">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
-                        <c:GrillaAdaptable Columnas="4" AnchoMinimo="250" Espacio="12"/>
+                        <!-- Ancho fijo = columna de la lista con el detalle abierto (268): la tarjeta no cambia al elegirla -->
+                        <c:GrillaAdaptable Columnas="6" AnchoMinimo="268" AnchoMaximo="268" Espacio="12"/>
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>

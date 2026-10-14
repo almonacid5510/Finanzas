@@ -1,7 +1,7 @@
 # Genera un icono .ico multi-resolucion para Mis Finanzas usando System.Drawing.
 Add-Type -AssemblyName System.Drawing
 
-$outIco = "c:\Users\juandalmonacidl\Documents\MisFinanzas\MisFinanzas\MisFinanzas\Recursos\app.ico"
+$outIco = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot "..\MisFinanzas\Recursos\app.ico"))
 $sizes  = @(16, 32, 48, 64, 128, 256)
 
 function New-IconBitmap([int]$size) {

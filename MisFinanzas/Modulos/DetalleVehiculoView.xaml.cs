@@ -138,32 +138,21 @@ namespace MisFinanzas.Modulos
         }
 
         // --- Eliminación con modal de confirmación ---
-        private GastoVehiculo? _gastoPendienteEliminar;
+        /// <summary>
+        /// Lo asigna la pantalla de Vehículos: muestra su confirmación, que cubre toda la pantalla
+        /// (título, nombre a eliminar, texto final, acción al confirmar).
+        /// </summary>
+        public Action<string, string, string, Action>? PedirConfirmacion { get; set; }
 
         private void BtnEliminarGasto_Click(object sender, RoutedEventArgs e)
         {
-            _gastoPendienteEliminar = ((Button)sender).DataContext as GastoVehiculo;
-            if (_gastoPendienteEliminar != null)
-            {
-                runNombreGasto.Text = $"\"{_gastoPendienteEliminar.Concepto}\"";
-                MostrarOverlayConfirm(true);
-            }
+            if (((Button)sender).DataContext is GastoVehiculo gasto)
+                PedirConfirmacion?.Invoke("Eliminar registro", $"\"{gasto.Concepto}\"",
+                    "? Esta acción no se puede deshacer.", () => EliminarGasto(gasto));
         }
 
-        private void ConfirmCancelar_Click(object sender, RoutedEventArgs e)
+        private void EliminarGasto(GastoVehiculo gasto)
         {
-            _gastoPendienteEliminar = null;
-            MostrarOverlayConfirm(false);
-        }
-
-        private void ConfirmEliminar_Click(object sender, RoutedEventArgs e)
-        {
-            var gasto = _gastoPendienteEliminar;
-            MostrarOverlayConfirm(false);
-            _gastoPendienteEliminar = null;
-
-            if (gasto == null) return;
-
             try
             {
                 using (var db = new AppDbContext())
@@ -186,18 +175,5 @@ namespace MisFinanzas.Modulos
             }
         }
 
-        private void MostrarOverlayConfirm(bool visible)
-        {
-            if (visible)
-            {
-                OverlayConfirm.Visibility = Visibility.Visible;
-                OverlayConfirm.BeginAnimation(OpacityProperty,
-                    new System.Windows.Media.Animation.DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(150)));
-            }
-            else
-            {
-                OverlayConfirm.Visibility = Visibility.Collapsed;
-            }
-        }
     }
 }

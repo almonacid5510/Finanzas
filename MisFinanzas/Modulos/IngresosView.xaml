@@ -27,13 +27,15 @@
         <DockPanel Grid.ColumnSpan="3" Margin="0,0,0,14">
             <Border DockPanel.Dock="Right" Style="{StaticResource CapsulaMes}">
                 <StackPanel Orientation="Horizontal">
-                    <Button Style="{StaticResource BotonFlecha}" c:Ui.Icono="{StaticResource IcoIzquierda}" IsEnabled="False"
-                            AutomationProperties.Name="Mes anterior" ToolTipService.ShowOnDisabled="True" ToolTip="Muestra el mes en curso"/>
+                    <Button Style="{StaticResource BotonFlecha}" c:Ui.Icono="{StaticResource IcoIzquierda}" Click="BtnMesAnterior_Click"
+                            AutomationProperties.Name="Mes anterior" ToolTip="Mes anterior"/>
                     <TextBlock x:Name="lblPeriodo" Width="150" TextAlignment="Center" FontSize="15" FontWeight="Bold" VerticalAlignment="Center"/>
-                    <Button Style="{StaticResource BotonFlecha}" c:Ui.Icono="{StaticResource IcoDerecha}" IsEnabled="False"
-                            AutomationProperties.Name="Mes siguiente" ToolTipService.ShowOnDisabled="True" ToolTip="Muestra el mes en curso"/>
+                    <Button Style="{StaticResource BotonFlecha}" c:Ui.Icono="{StaticResource IcoDerecha}" Click="BtnMesSiguiente_Click"
+                            AutomationProperties.Name="Mes siguiente" ToolTip="Mes siguiente"/>
                 </StackPanel>
             </Border>
+            <!-- El mes elegido aplica a "Otros ingresos"; el salario y las metas no dependen del mes -->
+            <Button x:Name="btnMesActual" DockPanel.Dock="Right" Click="BtnMesActual_Click" Style="{StaticResource BotonMesActual}" Margin="0,0,10,0"/>
             <StackPanel>
                 <TextBlock Text="Ingresos y ahorro" Style="{StaticResource TituloPagina}"/>
                 <TextBlock Text="Tu salario, ingresos extra y metas de ahorro" Style="{StaticResource SubtituloPagina}"/>
@@ -118,8 +120,12 @@
                     <TextBox Grid.Row="1" Grid.Column="4" x:Name="txtValorIngreso" Style="{StaticResource ModernInputNumeric}" local:NumeroHelper.EsMoneda="True" c:Ui.Pista="$ 0"/>
                     <Label Grid.Column="6" Content="Frecuencia" Target="{Binding ElementName=cbFrecuenciaIngreso}" Style="{StaticResource Etiqueta}"/>
                     <ComboBox Grid.Row="1" Grid.Column="6" x:Name="cbFrecuenciaIngreso" Style="{StaticResource ModernCombo}"/>
-                    <Button Grid.Row="1" Grid.Column="8" Content="Agregar" Click="BtnAgregarIngreso_Click" Style="{StaticResource BotonVerde}"
-                            c:Ui.Icono="{StaticResource IcoPlus}"/>
+                    <StackPanel Grid.Row="1" Grid.Column="8" Orientation="Horizontal">
+                        <Button x:Name="btnCancelarEdicionIngreso" Content="Cancelar" Click="BtnCancelarEdicionIngreso_Click" Style="{StaticResource BotonSecundario}"
+                                Margin="0,0,8,0" Visibility="Collapsed"/>
+                        <Button x:Name="btnGuardarIngreso" Content="Agregar" Click="BtnAgregarIngreso_Click" Style="{StaticResource BotonVerde}"
+                                c:Ui.Icono="{StaticResource IcoPlus}"/>
+                    </StackPanel>
                 </Grid>
 
                 <!-- Ingresos de este mes -->
@@ -133,7 +139,7 @@
                                         <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="90"/>
                                         <ColumnDefinition Width="120"/>
-                                        <ColumnDefinition Width="44"/>
+                                        <ColumnDefinition Width="88"/>
                                     </Grid.ColumnDefinitions>
                                     <TextBlock Text="{Binding Descripcion}" FontSize="13.5" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
                                     <Border Grid.Column="1" Style="{StaticResource Chip}" Background="{Binding FondoCategoria}">
@@ -142,8 +148,12 @@
                                     <TextBlock Grid.Column="2" Text="{Binding Frecuencia}" Style="{StaticResource TextoSecundario}" VerticalAlignment="Center" Margin="12,0,0,0"/>
                                     <TextBlock Grid.Column="3" Text="{Binding Venta, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" FontSize="13.5" FontWeight="Bold"
                                                Foreground="{StaticResource VerdeTexto}" TextAlignment="Right" VerticalAlignment="Center"/>
-                                    <Button Grid.Column="4" Click="BtnEliminarIngreso_Click" Style="{StaticResource BotonIconoPeligro}" HorizontalAlignment="Right"
-                                            c:Ui.Icono="{StaticResource IcoEliminar}" AutomationProperties.Name="Eliminar ingreso" ToolTip="Eliminar desde este mes"/>
+                                    <StackPanel Grid.Column="4" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                        <Button Click="BtnEditarIngreso_Click" Style="{StaticResource BotonIcono}" c:Ui.Icono="{StaticResource IcoEditar}"
+                                                AutomationProperties.Name="Editar ingreso" ToolTip="Editar ingreso"/>
+                                        <Button Click="BtnEliminarIngreso_Click" Style="{StaticResource BotonIconoPeligro}" Margin="6,0,0,0"
+                                                c:Ui.Icono="{StaticResource IcoEliminar}" AutomationProperties.Name="Eliminar ingreso" ToolTip="Eliminar desde este mes"/>
+                                    </StackPanel>
                                 </Grid>
                             </Border>
                         </DataTemplate>
@@ -231,9 +241,18 @@
                                             <Run Text="de" Foreground="{StaticResource Texto2}"/>
                                             <Run Text="{Binding MontoObjetivo, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}', Mode=OneWay}" Foreground="{StaticResource Texto2}"/>
                                         </TextBlock>
-                                        <TextBlock Style="{StaticResource TextoSecundario}" Margin="0,2,0,0">
-                                            <Run Text="Te faltan"/>
-                                            <Run Text="{Binding Faltante, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}', Mode=OneWay}"/>
+                                        <!-- "Te faltan…" o, si se pasó del objetivo, "Superaste la meta por…" -->
+                                        <TextBlock Text="{Binding EstadoTexto, Mode=OneWay}" Margin="0,2,0,0">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock" BasedOn="{StaticResource TextoSecundario}">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Superada}" Value="True">
+                                                            <Setter Property="Foreground" Value="{StaticResource VerdeTexto}"/>
+                                                            <Setter Property="FontWeight" Value="SemiBold"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
                                         </TextBlock>
                                     </StackPanel>
                                     <!-- Abono: el campo y el botón comparten la misma grilla (BtnAbonarMeta_Click busca el campo ahí) -->
@@ -242,13 +261,17 @@
                                             <ColumnDefinition Width="130"/>
                                             <ColumnDefinition Width="Auto"/>
                                             <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
                                         <TextBox x:Name="txtAbonoLocal" Tag="{Binding}" Style="{StaticResource ModernInputNumeric}"
                                                  local:NumeroHelper.EsMoneda="True" c:Ui.Pista="$ 0"
                                                  AutomationProperties.Name="Valor del abono"/>
                                         <Button Grid.Column="1" Content="Abonar" Click="BtnAbonarMeta_Click" CommandParameter="{Binding}"
                                                 Style="{StaticResource BotonSecundario}" Margin="8,0,0,0"/>
-                                        <Button Grid.Column="2" Click="BtnEliminarMeta_Click" CommandParameter="{Binding}" Style="{StaticResource BotonIconoPeligro}"
+                                        <Button Grid.Column="2" Click="BtnEditarMeta_Click" CommandParameter="{Binding}" Style="{StaticResource BotonIcono}"
+                                                c:Ui.Icono="{StaticResource IcoEditar}" Width="40" Height="40" Margin="8,0,0,0"
+                                                AutomationProperties.Name="Editar meta" ToolTip="Editar meta y sus abonos"/>
+                                        <Button Grid.Column="3" Click="BtnEliminarMeta_Click" CommandParameter="{Binding}" Style="{StaticResource BotonIconoPeligro}"
                                                 c:Ui.Icono="{StaticResource IcoEliminar}" Width="40" Height="40" Margin="8,0,0,0"
                                                 AutomationProperties.Name="Eliminar meta" ToolTip="Eliminar meta"/>
                                     </Grid>
@@ -277,6 +300,83 @@
                     <Button Content="Cancelar" Click="ConfirmCancelar_Click" Style="{StaticResource BotonSecundario}" IsCancel="True"/>
                     <Button Content="Eliminar" Click="ConfirmEliminar_Click" Style="{StaticResource Boton}" Background="{StaticResource Rojo}"
                             c:Ui.Icono="{StaticResource IcoEliminar}" Margin="10,0,0,0"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+    </Grid>
+
+    <!-- ===== EL ABONO SUPERA LA META ===== -->
+    <Grid x:Name="OverlayExcede" Background="#660F1B2D" Visibility="Collapsed" Panel.ZIndex="100">
+        <Border Background="White" CornerRadius="16" Width="440" Padding="26" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <StackPanel>
+                <Border Width="48" Height="48" Background="#FEF6E7" CornerRadius="12" HorizontalAlignment="Left" Margin="0,0,0,14">
+                    <c:Icono Geometria="{StaticResource IcoAlerta}" Tamano="20" Foreground="#B54708" HorizontalAlignment="Center"/>
+                </Border>
+                <TextBlock Text="Este abono supera la meta" FontSize="18" FontWeight="Bold"/>
+                <TextBlock x:Name="txtExcedeMsg" FontSize="13.5" Foreground="{StaticResource Texto2}" TextWrapping="Wrap" Margin="0,6,0,20"/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="Cancelar" Click="ExcedeCancelar_Click" Style="{StaticResource BotonSecundario}" IsCancel="True"/>
+                    <Button Content="Editar meta" Click="ExcedeEditar_Click" Style="{StaticResource BotonVerde}" IsDefault="True"
+                            c:Ui.Icono="{StaticResource IcoEditar}" Margin="10,0,0,0"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+    </Grid>
+
+    <!-- ===== EDITAR META (y corregir sus abonos) ===== -->
+    <Grid x:Name="OverlayEditarMeta" Background="#660F1B2D" Visibility="Collapsed" Panel.ZIndex="100">
+        <Border Background="White" CornerRadius="16" Width="480" Padding="26" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <StackPanel>
+                <TextBlock Text="Editar meta" FontSize="18" FontWeight="Bold" Margin="0,0,0,14"/>
+                <Label Content="Nombre de la meta" Target="{Binding ElementName=txtEditNombreMeta}" Style="{StaticResource Etiqueta}"/>
+                <TextBox x:Name="txtEditNombreMeta" Style="{StaticResource ModernInput}" Margin="0,0,0,10"/>
+                <Grid Margin="0,0,0,10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="110"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel>
+                        <Label Content="Valor objetivo" Target="{Binding ElementName=txtEditObjetivoMeta}" Style="{StaticResource Etiqueta}"/>
+                        <TextBox x:Name="txtEditObjetivoMeta" Style="{StaticResource ModernInputNumeric}" local:NumeroHelper.EsMoneda="True" c:Ui.Pista="$ 0"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="2">
+                        <Label Content="Meses" Target="{Binding ElementName=txtEditMesesMeta}" Style="{StaticResource Etiqueta}"/>
+                        <TextBox x:Name="txtEditMesesMeta" Style="{StaticResource ModernInputNumeric}" c:Ui.Pista="12"/>
+                    </StackPanel>
+                </Grid>
+                <Label Content="Ahorrado hasta hoy" Target="{Binding ElementName=txtEditAhorradoMeta}" Style="{StaticResource Etiqueta}"/>
+                <TextBox x:Name="txtEditAhorradoMeta" Style="{StaticResource ModernInputNumeric}" local:NumeroHelper.EsMoneda="True" c:Ui.Pista="$ 0"/>
+                <TextBlock Text="Corrígelo si te equivocaste en un abono que no aparece en la lista." Style="{StaticResource TextoSecundario}"
+                           FontSize="12.5" TextWrapping="Wrap" Margin="2,4,0,14"/>
+
+                <!-- Abonos registrados: borrar uno descuenta su valor de lo ahorrado -->
+                <TextBlock Text="ABONOS REGISTRADOS" Style="{StaticResource EtiquetaSeccion}" FontSize="11.5" Margin="0,0,0,6"/>
+                <TextBlock x:Name="lblSinAbonosMeta" Text="Aún no hay abonos registrados en esta meta." Style="{StaticResource TextoSecundario}"
+                           FontSize="13" Margin="0,0,0,4" Visibility="Collapsed"/>
+                <ScrollViewer MaxHeight="190" VerticalScrollBarVisibility="Auto">
+                    <ItemsControl x:Name="icAbonosMeta">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Style="{StaticResource LineaTabla}" Padding="2,6">
+                                    <DockPanel>
+                                        <Button DockPanel.Dock="Right" Click="BtnEliminarAbono_Click" Style="{StaticResource BotonIconoPeligro}"
+                                                c:Ui.Icono="{StaticResource IcoEliminar}" Width="32" Height="32" Margin="10,0,0,0"
+                                                AutomationProperties.Name="Eliminar abono" ToolTip="Eliminar este abono (se descuenta de lo ahorrado)"/>
+                                        <TextBlock DockPanel.Dock="Right" Text="{Binding Monto, StringFormat='{}{0:$&#160;#,##0}'}" FontSize="13.5" FontWeight="Bold"
+                                                   Foreground="{StaticResource VerdeTexto}" VerticalAlignment="Center"/>
+                                        <TextBlock Text="{Binding Fecha, StringFormat='{}{0:dd/MM/yyyy · h:mm tt}'}" FontSize="13" VerticalAlignment="Center"/>
+                                    </DockPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,18,0,0">
+                    <Button Content="Cancelar" Click="EditarMetaCancelar_Click" Style="{StaticResource BotonSecundario}" IsCancel="True"/>
+                    <Button Content="Guardar" Click="EditarMetaGuardar_Click" Style="{StaticResource BotonVerde}" IsDefault="True"
+                            c:Ui.Icono="{StaticResource IcoCheck}" Margin="10,0,0,0"/>
                 </StackPanel>
             </StackPanel>
         </Border>

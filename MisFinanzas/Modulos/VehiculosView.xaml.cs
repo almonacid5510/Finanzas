@@ -73,15 +73,53 @@ namespace MisFinanzas.Modulos
             _seleccionadoId = vehiculo?.Id ?? 0;
 
             pnlDetalle.DataContext = vehiculo;
-            contDetalle.Content = vehiculo == null ? null : new DetalleVehiculoView(vehiculo);
+            contDetalle.Content = vehiculo == null ? null : new DetalleVehiculoView(vehiculo) { PedirConfirmacion = PedirConfirmacion };
             pnlDetalle.Visibility = vehiculo == null ? Visibility.Collapsed : Visibility.Visible;
             lblSinDetalle.Visibility = vehiculo == null ? Visibility.Visible : Visibility.Collapsed;
             lblSinVehiculos.Visibility = listaVehiculos.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
             ActualizarTotalGeneral();
         }
 
+        // Vehículo que se está modificando en el formulario (null = se registra uno nuevo)
+        private Vehiculo? _editando;
+
+        // Carga el vehículo en el formulario para modificarlo
+        private void BtnEditarVehiculo_Click(object sender, RoutedEventArgs e)
+        {
+            if ((sender as Button)?.DataContext is not Vehiculo vehiculo) return;
+
+            _editando = vehiculo;
+            txtNombreVehiculo.Text = vehiculo.Nombre;
+            txtPlaca.Text = vehiculo.Placa;
+            cbTipoVehiculo.SelectedItem = cbTipoVehiculo.Items.OfType<ComboBoxItem>()
+                .FirstOrDefault(i => (string)i.Content == vehiculo.Tipo) ?? cbTipoVehiculo.Items[0];
+
+            lblTituloFormulario.Text = $"Editar \"{vehiculo.Nombre}\"";
+            btnGuardarVehiculo.Content = "Guardar";
+            btnCancelarEdicion.Visibility = Visibility.Visible;
+            txtNombreVehiculo.Focus();
+        }
+
+        private void BtnCancelarEdicion_Click(object sender, RoutedEventArgs e) => LimpiarFormulario();
+
+        private void LimpiarFormulario()
+        {
+            _editando = null;
+            txtNombreVehiculo.Clear();
+            txtPlaca.Clear();
+            cbTipoVehiculo.SelectedIndex = 0;
+            lblTituloFormulario.Text = "Registrar vehículo";
+            btnGuardarVehiculo.Content = "Registrar";
+            btnCancelarEdicion.Visibility = Visibility.Collapsed;
+        }
+
         private void BtnAgregarVehiculo_Click(object sender, RoutedEventArgs e)
         {
+            if (_editando != null)
+            {
+                GuardarEdicion(_editando);
+                return;
+            }
             if (!string.IsNullOrWhiteSpace(txtNombreVehiculo.Text) && cbTipoVehiculo.SelectedItem != null)
             {
                 var nuevo = new Vehiculo
@@ -116,35 +154,78 @@ namespace MisFinanzas.Modulos
             }
         }
 
-        // Vehículo pendiente de confirmar eliminación
-        private Vehiculo? _vehiculoPendienteEliminar;
+        private void GuardarEdicion(Vehiculo vehiculo)
+        {
+            if (string.IsNullOrWhiteSpace(txtNombreVehiculo.Text))
+            {
+                MisFinanzas.Controles.Aviso.Mostrar("Escribe el alias del vehículo.");
+                return;
+            }
+            var nombre = txtNombreVehiculo.Text.Trim();
+            var tipo = (cbTipoVehiculo.SelectedItem as ComboBoxItem)?.Content.ToString() ?? vehiculo.Tipo;
+            var placa = txtPlaca.Text.ToUpper();
+
+            try
+            {
+                using (var db = new AppDbContext())
+                {
+                    var v = db.Vehiculos.Find(vehiculo.Id);
+                    if (v != null)
+                    {
+                        v.Nombre = nombre;
+                        v.Tipo = tipo;
+                        v.Placa = placa;
+                        db.SaveChanges();
+                    }
+                }
+                // Mismo objeto de la lista: la tarjeta y el detalle se actualizan solos
+                vehiculo.Nombre = nombre;
+                vehiculo.Tipo = tipo;
+                vehiculo.Placa = placa;
+                LimpiarFormulario();
+                toast.Show("Cambios guardados");
+            }
+            catch (Exception ex)
+            {
+                MisFinanzas.Controles.Aviso.Mostrar($"Error al guardar: {ex.Message}");
+            }
+        }
+
+        // Acción pendiente de confirmar (eliminar un vehículo o un registro del detalle)
+        private Action? _alConfirmar;
+
+        private void PedirConfirmacion(string titulo, string nombre, string final, Action alConfirmar)
+        {
+            txtTituloConfirm.Text = titulo;
+            runNombreConfirm.Text = nombre;
+            runFinalConfirm.Text = final;
+            _alConfirmar = alConfirmar;
+            MostrarOverlayConfirm(true);
+        }
 
         private void BtnEliminarVehiculo_Click(object sender, RoutedEventArgs e)
         {
-            var boton = sender as Button;
-            _vehiculoPendienteEliminar = boton?.DataContext as Vehiculo;
-
-            if (_vehiculoPendienteEliminar != null)
-            {
-                runNombreVehiculo.Text = $"\"{_vehiculoPendienteEliminar.Nombre}\"";
-                MostrarOverlayConfirm(true);
-            }
+            if ((sender as Button)?.DataContext is Vehiculo vehiculo)
+                PedirConfirmacion("Eliminar vehículo", $"\"{vehiculo.Nombre}\"",
+                    " y todo su historial? Esta acción no se puede deshacer.", () => EliminarVehiculo(vehiculo));
         }
 
         private void ConfirmCancelar_Click(object sender, RoutedEventArgs e)
         {
-            _vehiculoPendienteEliminar = null;
+            _alConfirmar = null;
             MostrarOverlayConfirm(false);
         }
 
         private void ConfirmEliminar_Click(object sender, RoutedEventArgs e)
         {
-            var vehiculo = _vehiculoPendienteEliminar;
+            var accion = _alConfirmar;
             MostrarOverlayConfirm(false);
-            _vehiculoPendienteEliminar = null;
+            _alConfirmar = null;
+            accion?.Invoke();
+        }
 
-            if (vehiculo == null) return;
-
+        private void EliminarVehiculo(Vehiculo vehiculo)
+        {
             try
             {
                 using (var db = new AppDbContext())
@@ -156,6 +237,7 @@ namespace MisFinanzas.Modulos
                     db.SaveChanges();
                 }
                 listaVehiculos.Remove(vehiculo);
+                if (_editando == vehiculo) LimpiarFormulario();
                 Seleccionar(listaVehiculos.FirstOrDefault());
                 toast.Show("Vehículo eliminado");
             }

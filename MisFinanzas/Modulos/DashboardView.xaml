@@ -91,8 +91,8 @@
                 </Border>
                 <Button x:Name="btnMarcarPagado" DockPanel.Dock="Right" Style="{StaticResource BotonVerde}" Height="36"
                         c:Ui.Icono="{StaticResource IcoCheck}" Content="Marcar pagado" Click="BtnMarcarPagado_Click"/>
-                <Button DockPanel.Dock="Right" Style="{StaticResource BotonEnlace}" Content="Ver cuentas" Margin="0,0,18,0"
-                        VerticalAlignment="Center" Click="BtnVerCuentas_Click"/>
+                <Button x:Name="lnkVencidos" DockPanel.Dock="Right" Style="{StaticResource BotonEnlace}" Content="Ver cuentas" Margin="0,0,18,0"
+                        VerticalAlignment="Center" Click="LnkVencidos_Click"/>
                 <TextBlock x:Name="lblVencidos" FontSize="13.5" Foreground="#7A271A" VerticalAlignment="Center"
                            TextTrimming="CharacterEllipsis"/>
             </DockPanel>
@@ -125,19 +125,22 @@
                 </Grid>
             </Border>
             <Border Style="{StaticResource TarjetaOscura}" Padding="18,16">
-                <StackPanel>
-                    <DockPanel>
-                        <TextBlock x:Name="lblPorcentajeLibre" DockPanel.Dock="Right" FontSize="12.5" FontWeight="Bold" Foreground="#6CE9A6"/>
-                        <TextBlock Text="DISPONIBLE" Style="{StaticResource EtiquetaSeccion}" Foreground="{StaticResource TextoMenu}"/>
-                    </DockPanel>
-                    <TextBlock x:Name="lblDashBalance" Style="{StaticResource CifraKpi}" Foreground="White" Margin="0,8,0,2"/>
-                    <TextBlock Text="Ingresos menos gastos" Style="{StaticResource TextoSecundario}" Foreground="{StaticResource TextoMenu}"/>
-                </StackPanel>
+                <!-- Misma disposición que las demás: el "% libre" ocupa el lugar del ícono -->
+                <Grid>
+                    <TextBlock x:Name="lblPorcentajeLibre" Height="30" Padding="0,7,0,0" HorizontalAlignment="Right" VerticalAlignment="Top"
+                               FontSize="12.5" FontWeight="Bold" Foreground="#6CE9A6"/>
+                    <StackPanel>
+                        <TextBlock Text="DISPONIBLE" Style="{StaticResource EtiquetaSeccion}" Foreground="{StaticResource TextoMenu}" Margin="0,7,0,0"/>
+                        <TextBlock x:Name="lblDashBalance" Style="{StaticResource CifraKpi}" Foreground="White" Margin="0,16,0,2"/>
+                        <TextBlock Text="Ingresos menos gastos" Style="{StaticResource TextoSecundario}" Foreground="{StaticResource TextoMenu}"/>
+                    </StackPanel>
+                </Grid>
             </Border>
             <Border Style="{StaticResource Card}" Padding="18,16">
                 <Grid>
                     <Border Style="{StaticResource CajaIcono}" Background="{StaticResource AzulSuave}">
-                        <c:Icono Geometria="{StaticResource IcoVehiculos}" Tamano="16" Foreground="{StaticResource Azul}" HorizontalAlignment="Center"/>
+                        <c:Icono Geometria="{StaticResource IcoVehiculos}" Relleno="{StaticResource IcoVehiculosRelleno}" Tamano="19" Grosor="1.5"
+                                 Foreground="{StaticResource Azul}" HorizontalAlignment="Center"/>
                     </Border>
                     <StackPanel>
                         <TextBlock Text="VEHÍCULOS" Style="{StaticResource EtiquetaSeccion}" Margin="0,7,0,0"/>
@@ -150,46 +153,6 @@
 
         <!-- ===== FILA CENTRAL ===== -->
         <c:GrillaAdaptable Columnas="3" AnchoMinimo="300" Margin="0,0,0,14">
-
-            <!-- ¿A dónde va tu ingreso? -->
-            <Border Style="{StaticResource Card}">
-                <DockPanel>
-                    <TextBlock DockPanel.Dock="Top" Text="¿A dónde va tu ingreso?" Style="{StaticResource TituloTarjeta}" Margin="0,0,0,14"/>
-                    <!-- Proyección del mes siguiente -->
-                    <Border DockPanel.Dock="Bottom" Style="{StaticResource Recuadro}" Margin="0,14,0,0">
-                        <DockPanel>
-                            <c:Icono DockPanel.Dock="Left" Geometria="{StaticResource IcoGrafico}" Tamano="14" Foreground="{StaticResource Texto2}"
-                                     VerticalAlignment="Top" Margin="0,2,8,0"/>
-                            <TextBlock x:Name="lblProyeccionSiguiente" FontSize="12.5" Foreground="{StaticResource Texto2}" TextWrapping="Wrap"/>
-                        </DockPanel>
-                    </Border>
-                    <StackPanel>
-                        <!-- Barra apilada: cada parte es un gasto o lo disponible -->
-                        <Grid x:Name="barraIngreso" Height="14" Margin="0,0,0,14"/>
-                        <TextBlock x:Name="lblSinIngresoDistribucion" Text="Registra tu salario para ver cómo se reparte."
-                                   Style="{StaticResource TextoSecundario}" Visibility="Collapsed"/>
-                        <ItemsControl x:Name="icDistribucion">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Grid Margin="0,0,0,9">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto"/>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="56"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                        </Grid.ColumnDefinitions>
-                                        <Border Width="11" Height="11" CornerRadius="3" Background="{Binding Color}" Margin="0,0,10,0" VerticalAlignment="Center"/>
-                                        <TextBlock Grid.Column="1" Text="{Binding Nombre}" FontSize="13.5" TextTrimming="CharacterEllipsis"/>
-                                        <TextBlock Grid.Column="2" Text="{Binding PorcentajeTexto}" FontSize="13.5" Foreground="{StaticResource Texto2}" TextAlignment="Right" Margin="0,0,14,0"/>
-                                        <TextBlock Grid.Column="3" Text="{Binding Monto, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" FontSize="13.5" FontWeight="Bold"
-                                                   Foreground="{Binding ColorMonto}" TextAlignment="Right" MinWidth="90"/>
-                                    </Grid>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </StackPanel>
-                </DockPanel>
-            </Border>
 
             <!-- Por pagar este mes -->
             <Border Style="{StaticResource Card}">
@@ -229,6 +192,47 @@
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
                 </StackPanel>
+            </Border>
+
+            <!-- ¿A dónde va tu ingreso? -->
+            <Border Style="{StaticResource Card}">
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Top" Text="¿A dónde va tu ingreso?" Style="{StaticResource TituloTarjeta}" Margin="0,0,0,14"/>
+                    <!-- Proyección del mes siguiente -->
+                    <Border DockPanel.Dock="Bottom" Style="{StaticResource Recuadro}" Margin="0,14,0,0">
+                        <DockPanel>
+                            <c:Icono DockPanel.Dock="Left" Geometria="{StaticResource IcoGrafico}" Tamano="14" Foreground="{StaticResource Texto2}"
+                                     VerticalAlignment="Top" Margin="0,2,8,0"/>
+                            <TextBlock x:Name="lblProyeccionSiguiente" FontSize="12.5" Foreground="{StaticResource Texto2}" TextWrapping="Wrap"/>
+                        </DockPanel>
+                    </Border>
+                    <StackPanel>
+                        <!-- Barra apilada: cada parte es un gasto o lo disponible -->
+                        <Grid x:Name="barraIngreso" Height="14" Margin="0,0,0,14"/>
+                        <TextBlock x:Name="lblSinIngresoDistribucion" Text="Registra tu salario para ver cómo se reparte."
+                                   Style="{StaticResource TextoSecundario}" Visibility="Collapsed"/>
+                        <ItemsControl x:Name="icDistribucion">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <!-- Tooltip: en los abonos a metas dice cuándo y cuánto fue cada uno -->
+                                    <Grid Margin="0,0,0,9" Background="Transparent" ToolTip="{Binding ToolTipFila}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="56"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Border Width="11" Height="11" CornerRadius="3" Background="{Binding Color}" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Column="1" Text="{Binding Nombre}" FontSize="13.5" TextTrimming="CharacterEllipsis"/>
+                                        <TextBlock Grid.Column="2" Text="{Binding PorcentajeTexto}" FontSize="13.5" Foreground="{StaticResource Texto2}" TextAlignment="Right" Margin="0,0,14,0"/>
+                                        <TextBlock Grid.Column="3" Text="{Binding Monto, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" FontSize="13.5" FontWeight="Bold"
+                                                   Foreground="{Binding ColorMonto}" TextAlignment="Right" MinWidth="90"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </DockPanel>
             </Border>
 
             <!-- Comparado con el mes anterior: en qué se gasta más o menos -->

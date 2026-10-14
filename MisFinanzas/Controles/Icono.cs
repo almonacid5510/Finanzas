@@ -33,7 +33,12 @@ namespace MisFinanzas.Controles
         public static readonly DependencyProperty GrosorProperty =
             DependencyProperty.Register(nameof(Grosor), typeof(double), typeof(Icono), new PropertyMetadata(2.0));
 
+        /// <summary>Opcional: zona que se rellena con el color del ícono, suave (p. ej. la cabina del carro).</summary>
+        public static readonly DependencyProperty RellenoProperty =
+            DependencyProperty.Register(nameof(Relleno), typeof(Geometry), typeof(Icono));
+
         public Geometry? Geometria { get => (Geometry?)GetValue(GeometriaProperty); set => SetValue(GeometriaProperty, value); }
+        public Geometry? Relleno { get => (Geometry?)GetValue(RellenoProperty); set => SetValue(RellenoProperty, value); }
         public double Tamano { get => (double)GetValue(TamanoProperty); set => SetValue(TamanoProperty, value); }
         public double Grosor { get => (double)GetValue(GrosorProperty); set => SetValue(GrosorProperty, value); }
     }

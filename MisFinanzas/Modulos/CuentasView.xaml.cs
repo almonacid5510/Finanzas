@@ -30,6 +30,7 @@ namespace MisFinanzas.Modulos
         public CuentasView()
         {
             InitializeComponent();
+            Etiquetas.ActivarOpcionNueva(cbCategoria);
 
             // Opciones del formulario
             cbDiaPago.ItemsSource = Enumerable.Range(1, 31).ToList();
@@ -91,7 +92,7 @@ namespace MisFinanzas.Modulos
             {
                 using var db = new AppDbContext();
                 var texto = cbCategoria.Text;
-                cbCategoria.ItemsSource = Etiquetas.Lista(db, Etiquetas.Gasto);
+                cbCategoria.ItemsSource = Etiquetas.ListaConNueva(db, Etiquetas.Gasto);
                 cbCategoria.Text = texto;
             }
             catch (Exception ex)

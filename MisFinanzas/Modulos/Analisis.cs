@@ -130,10 +130,14 @@ namespace MisFinanzas.Modulos
         }
 
         /// <summary>Totales por categoría de un conjunto de gastos (opcionalmente con las cuotas de créditos).</summary>
-        public static List<TotalCategoria> PorCategoria(IEnumerable<CuentaMes> items, decimal creditos = 0)
+        public static List<TotalCategoria> PorCategoria(IEnumerable<CuentaMes> items, decimal creditos = 0,
+                                                        IEnumerable<GastoDiario>? diarios = null)
         {
-            var lista = items.GroupBy(i => i.Categoria)
-                             .Select(g => new TotalCategoria { Nombre = g.Key, Total = g.Sum(i => i.Real) })
+            // Los gastos del día a día se suman a la categoría que les corresponde
+            var lista = items.Select(i => (i.Categoria, Monto: i.Real))
+                             .Concat((diarios ?? Enumerable.Empty<GastoDiario>()).Select(d => (Categoria: Etiquetas.Mostrar(d.Categoria), d.Monto)))
+                             .GroupBy(i => i.Categoria)
+                             .Select(g => new TotalCategoria { Nombre = g.Key, Total = g.Sum(i => i.Monto) })
                              .ToList();
             if (creditos > 0) lista.Add(new TotalCategoria { Nombre = "Créditos", Total = creditos });
 

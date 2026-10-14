@@ -43,6 +43,32 @@ namespace MisFinanzas.Modulos
         private int _plazoMeses;
         public int PlazoMeses { get => _plazoMeses; set { _plazoMeses = value; OnPropertyChanged(); } }
 
+        // Día del mes en que se paga la cuota (1–31). 0 = sin definir (créditos registrados antes de pedirlo)
+        private int _diaPago;
+        public int DiaPago
+        {
+            get => _diaPago;
+            set { _diaPago = Math.Clamp(value, 0, 31); OnPropertyChanged(); OnPropertyChanged(nameof(DiaPagoTexto)); }
+        }
+
+        [NotMapped] public string DiaPagoTexto => DiaPago > 0 ? $"día {DiaPago} de cada mes" : "sin definir";
+
+        /// <summary>La cuota de este mes ya pasó su día de pago (o es hoy) y no se ha pagado.</summary>
+        public bool CuotaVencidaHoy()
+        {
+            var hoy = DateTime.Today;
+            bool pagadaEsteMes = Pagado && MesPagado == Periodo.MesActual;
+            return !Saldado && CuotaMensual > 0 && !pagadaEsteMes && VencimientoEn(hoy) is DateTime vence && vence <= hoy;
+        }
+
+        /// <summary>Fecha de pago de la cuota en el mes dado (si el mes es más corto, el último día); null sin día.</summary>
+        public DateTime? VencimientoEn(DateTime mes)
+        {
+            if (DiaPago <= 0) return null;
+            var inicio = Periodo.InicioMes(mes);
+            return inicio.AddDays(Math.Min(DiaPago, DateTime.DaysInMonth(inicio.Year, inicio.Month)) - 1);
+        }
+
         // Estado solo de UI: NO se persiste en la base de datos.
         // Así los créditos siempre cargan en modo solo lectura al abrir la app.
         private bool _editando;

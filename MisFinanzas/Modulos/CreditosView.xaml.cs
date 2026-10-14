@@ -20,6 +20,8 @@ namespace MisFinanzas.Modulos
         public CreditosView()
         {
             InitializeComponent();
+            cbDiaPagoCredito.ItemsSource = Enumerable.Range(1, 31).ToList();
+            cbDiaPagoCredito.SelectedItem = DateTime.Today.Day;
 
             // 1. Vinculamos la lista persistente al control de esta pestaña
             // Asumiendo que tu ItemsControl en Créditos se llama 'icListaCreditos'
@@ -49,6 +51,9 @@ namespace MisFinanzas.Modulos
             });
             lblResumenDeuda.Inlines.Add(new System.Windows.Documents.Run(
                 $" · {activos.Count} {(activos.Count == 1 ? "crédito activo" : "créditos activos")}"));
+
+            // Pagar, deshacer, editar el día de pago o eliminar cambian el punto rojo de cuotas vencidas
+            MainWindow.Actual?.VerificarVencimientosCuentas();
         }
 
         // Muestra u oculta el formulario de nuevo crédito
@@ -61,6 +66,11 @@ namespace MisFinanzas.Modulos
 
         private void BtnAgregarCredito_Click(object sender, RoutedEventArgs e)
         {
+            if (cbDiaPagoCredito.SelectedItem is not int diaPago)
+            {
+                MisFinanzas.Controles.Aviso.Mostrar("Elige el día del mes en que pagas la cuota.");
+                return;
+            }
             if (NumeroHelper.TryParseMoneda(txtTotalCredito.Text, out decimal total) &&
                 NumeroHelper.TryParseMoneda(txtCuotaCredito.Text, out decimal cuota) &&
                 !string.IsNullOrWhiteSpace(txtNombreCredito.Text))
@@ -77,6 +87,7 @@ namespace MisFinanzas.Modulos
                             CuotaMensual = cuota,
                             TasaEA = double.TryParse(txtTasaEA.Text, out var t) ? t : 0,
                             PlazoMeses = int.TryParse(txtPlazo.Text, out var p) ? p : 0,
+                            DiaPago = diaPago,
                             Pagado = false,
                             Editando = false
                         };
@@ -96,8 +107,9 @@ namespace MisFinanzas.Modulos
                     txtTotalCredito.Clear();
                     txtCuotaCredito.Clear();
                     txtAbonoCredito.Clear(); 
-                    txtTasaEA.Clear();       
+                    txtTasaEA.Clear();
                     txtPlazo.Clear();
+                    cbDiaPagoCredito.SelectedItem = DateTime.Today.Day;
                 }
                 catch (Exception ex) { MisFinanzas.Controles.Aviso.Mostrar("Error al guardar: " + ex.Message); }
             }

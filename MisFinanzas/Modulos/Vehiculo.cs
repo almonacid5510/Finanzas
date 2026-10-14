@@ -18,9 +18,15 @@ namespace MisFinanzas.Modulos
         [Key]
         public int Id { get; set; }
 
-        public string Nombre { get; set; } = string.Empty;
-        public string Tipo { get; set; } = string.Empty;
-        public string Placa { get; set; } = string.Empty;
+        // Notifican cambios para que la lista y el detalle se actualicen al editar el vehículo
+        private string _nombre = string.Empty;
+        public string Nombre { get => _nombre; set { _nombre = value; OnPropertyChanged(); } }
+
+        private string _tipo = string.Empty;
+        public string Tipo { get => _tipo; set { _tipo = value; OnPropertyChanged(); } }
+
+        private string _placa = string.Empty;
+        public string Placa { get => _placa; set { _placa = value; OnPropertyChanged(); } }
         public DateTime Fecha { get; set; } = DateTime.Now;
 
         [NotMapped]

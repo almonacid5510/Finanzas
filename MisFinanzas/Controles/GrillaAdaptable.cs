@@ -26,8 +26,14 @@ namespace MisFinanzas.Controles
             DependencyProperty.Register(nameof(Espacio), typeof(double), typeof(GrillaAdaptable),
                 new FrameworkPropertyMetadata(14.0, FrameworkPropertyMetadataOptions.AffectsMeasure));
 
+        /// <summary>Opcional: ancho máximo de cada columna (las columnas no se estiran más; sobra espacio a la derecha).</summary>
+        public static readonly DependencyProperty AnchoMaximoProperty =
+            DependencyProperty.Register(nameof(AnchoMaximo), typeof(double), typeof(GrillaAdaptable),
+                new FrameworkPropertyMetadata(double.PositiveInfinity, FrameworkPropertyMetadataOptions.AffectsMeasure));
+
         public int Columnas { get => (int)GetValue(ColumnasProperty); set => SetValue(ColumnasProperty, value); }
         public double AnchoMinimo { get => (double)GetValue(AnchoMinimoProperty); set => SetValue(AnchoMinimoProperty, value); }
+        public double AnchoMaximo { get => (double)GetValue(AnchoMaximoProperty); set => SetValue(AnchoMaximoProperty, value); }
         public double Espacio { get => (double)GetValue(EspacioProperty); set => SetValue(EspacioProperty, value); }
 
         private int ColumnasPara(double ancho)
@@ -38,7 +44,7 @@ namespace MisFinanzas.Controles
         }
 
         private double AnchoColumna(double ancho, int cols) =>
-            double.IsInfinity(ancho) ? AnchoMinimo : Math.Max(0, (ancho - Espacio * (cols - 1)) / cols);
+            double.IsInfinity(ancho) ? AnchoMinimo : Math.Min(AnchoMaximo, Math.Max(0, (ancho - Espacio * (cols - 1)) / cols));
 
         protected override Size MeasureOverride(Size disponible)
         {

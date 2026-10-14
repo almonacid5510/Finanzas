@@ -12,6 +12,8 @@ namespace MisFinanzas.Modulos
     public class AppDbContext : DbContext
     {
         public DbSet<MetaAhorro> Metas { get; set; }
+        public DbSet<AbonoMeta> AbonosMeta { get; set; }
+        public DbSet<GastoDiario> GastosDiarios { get; set; }
         public DbSet<Movimiento> Movimientos { get; set; }
         public DbSet<Vehiculo> Vehiculos { get; set; }
         public DbSet<GastoVehiculo> GastosVehiculo { get; set; }

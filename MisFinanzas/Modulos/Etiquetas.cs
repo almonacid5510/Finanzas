@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Windows.Controls;
 
 namespace MisFinanzas.Modulos
 {
@@ -19,6 +20,17 @@ namespace MisFinanzas.Modulos
         public string Tipo { get; set; } = Etiquetas.Gasto; // "Gasto" o "Ingreso"
     }
 
+    /// <summary>
+    /// Opción "Nueva" al final de la lista de etiquetas (se dibuja con un lápiz, ver AppTheme).
+    /// Su texto es vacío: al elegirla, el campo queda en blanco para escribir la etiqueta nueva.
+    /// </summary>
+    public sealed class NuevaEtiqueta
+    {
+        public static readonly NuevaEtiqueta Opcion = new();
+        private NuevaEtiqueta() { }
+        public override string ToString() => string.Empty;
+    }
+
     public static class Etiquetas
     {
         public const string Gasto = "Gasto";
@@ -28,7 +40,7 @@ namespace MisFinanzas.Modulos
         private static readonly string[] PorDefectoGasto =
             { "Hogar", "Servicios", "Alimentación", "Transporte", "Médicos", "Impuestos", "Educación", "Entretenimiento", "Otros" };
         private static readonly string[] PorDefectoIngreso =
-            { "Freelance", "Arriendo", "Bonos", "Ventas", "Otros" };
+            { "Freelance", "Bonos", "Ventas", "Otros" };
 
         /// <summary>Crea las etiquetas por defecto la primera vez (no las vuelve a crear si el usuario ya tiene).</summary>
         public static void Sembrar(AppDbContext db)
@@ -44,6 +56,33 @@ namespace MisFinanzas.Modulos
         public static List<string> Lista(AppDbContext db, string tipo) =>
             db.Etiquetas.Where(e => e.Tipo == tipo).Select(e => e.Nombre).AsEnumerable()
                         .OrderBy(n => n, StringComparer.CurrentCultureIgnoreCase).ToList();
+
+        /// <summary>Lista para los ComboBox: las etiquetas y, al final, la opción "Nueva".</summary>
+        public static List<object> ListaConNueva(AppDbContext db, string tipo) =>
+            Lista(db, tipo).Cast<object>().Append(NuevaEtiqueta.Opcion).ToList();
+
+        /// <summary>
+        /// Al elegir "Nueva" en el ComboBox (editable) se vacía el texto y queda el cursor
+        /// listo para escribir el nombre; la etiqueta se crea al guardar (ver Asegurar).
+        /// </summary>
+        public static void ActivarOpcionNueva(ComboBox combo)
+        {
+            combo.SelectionChanged += (s, e) =>
+            {
+                if (combo.SelectedItem is not NuevaEtiqueta) return;
+                // Solo cuando la elige el usuario (no al recargar la lista desde el código)
+                bool elegida = combo.IsDropDownOpen || combo.IsKeyboardFocusWithin;
+                combo.Dispatcher.BeginInvoke(() =>
+                {
+                    combo.SelectedItem = null;
+                    combo.Text = string.Empty;
+                    if (!elegida) return;
+                    combo.IsDropDownOpen = false;
+                    if (combo.Template.FindName("PART_EditableTextBox", combo) is TextBox caja) caja.Focus();
+                    else combo.Focus();
+                });
+            };
+        }
 
         /// <summary>Guarda la etiqueta si es nueva y devuelve el nombre limpio (o "" si está vacía).</summary>
         public static string Asegurar(AppDbContext db, string? nombre, string tipo)

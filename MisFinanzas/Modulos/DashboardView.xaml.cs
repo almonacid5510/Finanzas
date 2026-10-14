@@ -105,10 +105,19 @@ namespace MisFinanzas.Modulos
                 // --- 1. CONSULTAS A LA BASE DE DATOS (una sola carga para todo el resumen) ---
                 Analisis.Datos datos;
                 List<Movimiento> inversiones;
+                List<AbonoMeta> abonos;
+                List<GastoDiario> diariosMes, diariosAnterior;
                 using (var db = new AppDbContext())
                 {
                     datos = Analisis.Cargar(db);
                     inversiones = db.Movimientos.Where(m => m.Tipo == "Inversion").ToList();
+                    abonos = db.AbonosMeta.ToList();
+                    // Gastos del día a día de este mes y del anterior (para la comparación)
+                    var desde = mesActual.AddMonths(-1);
+                    var hasta = mesActual.AddMonths(1);
+                    var diarios = db.GastosDiarios.Where(g => g.Fecha >= desde && g.Fecha < hasta).ToList();
+                    diariosMes = diarios.Where(g => g.Fecha >= mesActual).ToList();
+                    diariosAnterior = diarios.Where(g => g.Fecha < mesActual).ToList();
                 }
 
                 // Salario + ingresos extra que aplican este mes
@@ -134,7 +143,9 @@ namespace MisFinanzas.Modulos
                 decimal totalV = vehiculos?.Sum(v => v.TotalInvertido) ?? 0;
 
                 // --- 4. OPERACIONES Y BALANCES ---
-                decimal totalGastosYCompromisos = totalGastosCuentas + totalCreditosMes;
+                // Los gastos del día a día ya están pagados: suman al gasto, no a lo pendiente
+                decimal totalDiarios = diariosMes.Sum(g => g.Monto);
+                decimal totalGastosYCompromisos = totalGastosCuentas + totalCreditosMes + totalDiarios;
                 decimal balanceNeto = totalIngresos - totalGastosYCompromisos;
 
                 // --- 5. INDICADORES ---
@@ -145,21 +156,30 @@ namespace MisFinanzas.Modulos
                                   : "Así fue este mes";
                 lblDashIngresos.Text = totalIngresos.ToString("C0");
                 lblDashGastos.Text = totalGastosYCompromisos.ToString("C0");
-                lblDashPendiente.Text = $"Pendiente por pagar: {(pendienteCuentas + pendienteCreditos):C0}";
-                lblDashBalance.Text = balanceNeto.ToString("C0");
-                lblPorcentajeLibre.Text = totalIngresos > 0 && balanceNeto >= 0
-                    ? $"{balanceNeto / totalIngresos:P0} libre"
-                    : balanceNeto < 0 ? "En déficit" : string.Empty;
-                lblPorcentajeLibre.Foreground = Pincel(balanceNeto < 0 ? "#FDA29B" : "#6CE9A6");
+                // El monto pendiente solo se muestra cuando difiere del total (si no, repetiría la cifra grande)
+                decimal pendiente = pendienteCuentas + pendienteCreditos;
+                lblDashPendiente.Text = pendiente <= 0 ? "Todo pagado"
+                                      : pendiente >= totalGastosYCompromisos ? "Pendiente por pagar"
+                                      : $"Pendiente por pagar: {pendiente:C0}";
+                // Disponible: lo que queda después de gastos y de lo abonado a metas este mes
+                var ahorroDelMes = AbonosDelMes(abonos, mesActual);
+                decimal totalAhorroMes = ahorroDelMes.Sum(f => f.Monto);
+                decimal disponible = balanceNeto - totalAhorroMes;
+                lblDashBalance.Text = disponible.ToString("C0");
+                lblPorcentajeLibre.Text = totalIngresos > 0 && disponible >= 0
+                    ? $"{disponible / totalIngresos:P0} libre"
+                    : disponible < 0 ? "En déficit" : string.Empty;
+                lblPorcentajeLibre.Foreground = Pincel(disponible < 0 ? "#FDA29B" : "#6CE9A6");
                 int nVehiculos = vehiculos?.Count ?? 0;
                 lblDashMoto.Text = totalV.ToString("C0");
                 lblDashVehiculosDetalle.Text = $"Capital invertido · {nVehiculos} {(nVehiculos == 1 ? "vehículo" : "vehículos")}";
 
                 MostrarSalud(balanceNeto);
-                MostrarVencidas(esActual ? cuentasDelMes : new List<CuentaMes>());
+                MostrarVencidas(esActual ? cuentasDelMes : new List<CuentaMes>(),
+                                esActual ? creditos.Where(c => c.CuotaVencidaHoy()).ToList() : new List<Credito>());
 
                 // --- 6. ¿A DÓNDE VA TU INGRESO? ---
-                MostrarDistribucion(cuentasDelMes, cuotas, totalIngresos, totalGastosYCompromisos, balanceNeto);
+                MostrarDistribucion(cuentasDelMes, cuotas, diariosMes, ahorroDelMes, totalIngresos, totalGastosYCompromisos, balanceNeto);
 
                 // Proyección del próximo mes, con la predicción de cada gasto
                 var siguiente = Analisis.Proyeccion(datos, mesActual.AddMonths(1), 1)[0];
@@ -184,11 +204,11 @@ namespace MisFinanzas.Modulos
                 var mesAnterior = mesActual.AddMonths(-1);
                 var cuentasAnterior = CuentasMensuales.DelMes(datos.Cuentas, datos.Pagos, mesAnterior);
                 decimal creditosAnterior = CuotasDelMes(creditos, datos.PagosCredito, mesAnterior).Sum(c => c.Cuota);
-                MostrarComparacion(Analisis.PorCategoria(cuentasDelMes, totalCreditosMes),
-                                   Analisis.PorCategoria(cuentasAnterior, creditosAnterior), mesAnterior);
+                MostrarComparacion(Analisis.PorCategoria(cuentasDelMes, totalCreditosMes, diariosMes),
+                                   Analisis.PorCategoria(cuentasAnterior, creditosAnterior, diariosAnterior), mesAnterior);
 
                 // --- 9. ACCESOS: AHORRO, INVERSIONES Y CRÉDITOS ---
-                MostrarAccesos(inversiones, creditos);
+                MostrarAccesos(inversiones, creditos, abonos);
             }
             catch (Exception ex)
             {
@@ -209,47 +229,93 @@ namespace MisFinanzas.Modulos
             txtMensajeSalud.Text = sano ? "Finanzas saludables" : "Gastas más de lo que ingresas";
         }
 
-        // Aviso rojo: gastos del mes que vencen hoy o ya vencieron y siguen sin pagar
-        private void MostrarVencidas(List<CuentaMes> cuentasDelMes)
+        // Cuotas de crédito que pasaron su día de pago sin pagarse (se pagan desde Créditos)
+        private List<Credito> _creditosVencidos = new();
+
+        // Aviso rojo: gastos y cuotas de crédito del mes que vencen hoy o ya vencieron y siguen sin pagar
+        private void MostrarVencidas(List<CuentaMes> cuentasDelMes, List<Credito> creditosVencidos)
         {
             var hoy = DateTime.Today;
             _vencidas = cuentasDelMes.Where(c => !c.Pagada && c.Vence <= hoy).OrderBy(c => c.Vence).ToList();
-            bannerVencidos.Visibility = _vencidas.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
-            if (_vencidas.Count == 0) return;
+            _creditosVencidos = creditosVencidos;
+
+            // Todo lo vencido en una sola lista: nombre, valor y fecha
+            var items = _vencidas.Select(c => (Nombre: c.Descripcion, Monto: c.Venta, Vence: c.Vence))
+                .Concat(creditosVencidos.Select(c => (Nombre: $"Cuota crédito · {c.NombreCustom}", Monto: c.CuotaEsteMes, Vence: c.VencimientoEn(hoy)!.Value)))
+                .OrderBy(i => i.Vence).ToList();
+
+            bannerVencidos.Visibility = items.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+            if (items.Count == 0) return;
 
             lblVencidos.Inlines.Clear();
-            if (_vencidas.Count == 1)
+            if (items.Count == 1)
             {
-                var c = _vencidas[0];
+                var i = items[0];
                 lblVencidos.Inlines.Add(new Run("1 pago vencido: ") { FontWeight = FontWeights.Bold });
-                lblVencidos.Inlines.Add(new Run($"{c.Descripcion} · "));
-                lblVencidos.Inlines.Add(new Run(c.Venta.ToString("C0")) { FontWeight = FontWeights.Bold });
-                lblVencidos.Inlines.Add(new Run(c.Vence == hoy ? " · vence hoy" : $" · venció el {c.Vence:dd/MM/yyyy}"));
-                btnMarcarPagado.Content = "Marcar pagado";
+                lblVencidos.Inlines.Add(new Run($"{i.Nombre} · "));
+                lblVencidos.Inlines.Add(new Run(i.Monto.ToString("C0")) { FontWeight = FontWeights.Bold });
+                lblVencidos.Inlines.Add(new Run(i.Vence == hoy ? " · vence hoy" : $" · venció el {i.Vence:dd/MM/yyyy}"));
             }
             else
             {
-                lblVencidos.Inlines.Add(new Run($"{_vencidas.Count} pagos vencidos: ") { FontWeight = FontWeights.Bold });
-                lblVencidos.Inlines.Add(new Run(string.Join(", ", _vencidas.Select(c => c.Descripcion)) + " · total "));
-                lblVencidos.Inlines.Add(new Run(_vencidas.Sum(c => c.Venta).ToString("C0")) { FontWeight = FontWeights.Bold });
-                btnMarcarPagado.Content = "Revisar pagos";
+                lblVencidos.Inlines.Add(new Run($"{items.Count} pagos vencidos: ") { FontWeight = FontWeights.Bold });
+                lblVencidos.Inlines.Add(new Run(string.Join(", ", items.Select(i => i.Nombre)) + " · total "));
+                lblVencidos.Inlines.Add(new Run(items.Sum(i => i.Monto).ToString("C0")) { FontWeight = FontWeights.Bold });
             }
+
+            // Botón verde: las cuentas se marcan aquí; las cuotas se pagan en Créditos (registra intereses y capital)
+            btnMarcarPagado.Content = _vencidas.Count == 1 ? "Marcar pagado"
+                                    : _vencidas.Count > 1 ? "Revisar pagos"
+                                    : "Pagar cuota";
+            lnkVencidos.Content = _creditosVencidos.Count > 0 ? "Ver créditos" : "Ver cuentas";
         }
 
-        private void MostrarDistribucion(List<CuentaMes> cuentasDelMes, List<CuotaDelMes> cuotas,
+        private void LnkVencidos_Click(object sender, RoutedEventArgs e)
+        {
+            if (_creditosVencidos.Count > 0) MainWindow.Actual?.IrACreditos(_creditosVencidos[0].Id);
+            else MainWindow.Actual?.IrACuentas();
+        }
+
+        // Abonos del mes agrupados por meta (las metas eliminadas no cuentan)
+        private static List<FilaDistribucion> AbonosDelMes(List<AbonoMeta> abonos, DateTime mes)
+        {
+            var metas = IngresosView.ListaMetas.ToDictionary(m => m.Id);
+            var clave = Periodo.Clave(mes);
+            return abonos.Where(a => Periodo.Clave(a.Fecha) == clave && metas.ContainsKey(a.MetaId))
+                         .GroupBy(a => a.MetaId)
+                         .Select(g => new FilaDistribucion
+                         {
+                             Nombre = $"Ahorro · {NombreMeta(metas[g.Key])}",
+                             Monto = g.Sum(a => a.Monto),
+                             Color = "#14928F",
+                             ColorMonto = "#0E6E6E",
+                             // Al pasar el mouse: cuándo y cuánto fue cada abono
+                             Detalle = string.Join("\n", g.OrderBy(a => a.Fecha)
+                                                          .Select(a => $"{a.Fecha:dd MMM · h:mm tt}  {NumeroHelper.Moneda(a.Monto)}"))
+                         })
+                         .OrderByDescending(f => f.Monto)
+                         .ToList();
+        }
+
+        private void MostrarDistribucion(List<CuentaMes> cuentasDelMes, List<CuotaDelMes> cuotas, List<GastoDiario> diarios, List<FilaDistribucion> ahorro,
                                          decimal ingresos, decimal gastos, decimal disponible)
         {
             var filas = new List<FilaDistribucion>();
             foreach (var c in cuotas.Where(c => c.Cuota > 0))
                 filas.Add(new FilaDistribucion { Nombre = $"Crédito · {c.Credito.NombreCustom}", Monto = c.Cuota, Color = "#6941C6" });
-            foreach (var cat in Analisis.PorCategoria(cuentasDelMes))
+            foreach (var cat in Analisis.PorCategoria(cuentasDelMes, 0, diarios))
                 filas.Add(new FilaDistribucion { Nombre = cat.Nombre, Monto = cat.Total, Color = cat.ColorBarra });
             filas = filas.OrderByDescending(f => f.Monto).ToList();
-            if (disponible > 0)
-                filas.Add(new FilaDistribucion { Nombre = "Disponible", Monto = disponible, Color = "#0B7A5C", ColorMonto = "#075E46" });
 
-            // Si se gasta más de lo que entra, el 100 % son los gastos
-            decimal baseTotal = Math.Max(ingresos, gastos);
+            // Lo abonado a metas sale de lo disponible
+            decimal totalAhorro = ahorro.Sum(f => f.Monto);
+            filas.AddRange(ahorro);
+            decimal libre = disponible - totalAhorro;
+            if (libre > 0)
+                filas.Add(new FilaDistribucion { Nombre = "Disponible", Monto = libre, Color = "#0B7A5C", ColorMonto = "#075E46" });
+
+            // Si se gasta (y ahorra) más de lo que entra, el 100 % es lo que salió
+            decimal baseTotal = Math.Max(ingresos, gastos + totalAhorro);
             foreach (var f in filas) f.Porcentaje = baseTotal > 0 ? (double)(f.Monto / baseTotal) : 0;
 
             icDistribucion.ItemsSource = filas;
@@ -266,7 +332,7 @@ namespace MisFinanzas.Modulos
                     Background = Pincel(filas[i].Color),
                     CornerRadius = new CornerRadius(i == 0 ? 7 : 0, i == filas.Count - 1 ? 7 : 0, i == filas.Count - 1 ? 7 : 0, i == 0 ? 7 : 0),
                     Margin = new Thickness(0, 0, i == filas.Count - 1 ? 0 : 2, 0),
-                    ToolTip = $"{filas[i].Nombre}: {filas[i].Monto:C0}"
+                    ToolTip = filas[i].ToolTipFila
                 };
                 Grid.SetColumn(parte, i);
                 barraIngreso.Children.Add(parte);
@@ -280,36 +346,56 @@ namespace MisFinanzas.Modulos
             var hoy = DateTime.Today;
             var filas = new List<FilaPorPagar>();
 
-            var pendientes = cuentasDelMes.Where(c => !c.Pagada).OrderBy(c => c.Vence).ToList();
-            foreach (var c in pendientes)
+            // Fila con fecha (cuenta o cuota de crédito con día de pago): roja si ya venció
+            FilaPorPagar ConFecha(DateTime vence, string titulo, decimal monto)
             {
-                bool vencida = c.Vence <= hoy;
-                filas.Add(new FilaPorPagar
+                bool vencida = vence <= hoy;
+                return new FilaPorPagar
                 {
-                    Dia = c.Vence.Day.ToString("00"), MesCorto = MesCorto(c.Vence), Titulo = c.Descripcion, Monto = c.Venta,
-                    Detalle = c.Vence == hoy ? "Vence hoy" : vencida ? $"Vencida el {c.Vence:dd/MM}" : $"Vence el {c.Vence:dd/MM}",
+                    Dia = vence.Day.ToString("00"), MesCorto = MesCorto(vence), Titulo = titulo, Monto = monto,
+                    Detalle = vence == hoy ? "Vence hoy" : vencida ? $"Vencida el {vence:dd/MM}" : $"Vence el {vence:dd/MM}",
                     Fondo = vencida ? "#FEF3F2" : "#FFFFFF", Borde = vencida ? "#FECDCA" : "#E3E7EE",
                     ColorDia = vencida ? "#B42318" : "#0F1B2D", ColorDetalle = vencida ? "#B42318" : "#93370D",
-                });
+                };
             }
-            // Los vencidos van primero; luego las cuotas de crédito (las más grandes) y el resto de pendientes
-            int nVencidos = pendientes.Count(c => c.Vence <= hoy);
-            var restantes = filas.Skip(nVencidos).ToList();
-            filas = filas.Take(nVencidos).ToList();
 
+            var conFecha = cuentasDelMes.Where(c => !c.Pagada)
+                                        .Select(c => (Vence: c.Vence, Fila: ConFecha(c.Vence, c.Descripcion, c.Venta)))
+                                        .ToList();
+            var sinFecha = new List<FilaPorPagar>();
             bool esActual = Periodo.EsMesActual(mes);
             foreach (var cr in cuotas.Where(c => !c.Pagada && c.Cuota > 0))
-                filas.Add(new FilaPorPagar
+            {
+                var titulo = $"Cuota crédito · {cr.Credito.NombreCustom}";
+                if (cr.Credito.VencimientoEn(mes) is DateTime vence)
                 {
-                    Dia = "—", MesCorto = MesCorto(mes), Titulo = $"Cuota crédito · {cr.Credito.NombreCustom}", Monto = cr.Cuota,
-                    Detalle = esActual ? "Pendiente este mes" : $"Cuota de {mes:MMMM}", Fondo = "#FFFFFF", Borde = "#E3E7EE",
-                    ColorDia = "#6941C6", ColorDetalle = "#93370D",
-                });
+                    var fila = ConFecha(vence, titulo, cr.Cuota);
+                    fila.EsCredito = true;
+                    conFecha.Add((vence, fila));
+                }
+                else // créditos sin día de pago registrado
+                    sinFecha.Add(new FilaPorPagar
+                    {
+                        Dia = "—", MesCorto = MesCorto(mes), Titulo = titulo, Monto = cr.Cuota,
+                        Detalle = esActual ? "Pendiente este mes" : $"Cuota de {mes:MMMM}", Fondo = "#FFFFFF", Borde = "#E3E7EE",
+                        ColorDia = "#6941C6", ColorDetalle = "#93370D", EsCredito = true,
+                    });
+            }
 
-            filas.AddRange(restantes);
+            // Los vencidos van primero; luego las cuotas sin día de pago y el resto por fecha
+            var ordenadas = conFecha.OrderBy(x => x.Vence).ToList();
+            var todas = ordenadas.Where(x => x.Vence <= hoy).Select(x => x.Fila)
+                                 .Concat(sinFecha)
+                                 .Concat(ordenadas.Where(x => x.Vence > hoy).Select(x => x.Fila))
+                                 .ToList();
 
-            // Próxima ocurrencia (mes siguiente al que se ve): nunca se confunde con lo vencido
-            foreach (var p in proximas.OrderBy(p => p.Vence).Take(2))
+            // Máximo 5 filas, pero las cuotas de crédito siempre se ven (son los pagos más grandes)
+            int cupo = Math.Max(0, Maximo - todas.Count(f => f.EsCredito));
+            foreach (var f in todas)
+                if (f.EsCredito || cupo-- > 0) filas.Add(f);
+
+            // Próxima ocurrencia (mes siguiente al que se ve), solo si queda espacio: nunca se confunde con lo vencido
+            foreach (var p in proximas.OrderBy(p => p.Vence).Take(Math.Min(2, Maximo - filas.Count)))
             {
                 int dias = (p.Vence - hoy).Days;
                 filas.Add(new FilaPorPagar
@@ -319,8 +405,11 @@ namespace MisFinanzas.Modulos
                     Fondo = "#F4F6F9", Borde = "#F4F6F9", ColorDia = "#5B6676", ColorDetalle = "#5B6676", ColorTitulo = "#3B4656",
                 });
             }
-            return filas.Take(5).ToList();
+            return filas;
         }
+
+        // Filas que caben en "Por pagar este mes"
+        private const int Maximo = 5;
 
         // En qué categorías se gasta más o menos que el mes anterior
         private void MostrarComparacion(List<TotalCategoria> actual, List<TotalCategoria> anterior, DateTime mesAnterior)
@@ -371,16 +460,20 @@ namespace MisFinanzas.Modulos
 
         private static string MesCorto(DateTime fecha) => fecha.ToString("MMM").TrimEnd('.').ToUpperInvariant();
 
-        private void MostrarAccesos(List<Movimiento> inversiones, IEnumerable<Credito> creditos)
+        private void MostrarAccesos(List<Movimiento> inversiones, IEnumerable<Credito> creditos, List<AbonoMeta> abonos)
         {
             var metas = IngresosView.ListaMetas;
             lblAhorro.Text = metas.Sum(m => m.MontoActual).ToString("C0");
-            lblAhorroDetalle.Text = metas.Count switch
-            {
-                0 => "Aún no tienes metas de ahorro",
-                1 => $"Meta “{NombreMeta(metas[0])}” al {metas[0].Progreso / 100:P0}",
-                _ => $"Repartido en {metas.Count} metas"
-            };
+            // Con abonos registrados se muestra el último; si no, cómo va el ahorro
+            var ultimo = abonos.Where(a => metas.Any(m => m.Id == a.MetaId)).OrderByDescending(a => a.Fecha).FirstOrDefault();
+            lblAhorroDetalle.Text = ultimo != null
+                ? $"Último abono: {NumeroHelper.Moneda(ultimo.Monto)} a “{NombreMeta(metas.First(m => m.Id == ultimo.MetaId))}” · {ultimo.Fecha:dd MMM}"
+                : metas.Count switch
+                {
+                    0 => "Aún no tienes metas de ahorro",
+                    1 => $"Meta “{NombreMeta(metas[0])}” al {metas[0].Progreso / 100:P0}",
+                    _ => $"Repartido en {metas.Count} metas"
+                };
 
             lblInversiones.Text = inversiones.Sum(i => i.Costo).ToString("C0");
             lblInversionesDetalle.Text = inversiones.Count == 0
@@ -411,7 +504,12 @@ namespace MisFinanzas.Modulos
         // Un solo vencido: se marca pagado por su valor. Varios: se abre la ventana para revisarlos uno a uno.
         private void BtnMarcarPagado_Click(object sender, RoutedEventArgs e)
         {
-            if (_vencidas.Count == 0) return;
+            if (_vencidas.Count == 0)
+            {
+                // Solo hay cuotas de crédito vencidas: se pagan desde su detalle en Créditos
+                if (_creditosVencidos.Count > 0) MainWindow.Actual?.IrACreditos(_creditosVencidos[0].Id);
+                return;
+            }
             try
             {
                 if (_vencidas.Count == 1)
@@ -452,6 +550,8 @@ namespace MisFinanzas.Modulos
         public string PorcentajeTexto => Porcentaje.ToString("P0");
         public string Color { get; set; } = "#8A94A3";
         public string ColorMonto { get; set; } = "#0F1B2D";
+        public string? Detalle { get; set; } // texto extra del tooltip (p. ej. cuándo y cuánto se abonó a una meta)
+        public string ToolTipFila => Detalle is null ? $"{Nombre}: {NumeroHelper.Moneda(Monto)}" : $"{Nombre}: {NumeroHelper.Moneda(Monto)}\n{Detalle}";
     }
 
     public class FilaPorPagar
@@ -466,6 +566,7 @@ namespace MisFinanzas.Modulos
         public string ColorDia { get; set; } = "#0F1B2D";
         public string ColorTitulo { get; set; } = "#0F1B2D";
         public string ColorDetalle { get; set; } = "#5B6676";
+        public bool EsCredito { get; set; } // cuota de crédito: siempre se muestra
     }
 
     /// <summary>Una categoría comparada con el mes anterior.</summary>
