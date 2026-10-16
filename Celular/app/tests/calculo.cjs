@@ -11,7 +11,7 @@ const codigo = ts.transpileModule(fs.readFileSync('src/app/nucleo/calculo.ts', '
 }).outputText;
 const modulo = { exports: {} };
 new Function('require', 'exports', 'module', codigo)(require, modulo.exports, modulo);
-const { construirResumen, desdeDocumentos } = modulo.exports;
+const { construirResumen, desdeDocumentos, pagoDeCuota } = modulo.exports;
 
 const ruta = path.join(__dirname, 'fixtures', 'resumen-pc.json');
 const fixture = JSON.parse(fs.readFileSync(ruta, 'utf8'));
@@ -56,8 +56,19 @@ for (const [mes, pc] of Object.entries(fixture.resumenes)) {
   igual(celular, pc, mes);
   campos += JSON.stringify(pc).length;
 }
+// Botón "Pagado" del celular: el reparto de la cuota es el mismo que hace el PC al pagarla
+let probados = 0;
+for (const [uid, pc] of Object.entries(fixture.pagosCuota)) {
+  const credito = datos.creditos.find(c => c.uid === uid);
+  const celular = pagoDeCuota(credito, datos.pagosCredito, hoy);
+  if (pc === null) { assert.equal(celular, null, `Pago de ${credito.nombreCustom}: el PC no lo permite`); continue; }
+  igual(celular, pc, `pagoCuota.${credito.nombreCustom}`);
+  probados++;
+}
+assert.ok(probados > 0, 'Se probó al menos un pago de cuota');
+
 // Que la prueba cubra los casos difíciles (no solo ceros)
 const actual = fixture.resumenes[Object.keys(fixture.resumenes)[1]];
 assert.ok(actual.porPagar.some(p => p.credito) && actual.vencidas.length > 0 && actual.gastos > 0 && actual.ahorroMes > 0,
   'Los datos de la prueba cubren cuotas de crédito, vencidas, gastos y ahorro');
-console.log(`OK Resumen del celular igual al del PC: ${Object.keys(fixture.resumenes).length} meses (ingresos, gastos, disponible, vencidas, por pagar, tarjetas, deuda, ahorro y salidas de dinero).`);
+console.log(`OK Resumen del celular igual al del PC: ${Object.keys(fixture.resumenes).length} meses (ingresos, gastos, disponible, vencidas, por pagar, tarjetas, deuda, ahorro y salidas de dinero) y el pago de la cuota de ${probados} crédito(s).`);

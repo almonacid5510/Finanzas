@@ -196,6 +196,17 @@ function interesesTarjetas(creditos: CreditoN[], pagos: PagoCreditoN[], gastos: 
   }, 0);
 }
 
+/** Pago de la cuota del mes de un préstamo, como Amortizacion.PagarCuota: interés y capital, y el saldo y plazo que quedan. */
+export interface PagoDeCuota { mes: string; monto: number; interes: number; capital: number; saldoAnterior: number; saldoNuevo: number; mesesReducidos: number; plazoMeses: number; }
+export function pagoDeCuota(c: CreditoN, pagos: PagoCreditoN[], hoy: Date): PagoDeCuota | null {
+  const mes = clave(hoy);
+  if (esTarjeta(c) || saldado(c) || c.cuotaMensual <= 0 || cuotaPagadaEn(c, pagos, mes)) return null;
+  const r = repartirCuota(c.disponible, c.tasaEA, c.cuotaMensual);
+  const reducidos = c.plazoMeses > 0 ? 1 : 0;
+  return { mes, monto: r.cuota, interes: r.interes, capital: r.capital, saldoAnterior: c.disponible, saldoNuevo: c.disponible - r.capital,
+           mesesReducidos: reducidos, plazoMeses: c.plazoMeses - reducidos };
+}
+
 // ---------- Dinero real (FlujoCaja.cs) ----------
 export function flujoCaja(d: DatosNube, hasta: Date) {
   const limite = new Date(hasta.getFullYear(), hasta.getMonth(), hasta.getDate() + 1);
@@ -291,14 +302,15 @@ export function construirResumen(d: DatosNube, mesPedido: Date, hoy: Date) {
   const metas = new Set(d.metas.map(m => m.uid));
   const ahorroMes = d.abonosMeta.filter(a => clave(a.fecha) === clave(mes) && metas.has(a.metaUid)).reduce((s, a) => s + a.monto, 0);
 
-  const vencidas: { tipo: 'cuenta' | 'credito'; id: number; mes: string; quincena?: number; nombre: string; monto: number; detalle: string }[] = [];
+  // uid: el registro en la nube, para que el botón "Pagado" del celular guarde el pago directo allá
+  const vencidas: { tipo: 'cuenta' | 'credito'; id: number; uid: string; mes: string; quincena?: number; nombre: string; monto: number; detalle: string }[] = [];
   if (esActual) {
     for (const c of cuentasMes.filter(c => !c.pagada && dia(c.vence) <= dia(hoy)))
-      vencidas.push({ tipo: 'cuenta', id: c.cuenta.idPc, mes: clave(mes), quincena: c.quincena, nombre: c.descripcion, monto: c.venta,
+      vencidas.push({ tipo: 'cuenta', id: c.cuenta.idPc, uid: c.cuenta.uid, mes: clave(mes), quincena: c.quincena, nombre: c.descripcion, monto: c.venta,
                       detalle: mismoDia(c.vence, hoy) ? 'Vence hoy' : `Vencida el ${ddMM(c.vence)}` });
     for (const c of d.creditos.filter(c => cuotaVencidaHoy(c, d.pagosCredito, hoy))) {
       const vence = vencimientoCredito(c, hoy)!;
-      vencidas.push({ tipo: 'credito', id: c.idPc, mes: clave(mes), nombre: `Cuota crédito · ${c.nombreCustom}`, monto: cuotaEsteMes(c, d.pagosCredito, hoy),
+      vencidas.push({ tipo: 'credito', id: c.idPc, uid: c.uid, mes: clave(mes), nombre: `Cuota crédito · ${c.nombreCustom}`, monto: cuotaEsteMes(c, d.pagosCredito, hoy),
                       detalle: mismoDia(vence, hoy) ? 'Vence hoy' : `Vencida el ${ddMM(vence)}` });
     }
   }

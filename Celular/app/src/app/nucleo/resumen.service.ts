@@ -4,20 +4,20 @@
 //  Copyright (c) 2026 Juan Almonacid. Todos los derechos reservados.
 // ============================================================
 // Resumen de cada mes que publica Mis Finanzas del PC (usuarios/{uid}/resumen/{yyyy-MM}):
-// los mismos números del Dashboard. "Pagado" deja una acción para que el PC la marque.
+// los mismos números del Dashboard. "Pagado" guarda el pago en la nube (o, sin datos allá, deja una acción para el PC).
 import { DestroyRef, Injectable, computed, effect, inject, signal, untracked } from '@angular/core';
-import { Timestamp, addDoc, collection, deleteDoc, doc, onSnapshot, serverTimestamp, setDoc } from 'firebase/firestore';
+import { Timestamp, addDoc, collection, deleteDoc, doc, onSnapshot, serverTimestamp, setDoc, writeBatch } from 'firebase/firestore';
 import { db, marcarCambio } from './firebase';
 import { claveMes } from './formato';
 import { mesesVisibles } from './periodos';
 import { PlanNomina, validarNomina } from './nomina';
 import { DatosNubeService } from './datos-nube.service';
-import { construirResumen, mesesDelRegistro } from './calculo';
+import { TIPO_CUOTA, construirResumen, mesesDelRegistro, pagoDeCuota } from './calculo';
 import { CajaPC, Cobro } from './caja';
 import { VehiculoBasico } from './interprete';
 import { SesionService } from './sesion.service';
 
-export interface Vencida { tipo: 'cuenta' | 'credito'; id: number; mes: string; nombre: string; monto: number; detalle: string; quincena?: number; }
+export interface Vencida { tipo: 'cuenta' | 'credito'; id: number; mes: string; nombre: string; monto: number; detalle: string; quincena?: number; uid?: string; }
 export interface PorPagar {
   dia: string; mesCorto: string; titulo: string; detalle: string; monto: number;
   vencida: boolean; proxima: boolean; credito: boolean;
@@ -196,18 +196,51 @@ export class ResumenService {
   }
 
   /** Pide al PC marcar la vencida como pagada (cuenta del mes o cuota de crédito) */
-  pagar(v: Vencida) {
+  /** Devuelve true si el pago quedó guardado en la nube; false si se le pidió al PC. */
+  pagar(v: Vencida): boolean {
     const u = this.sesion.usuario();
-    if (!u) return;
+    if (!u) return false;
+    // Con los datos en la nube, el pago se guarda allá directamente (el PC lo recibe por la réplica)
+    if (this.calculados() && v.uid && this.pagarEnNube(u.uid, v)) { marcarCambio(u.uid); return true; }
     addDoc(collection(db, 'usuarios', u.uid, 'acciones'), {
       tipo: v.tipo === 'cuenta' ? 'pagarCuenta' : 'pagarCuota',
       id: v.id, mes: v.mes, monto: v.monto, quincena: v.quincena ?? 0, creado: serverTimestamp(),
     });
     marcarCambio(u.uid);
     this.enviadas.update((s) => new Set(s).add(clave(v)));
+    return false;
   }
 
   fueEnviada = (v: Vencida) => this.enviadas().has(clave(v));
+
+  /**
+   * Guarda en la nube el pago de una vencida, como lo haría el PC: la cuenta queda pagada en su mes
+   * (o quincena) y la cuota del crédito baja su saldo y su plazo. El id del pago es fijo por mes:
+   * tocar dos veces no lo duplica. Sin señal queda en la caché y se sube al volver la conexión.
+   */
+  private pagarEnNube(uid: string, v: Vencida): boolean {
+    const datos = this.nube.datos();
+    if (!datos || !v.uid) return false;
+    const base = { actualizada: serverTimestamp(), borrado: false };
+    if (v.tipo === 'cuenta') {
+      const quincena = v.quincena === 2 ? 2 : 0;
+      setDoc(doc(db, 'usuarios', uid, 'pagosCuenta', `${v.uid}-${v.mes}-${quincena}`),
+        { movimientoUid: v.uid, mes: v.mes, monto: v.monto, quincena, ...base }).catch(() => { /* reintenta la caché */ });
+      return true;
+    }
+    const credito = datos.creditos.find(c => c.uid === v.uid);
+    const pago = credito ? pagoDeCuota(credito, datos.pagosCredito, new Date()) : null;
+    if (!credito || !pago) return false;
+    const lote = writeBatch(db);
+    lote.set(doc(db, 'usuarios', uid, 'pagosCredito', `${credito.uid}-${pago.mes}-cuota`), {
+      creditoUid: credito.uid, mes: pago.mes, fecha: Timestamp.now(), tipo: TIPO_CUOTA, monto: pago.monto, interes: pago.interes, capital: pago.capital,
+      saldoAnterior: pago.saldoAnterior, saldoNuevo: pago.saldoNuevo, mesesReducidos: pago.mesesReducidos, ...base,
+    });
+    lote.set(doc(db, 'usuarios', uid, 'creditos', credito.uid),
+      { disponible: pago.saldoNuevo, plazoMeses: pago.plazoMeses, pagado: true, mesPagado: pago.mes, actualizada: serverTimestamp() }, { merge: true });
+    lote.commit().catch(() => { /* reintenta la caché */ });
+    return true;
+  }
 }
 
 const clave = (v: Vencida) => `${v.tipo}-${v.id}-${v.mes}-${v.quincena ?? 0}`;

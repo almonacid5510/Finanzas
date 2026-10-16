@@ -109,6 +109,22 @@ static class ResumenCruzadoTest
             resumenes[Periodo.Clave(m)] = JsonSerializer.SerializeToNode(ResumenCelular.Construir(m));
         salida["resumenes"] = resumenes;
 
+        // Pago de la cuota del mes de cada préstamo (lo que hace Amortizacion.PagarCuota), para el botón Pagado del celular
+        var pagos = new JsonObject();
+        using (var db = new AppDbContext())
+            foreach (var c in db.Creditos.ToList())
+            {
+                bool pagada = db.PagosCredito.Any(p => p.CreditoId == c.Id && p.Tipo == Amortizacion.TipoCuota && p.Mes == Periodo.MesActual);
+                if (c.EsTarjeta || c.Disponible <= 0 || c.CuotaMensual <= 0 || pagada) { pagos[c.Uid] = null; continue; }
+                var r = Amortizacion.RepartirCuota(c.Disponible, c.TasaEA, c.CuotaMensual);
+                pagos[c.Uid] = new JsonObject
+                {
+                    ["monto"] = r.Cuota, ["interes"] = r.Interes, ["capital"] = r.Capital, ["saldoNuevo"] = c.Disponible - r.Capital,
+                    ["plazoMeses"] = c.PlazoMeses > 0 ? c.PlazoMeses - 1 : c.PlazoMeses
+                };
+            }
+        salida["pagosCuota"] = pagos;
+
         // Junto a la prueba del celular (Celular/app/tests/fixtures)
         var dir = new DirectoryInfo(AppContext.BaseDirectory);
         while (dir != null && !Directory.Exists(Path.Combine(dir.FullName, "Celular"))) dir = dir.Parent;

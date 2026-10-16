@@ -141,7 +141,7 @@ export class Resumen {
   });
 
   protected pagar(v: Vencida) {
-    this.servicio.pagar(v);
-    this.toast.mostrar(`"${v.nombre}" se marcará como pagado en el PC`);
+    const guardado = this.servicio.pagar(v);
+    this.toast.mostrar(guardado ? `"${v.nombre}" quedó pagado` : `"${v.nombre}" se marcará como pagado en el PC`);
   }
 }
