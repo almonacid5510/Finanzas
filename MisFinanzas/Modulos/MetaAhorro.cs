@@ -8,10 +8,14 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MisFinanzas.Modulos
 {
-    public class MetaAhorro
+    public class MetaAhorro : IReplicable
     {
         [Key]
         public int Id { get; set; }
+        /// <summary>Identidad en la nube (igual en el PC y el celular).</summary>
+        public string Uid { get; set; } = string.Empty;
+        /// <summary>Último cambio (UTC): en la nube gana el más reciente.</summary>
+        public System.DateTime ActualizadaUtc { get; set; }
         public string Nombre { get; set; } = string.Empty;
         public string NombreCustom { get; set; } = string.Empty;
         public decimal MontoObjetivo { get; set; }
@@ -53,10 +57,14 @@ namespace MisFinanzas.Modulos
     }
 
     /// <summary>Cada abono a una meta (cuándo y cuánto). MetaAhorro.MontoActual es la suma acumulada.</summary>
-    public class AbonoMeta
+    public class AbonoMeta : IReplicable
     {
         [Key]
         public int Id { get; set; }
+        /// <summary>Identidad en la nube (igual en el PC y el celular).</summary>
+        public string Uid { get; set; } = string.Empty;
+        /// <summary>Último cambio (UTC): en la nube gana el más reciente.</summary>
+        public System.DateTime ActualizadaUtc { get; set; }
         public int MetaId { get; set; }
         public System.DateTime Fecha { get; set; } = System.DateTime.Now;
         public decimal Monto { get; set; }

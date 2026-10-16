@@ -8,7 +8,7 @@
 // Los mismos valores están en MisFinanzas/Modulos/SincronizacionCelular.cs (ApiKey y ProjectId).
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from 'firebase/firestore';
+import { doc, initializeFirestore, persistentLocalCache, persistentMultipleTabManager, serverTimestamp, setDoc } from 'firebase/firestore';
 
 export const firebaseConfig = {
   apiKey: 'AIzaSyD5nujQQBtcMwn-V34b1kyll9taIoq_v0k',
@@ -24,3 +24,11 @@ export const auth = getAuth(app);
 export const db = initializeFirestore(app, {
   localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }),
 });
+
+/**
+ * Avisa a los demás dispositivos que hubo un cambio: el PC revisa esta marca cada pocos segundos y,
+ * si cambió, sincroniza. Sin señal queda en la caché y se envía junto con el cambio.
+ */
+export function marcarCambio(uid: string) {
+  setDoc(doc(db, 'usuarios', uid, 'estado', 'cambios'), { actualizada: serverTimestamp() }).catch(() => { /* se reintenta con el próximo cambio */ });
+}

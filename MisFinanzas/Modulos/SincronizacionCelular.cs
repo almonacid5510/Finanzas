@@ -47,6 +47,7 @@ namespace MisFinanzas.Modulos
             public string Uid { get; set; } = string.Empty;
             public string RefreshToken { get; set; } = string.Empty;
             public bool GastosPCSubidos { get; set; }   // ya se subieron los gastos registrados en este PC
+            public bool ReplicaSubida { get; set; }     // ya se subieron a la nube todos los datos de este PC
         }
 
         private static Sesion? _sesion = LeerSesion();
@@ -81,6 +82,7 @@ namespace MisFinanzas.Modulos
                     RefreshToken = json["refreshToken"]!.GetValue<string>()
                 };
                 GuardarSesion(_sesion);
+                _token = null; // el token anterior era de otra sesión
                 return null;
             }
             catch (HttpRequestException) { return "Sin conexión a internet. Intenta de nuevo."; }
@@ -91,6 +93,7 @@ namespace MisFinanzas.Modulos
         public static void Desconectar()
         {
             _sesion = null;
+            _token = null;
             UltimaSincronizacion = null;
             try { if (File.Exists(RutaSesion)) File.Delete(RutaSesion); } catch { /* sin permisos: se ignora */ }
         }
@@ -144,6 +147,19 @@ namespace MisFinanzas.Modulos
                 }
                 var acciones = await AplicarAccionesAsync(sesion.Uid, token);
                 await EnviarCambiosAsync(sesion.Uid, token);
+
+                // La nube como base principal: baja lo que cambió allá y sube lo de aquí (la primera vez, todo)
+                try
+                {
+                    if (await ReplicarAsync(sesion.Uid, token, primeraVez: !sesion.ReplicaSubida)) DatosNubeActualizados?.Invoke();
+                    if (!sesion.ReplicaSubida) { sesion.ReplicaSubida = true; GuardarSesion(sesion); }
+                    UltimoErrorNube = null;
+                }
+                catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Forbidden)
+                {
+                    // Reglas de la nube sin publicar: los datos quedan en la cola y se suben cuando se publiquen
+                    UltimoErrorNube = "Faltan publicar las reglas de la nube para guardar todos tus datos allá.";
+                }
 
                 var pendientes = await PendientesAsync(sesion.Uid, token);
                 int nuevos = GuardarEnBD(pendientes);
@@ -493,9 +509,14 @@ namespace MisFinanzas.Modulos
             _ => new JsonObject { ["stringValue"] = v.ToString() }
         };
 
-        // Token de acceso (dura 1 hora) a partir del refresh token guardado
+        // Token de acceso (dura 1 hora) a partir del refresh token guardado. Se reutiliza mientras le queden
+        // más de 5 minutos: la marca de cambios se revisa cada pocos segundos.
+        private static string? _token;
+        private static DateTime _tokenVence;
+
         private static async Task<string?> TokenAsync(Sesion sesion)
         {
+            if (_token != null && DateTime.UtcNow < _tokenVence) return _token;
             var cuerpo = new FormUrlEncodedContent(new Dictionary<string, string>
             {
                 ["grant_type"] = "refresh_token",
@@ -505,9 +526,13 @@ namespace MisFinanzas.Modulos
             var json = JsonNode.Parse(await resp.Content.ReadAsStringAsync());
             if (!resp.IsSuccessStatusCode)
             {
-                // Contraseña cambiada o cuenta eliminada: hay que volver a conectar
-                UltimoError = "La sesión del celular expiró. Vuelve a conectar tu cuenta.";
-                Desconectar();
+                if ((int)resp.StatusCode == 400)
+                {
+                    // Contraseña cambiada o cuenta eliminada: hay que volver a conectar
+                    UltimoError = "La sesión del celular expiró. Vuelve a conectar tu cuenta.";
+                    Desconectar();
+                }
+                else UltimoError = "El servidor de la cuenta no respondió. Se reintenta en un momento.";
                 return null;
             }
             var nuevoRefresh = json?["refresh_token"]?.GetValue<string>();
@@ -516,7 +541,10 @@ namespace MisFinanzas.Modulos
                 sesion.RefreshToken = nuevoRefresh;
                 GuardarSesion(sesion);
             }
-            return json?["id_token"]?.GetValue<string>();
+            _token = json?["id_token"]?.GetValue<string>();
+            int segundos = int.TryParse(json?["expires_in"]?.GetValue<string>(), out var n) ? n : 3600;
+            _tokenVence = DateTime.UtcNow.AddSeconds(Math.Max(60, segundos - 300));
+            return _token;
         }
 
         private record GastoNube(string Nombre, string Uid, DateTime Fecha, decimal Monto, string Descripcion, string Categoria, string Texto, int? VehiculoId, int? TarjetaId, int Cuotas);

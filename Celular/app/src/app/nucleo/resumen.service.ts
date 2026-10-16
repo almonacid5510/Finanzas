@@ -7,7 +7,7 @@
 // los mismos números del Dashboard. "Pagado" deja una acción para que el PC la marque.
 import { DestroyRef, Injectable, computed, effect, inject, signal } from '@angular/core';
 import { Timestamp, addDoc, collection, deleteDoc, doc, onSnapshot, serverTimestamp, setDoc } from 'firebase/firestore';
-import { db } from './firebase';
+import { db, marcarCambio } from './firebase';
 import { claveMes } from './formato';
 import { mesesVisibles } from './periodos';
 import { PlanNomina, validarNomina } from './nomina';
@@ -141,20 +141,26 @@ export class ResumenService {
     // Un saldo por mes evita sumar dos saldos iniciales al tocar el botón otra vez.
     const ref = inicial ? doc(db, 'usuarios', u.uid, 'ingresosRecibidos', `saldo-${claveMes(fecha)}`)
       : idEsperado ? doc(db, 'usuarios', u.uid, 'ingresosRecibidos', idEsperado) : doc(collection(db, 'usuarios', u.uid, 'ingresosRecibidos'));
-    return setDoc(ref, { monto, concepto: concepto.trim().slice(0, 120), fecha: Timestamp.fromDate(fecha), inicial, borrado: false, actualizada: serverTimestamp() });
+    const envio = setDoc(ref, { monto, concepto: concepto.trim().slice(0, 120), fecha: Timestamp.fromDate(fecha), inicial, borrado: false, actualizada: serverTimestamp() });
+    marcarCambio(u.uid);
+    return envio;
   }
 
   borrarCobro(cobro: Cobro) {
     const u = this.sesion.usuario();
     if (!u) throw new Error('Sin sesión');
-    return setDoc(doc(db, 'usuarios', u.uid, 'ingresosRecibidos', cobro.id), { borrado: true, actualizada: serverTimestamp() }, { merge: true });
+    const envio = setDoc(doc(db, 'usuarios', u.uid, 'ingresosRecibidos', cobro.id), { borrado: true, actualizada: serverTimestamp() }, { merge: true });
+    marcarCambio(u.uid);
+    return envio;
   }
 
   guardarNomina(plan: PlanNomina) {
     const u = this.sesion.usuario();
     if (!u) throw new Error('Sin sesión');
     validarNomina(plan);
-    return setDoc(doc(db, 'usuarios', u.uid, 'configuracion', 'nomina'), { ...plan, actualizada: serverTimestamp() });
+    const envio = setDoc(doc(db, 'usuarios', u.uid, 'configuracion', 'nomina'), { ...plan, actualizada: serverTimestamp() });
+    marcarCambio(u.uid);
+    return envio;
   }
 
   irA(paso: number) {
@@ -174,6 +180,7 @@ export class ResumenService {
       tipo: v.tipo === 'cuenta' ? 'pagarCuenta' : 'pagarCuota',
       id: v.id, mes: v.mes, monto: v.monto, quincena: v.quincena ?? 0, creado: serverTimestamp(),
     });
+    marcarCambio(u.uid);
     this.enviadas.update((s) => new Set(s).add(clave(v)));
   }
 

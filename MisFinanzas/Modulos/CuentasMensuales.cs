@@ -12,10 +12,14 @@ using System.Linq;
 namespace MisFinanzas.Modulos
 {
     /// <summary>Registro de que una cuenta se pagó en un mes concreto y cuánto se pagó realmente.</summary>
-    public class PagoCuenta
+    public class PagoCuenta : IReplicable
     {
         [Key]
         public int Id { get; set; }
+        /// <summary>Identidad en la nube (igual en el PC y el celular).</summary>
+        public string Uid { get; set; } = string.Empty;
+        /// <summary>Último cambio (UTC): en la nube gana el más reciente.</summary>
+        public DateTime ActualizadaUtc { get; set; }
         public int MovimientoId { get; set; }
         public string Mes { get; set; } = string.Empty; // "yyyy-MM"
         public decimal Monto { get; set; }              // valor real pagado ese mes

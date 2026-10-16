@@ -45,6 +45,13 @@ service cloud.firestore {
         && request.resource.data.confirmada is bool && request.resource.data.actualizada is timestamp;
     }
 
+    // La nube como base principal: cuentas, pagos, créditos, metas, vehículos y categorías de cada usuario
+    // (documento por registro con "actualizada" y "borrado"), y la marca de cambios que revisan los dispositivos.
+    match /usuarios/{uid}/{coleccion}/{docId} {
+      allow read, write: if esDueno(uid) && coleccion in ['movimientos', 'creditos', 'metas', 'vehiculos', 'etiquetas',
+        'pagosCuenta', 'pagosCredito', 'abonosMeta', 'gastosVehiculo', 'estado'];
+    }
+
     // Resumen de cada mes que publica el PC para la pestaña "Resumen"
     match /usuarios/{uid}/resumen/{mes} {
       allow read, write: if esDueno(uid);

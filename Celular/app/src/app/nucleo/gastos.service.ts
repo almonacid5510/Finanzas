@@ -12,7 +12,7 @@ import {
   Timestamp, addDoc, collection, deleteDoc, disableNetwork, doc, enableNetwork, onSnapshot, orderBy, query,
   serverTimestamp, setDoc, where,
 } from 'firebase/firestore';
-import { db } from './firebase';
+import { db, marcarCambio } from './firebase';
 import { aISO, inicioMes, inicioSemana } from './formato';
 import { SesionService } from './sesion.service';
 
@@ -112,8 +112,9 @@ export class GastosService {
 
   /** Guarda sin esperar a la red: con o sin señal queda guardado (la caché local lo sube después) */
   guardar(g: NuevoGasto): Promise<void> {
-    const ref = doc(collection(db, 'usuarios', this.uid, 'gastos')); // el id del documento es el Uid del gasto en el PC
-    return setDoc(ref, {
+    const uid = this.uid;
+    const ref = doc(collection(db, 'usuarios', uid, 'gastos')); // el id del documento es el Uid del gasto en el PC
+    const envio = setDoc(ref, {
       fecha: Timestamp.fromDate(g.fecha),
       monto: g.monto,
       descripcion: g.descripcion,
@@ -128,6 +129,8 @@ export class GastosService {
       descargado: false,
       creado: serverTimestamp(),
     });
+    marcarCambio(uid);
+    return envio;
   }
 
   borrar(g: Gasto): Promise<unknown> {
@@ -135,7 +138,9 @@ export class GastosService {
     // Si el PC ya lo tiene, se le pide que también lo borre
     if (g.descargado)
       addDoc(collection(db, 'usuarios', uid, 'acciones'), { tipo: 'borrarGasto', gasto: g.id, creado: serverTimestamp() });
-    return deleteDoc(doc(db, 'usuarios', uid, 'gastos', g.id));
+    const envio = deleteDoc(doc(db, 'usuarios', uid, 'gastos', g.id));
+    marcarCambio(uid);
+    return envio;
   }
 
   /** Compras con la tarjeta hechas aquí que el PC aún no ha descontado (para mostrar el cupo al día) */

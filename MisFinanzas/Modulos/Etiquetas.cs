@@ -12,10 +12,14 @@ using System.Windows.Controls;
 namespace MisFinanzas.Modulos
 {
     /// <summary>Categoría o etiqueta creada por el usuario para clasificar gastos o ingresos.</summary>
-    public class Etiqueta
+    public class Etiqueta : IReplicable
     {
         [Key]
         public int Id { get; set; }
+        /// <summary>Identidad en la nube (igual en el PC y el celular).</summary>
+        public string Uid { get; set; } = string.Empty;
+        /// <summary>Último cambio (UTC): en la nube gana el más reciente.</summary>
+        public DateTime ActualizadaUtc { get; set; }
         public string Nombre { get; set; } = string.Empty;
         public string Tipo { get; set; } = Etiquetas.Gasto; // "Gasto" o "Ingreso"
     }

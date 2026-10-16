@@ -13,10 +13,14 @@ using System.Runtime.CompilerServices;
 
 namespace MisFinanzas.Modulos
 {
-    public class Vehiculo : INotifyPropertyChanged
+    public class Vehiculo : INotifyPropertyChanged, IReplicable
     {
         [Key]
         public int Id { get; set; }
+        /// <summary>Identidad en la nube (igual en el PC y el celular).</summary>
+        public string Uid { get; set; } = string.Empty;
+        /// <summary>Último cambio (UTC): en la nube gana el más reciente.</summary>
+        public DateTime ActualizadaUtc { get; set; }
 
         // Notifican cambios para que la lista y el detalle se actualicen al editar el vehículo
         private string _nombre = string.Empty;
@@ -63,10 +67,14 @@ namespace MisFinanzas.Modulos
         }
     }
 
-    public class GastoVehiculo : INotifyPropertyChanged
+    public class GastoVehiculo : INotifyPropertyChanged, IReplicable
     {
         [Key]
         public int Id { get; set; }
+        /// <summary>Identidad en la nube (igual en el PC y el celular).</summary>
+        public string Uid { get; set; } = string.Empty;
+        /// <summary>Último cambio (UTC): en la nube gana el más reciente.</summary>
+        public DateTime ActualizadaUtc { get; set; }
         public int VehiculoId { get; set; }
 
         private string _concepto = string.Empty;

@@ -116,6 +116,36 @@ namespace MisFinanzas
             };
             // Algo pagado desde el celular cambia los avisos de vencidos del menú
             SincronizacionCelular.AccionesAplicadas += _ => Dispatcher.BeginInvoke(VerificarVencimientosCuentas);
+
+            // La nube es la base principal: se revisa su marca de cambios cada 5 s con la ventana activa
+            // (cada minuto en segundo plano); 1 lectura por revisión, y solo se sincroniza si alguien escribió.
+            _relojMarca = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromSeconds(5) };
+            _relojMarca.Tick += async (s, e) =>
+            {
+                if (!IsActive && DateTime.Now - _ultimaMarca < TimeSpan.FromMinutes(1)) return;
+                _ultimaMarca = DateTime.Now;
+                await SincronizacionCelular.RevisarMarcaAsync();
+            };
+            _relojMarca.Start();
+
+            // Lo guardado aquí se sube enseguida (se agrupan los cambios de 1,5 s)
+            _subirPronto = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromSeconds(1.5) };
+            _subirPronto.Tick += (s, e) => { _subirPronto.Stop(); RevisarCelular(); };
+            AppDbContext.CambiosLocales += () => Dispatcher.BeginInvoke(() => { _subirPronto.Stop(); _subirPronto.Start(); });
+
+            // Llegó de la nube algo hecho en otro dispositivo: se recargan los datos en memoria y el resumen
+            SincronizacionCelular.DatosNubeActualizados += () => Dispatcher.BeginInvoke(DatosDeLaNube);
+        }
+
+        private System.Windows.Threading.DispatcherTimer? _relojMarca, _subirPronto;
+        private DateTime _ultimaMarca = DateTime.MinValue;
+
+        private void DatosDeLaNube()
+        {
+            CargarDatosIniciales();
+            CreditosView.CargarDatosGlobal();
+            VerificarVencimientosCuentas();
+            (ContenedorPrincipal.Content as DashboardView)?.CargarResumen();
         }
 
         private async void RevisarCelular()
@@ -180,6 +210,8 @@ namespace MisFinanzas
                 {
                     // Crea la BD si no existe y agrega/retira tablas y columnas según el modelo
                     EsquemaBD.Actualizar(db);
+                    // Registros anteriores a la nube: reciben su identidad (una sola vez)
+                    ReplicaNube.AsignarIdentidades(db);
                     Etiquetas.Sembrar(db);
                 }
             }

@@ -6,6 +6,7 @@
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.IO;
+using System.Linq;
 
 namespace MisFinanzas.Modulos
 {
@@ -25,6 +26,46 @@ namespace MisFinanzas.Modulos
         public DbSet<PagoCuenta> PagosCuenta { get; set; }
         public DbSet<PagoCredito> PagosCredito { get; set; }
         public DbSet<Etiqueta> Etiquetas { get; set; }
+        public DbSet<CambioReplica> CambiosReplica { get; set; }
+        public DbSet<EstadoReplica> EstadosReplica { get; set; }
+
+        /// <summary>Lo que se guarda aquí viene de la nube: no se vuelve a anotar para subir.</summary>
+        public bool AplicandoNube { get; set; }
+
+        /// <summary>Se lanza (en el hilo que guardó) cuando quedan cambios de este PC por subir a la nube.</summary>
+        public static event Action? CambiosLocales;
+
+        public override int SaveChanges(bool acceptAllChangesOnSuccess)
+        {
+            bool hayCambios = !AplicandoNube && AnotarCambiosParaLaNube();
+            var filas = base.SaveChanges(acceptAllChangesOnSuccess);
+            if (hayCambios) CambiosLocales?.Invoke();
+            return filas;
+        }
+
+        /// <summary>
+        /// Cada registro que vive en la nube (IReplicable) y se agregó, cambió o borró aquí queda en la cola
+        /// CambiosReplica con su identidad; la sincronización sube su versión actual (o lo marca borrado).
+        /// </summary>
+        private bool AnotarCambiosParaLaNube()
+        {
+            var ahora = DateTime.UtcNow;
+            var cambios = ChangeTracker.Entries<IReplicable>()
+                .Where(e => e.State is EntityState.Added or EntityState.Modified or EntityState.Deleted).ToList();
+            foreach (var e in cambios)
+            {
+                if (string.IsNullOrEmpty(e.Entity.Uid)) e.Entity.Uid = Guid.NewGuid().ToString("N");
+                if (e.State != EntityState.Deleted) e.Entity.ActualizadaUtc = ahora;
+                CambiosReplica.Add(new CambioReplica
+                {
+                    Coleccion = ReplicaNube.Coleccion(e.Entity.GetType()),
+                    Uid = e.Entity.Uid,
+                    Borrado = e.State == EntityState.Deleted,
+                    FechaUtc = ahora
+                });
+            }
+            return cambios.Count > 0;
+        }
 
         // La ruta en Documentos es correcta y persistente
         public static string RutaBD { get; set; } =

@@ -50,6 +50,7 @@ class Program {
  rechazo=false;try{Nomina.GuardarCobro(db,"futuro",DateTime.Today.AddDays(1),3200000,"Pago futuro",false);}catch(ArgumentException){rechazo=true;}Check(rechazo,"Rechaza cobros con fecha futura");
  }
  NominaNetworkTest.Run().GetAwaiter().GetResult();
+ ReplicaNubeTest.Run().GetAwaiter().GetResult();
  ColoresPagoTest.Run();
  ActualizacionesTest.Run().GetAwaiter().GetResult();
  var feed=Path.GetFullPath("Instalador/Salida/Actualizaciones/1.9.0");

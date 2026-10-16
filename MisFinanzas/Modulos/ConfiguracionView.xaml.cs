@@ -109,6 +109,7 @@ namespace MisFinanzas.Modulos
             var ultima = SincronizacionCelular.UltimaSincronizacion;
             lblEstadoCelular.Text = $"{SincronizacionCelular.Correo} · " +
                 (SincronizacionCelular.UltimoError is string error ? $"Último intento: {error}"
+                 : SincronizacionCelular.UltimoErrorNube is string nube ? nube
                  : ultima is DateTime u ? $"Última revisión: {(u.Date == DateTime.Today ? "hoy" : u.ToString("dd/MM"))}, {u:h:mm tt}"
                  : "Esperando la primera revisión");
         }

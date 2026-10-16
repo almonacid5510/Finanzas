@@ -14,10 +14,14 @@ namespace MisFinanzas.Modulos
     /// Un movimiento de un crédito: la cuota de un mes o un abono extra a capital.
     /// Guarda cómo se repartió el pago y el saldo antes y después, para el historial.
     /// </summary>
-    public class PagoCredito
+    public class PagoCredito : IReplicable
     {
         [Key]
         public int Id { get; set; }
+        /// <summary>Identidad en la nube (igual en el PC y el celular).</summary>
+        public string Uid { get; set; } = string.Empty;
+        /// <summary>Último cambio (UTC): en la nube gana el más reciente.</summary>
+        public DateTime ActualizadaUtc { get; set; }
         public int CreditoId { get; set; }
         public string Mes { get; set; } = string.Empty; // "yyyy-MM"
         public DateTime Fecha { get; set; }

@@ -21,9 +21,13 @@ namespace MisFinanzas.Modulos
         public static readonly string[] Todos = { LibreInversion, Hipotecario, Tarjeta };
     }
 
-    public class Credito : INotifyPropertyChanged
+    public class Credito : INotifyPropertyChanged, IReplicable
     {
         public int Id { get; set; }
+        /// <summary>Identidad en la nube (igual en el PC y el celular).</summary>
+        public string Uid { get; set; } = string.Empty;
+        /// <summary>Último cambio (UTC): en la nube gana el más reciente.</summary>
+        public DateTime ActualizadaUtc { get; set; }
 
         private decimal _total;
         public decimal Total { get => _total; set { _total = value; OnPropertyChanged(); AvisarCalculos(); } }

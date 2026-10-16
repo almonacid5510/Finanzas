@@ -10,10 +10,14 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace MisFinanzas.Modulos
 {
     [Table("MovimientosV2")]
-    public class Movimiento
+    public class Movimiento : IReplicable
     {
         [Key]
         public int Id { get; set; }
+        /// <summary>Identidad en la nube (igual en el PC y el celular).</summary>
+        public string Uid { get; set; } = string.Empty;
+        /// <summary>Último cambio (UTC): en la nube gana el más reciente.</summary>
+        public System.DateTime ActualizadaUtc { get; set; }
 
         [Required] // Asegura que no sea null en la BD
         public string Descripcion { get; set; } = string.Empty;
