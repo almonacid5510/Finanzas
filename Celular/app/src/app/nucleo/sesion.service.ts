@@ -3,7 +3,7 @@
 //  Autoria: Juan Almonacid
 //  Copyright (c) 2026 Juan Almonacid. Todos los derechos reservados.
 // ============================================================
-// Cuenta del usuario (la misma que se conecta en Mis Finanzas del PC → Día a día → Conectar celular).
+// Cuenta del usuario (la misma que se conecta en Mis Finanzas del PC → Cuenta → Conectar tu celular).
 import { Injectable, signal } from '@angular/core';
 import { User, createUserWithEmailAndPassword, onAuthStateChanged, signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import { auth } from './firebase';

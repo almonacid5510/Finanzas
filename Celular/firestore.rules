@@ -49,7 +49,7 @@ service cloud.firestore {
     // (documento por registro con "actualizada" y "borrado"), y la marca de cambios que revisan los dispositivos.
     match /usuarios/{uid}/{coleccion}/{docId} {
       allow read, write: if esDueno(uid) && coleccion in ['movimientos', 'creditos', 'metas', 'vehiculos', 'etiquetas',
-        'pagosCuenta', 'pagosCredito', 'abonosMeta', 'gastosVehiculo', 'estado'];
+        'pagosCuenta', 'pagosCredito', 'abonosMeta', 'gastosVehiculo', 'inicioRegistro', 'estado'];
     }
 
     // Resumen de cada mes que publica el PC para la pestaña "Resumen"

@@ -116,7 +116,7 @@ namespace MisFinanzas.Modulos
         /// 1. Aplica lo que se hizo en el celular (marcar pagado, borrar un gasto ya enviado).
         /// 2. Envía lo que se hizo aquí (gastos nuevos, editados o borrados).
         /// 3. Descarga los gastos nuevos del celular.
-        /// 4. Publica el resumen de los meses (solo si cambió) para la pestaña "Resumen" del celular.
+        /// 4. Réplica con la nube (cuentas, pagos, créditos, metas, vehículos…): el celular calcula su Resumen con ella.
         /// Devuelve cuántos gastos nuevos llegaron.
         /// </summary>
         public static async Task<int> SincronizarAsync()
@@ -159,6 +159,7 @@ namespace MisFinanzas.Modulos
                 {
                     // Reglas de la nube sin publicar: los datos quedan en la cola y se suben cuando se publiquen
                     UltimoErrorNube = "Faltan publicar las reglas de la nube para guardar todos tus datos allá.";
+                    Anotar(ex);
                 }
 
                 var pendientes = await PendientesAsync(sesion.Uid, token);
@@ -173,18 +174,36 @@ namespace MisFinanzas.Modulos
                     _ultimaConciliacion = DateTime.Now;
                 }
 
-                await PublicarResumenesAsync(sesion.Uid, token);
-
                 UltimaSincronizacion = DateTime.Now;
                 UltimoError = null;
                 if (nuevos > 0) GastosRecibidos?.Invoke(nuevos);
                 if (acciones.Count > 0) AccionesAplicadas?.Invoke(string.Join(" · ", acciones));
                 return nuevos;
             }
-            catch (HttpRequestException) { UltimoError = "Sin conexión a internet"; return 0; }
-            catch (TaskCanceledException) { UltimoError = "El servidor no respondió"; return 0; }
-            catch (Exception ex) { UltimoError = ex.Message; return 0; }
+            // Un error de la nube (400, 500…) no es falta de internet: se distingue y queda en el registro
+            catch (HttpRequestException ex) { UltimoError = ex.StatusCode is System.Net.HttpStatusCode c ? $"La nube respondió {(int)c}" : "Sin conexión a internet"; Anotar(ex); return 0; }
+            catch (TaskCanceledException ex) { UltimoError = "El servidor no respondió"; Anotar(ex); return 0; }
+            catch (Exception ex) { UltimoError = ex.Message; Anotar(ex); return 0; }
             finally { UnaALaVez.Release(); }
+        }
+
+        // Registro de errores de sincronización (%AppData%\MisFinanzas\sincronizacion.log, se recorta solo)
+        private static readonly string RutaRegistro =
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "MisFinanzas", "sincronizacion.log");
+        private static string? _ultimoAnotado;
+
+        internal static void Anotar(Exception ex)
+        {
+            try
+            {
+                var texto = ex.ToString();
+                if (texto == _ultimoAnotado) return; // el mismo error cada pocos segundos se anota una vez
+                _ultimoAnotado = texto;
+                Directory.CreateDirectory(Path.GetDirectoryName(RutaRegistro)!);
+                if (File.Exists(RutaRegistro) && new FileInfo(RutaRegistro).Length > 200_000) File.Delete(RutaRegistro);
+                File.AppendAllText(RutaRegistro, $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {texto}{Environment.NewLine}{Environment.NewLine}");
+            }
+            catch { /* sin permisos: no se registra */ }
         }
 
         /// <summary>Se lanza cuando se aplicó algo hecho en el celular (texto para mostrar al usuario).</summary>
@@ -454,31 +473,6 @@ namespace MisFinanzas.Modulos
                 using var respBorrar = await Http.SendAsync(borrar);
             }
             return hechas;
-        }
-
-        // ---------- Resumen para la pestaña "Resumen" del celular ----------
-
-        // Último resumen publicado de cada mes en esta sesión: solo se vuelve a escribir si cambió
-        private static readonly Dictionary<string, string> UltimoResumen = new();
-
-        private static async Task PublicarResumenesAsync(string uid, string token)
-        {
-            var actual = Periodo.InicioMes(DateTime.Today);
-            DateTime inicio;
-            using (var db = new AppDbContext()) inicio = InicioRegistro.Obtener(db);
-            foreach (var mes in new[] { actual.AddMonths(-1), actual, actual.AddMonths(1) }.Where(m => m >= inicio))
-            {
-                var datos = ResumenCelular.Construir(mes);
-                var clave = Periodo.Clave(mes);
-                var huella = JsonSerializer.Serialize(datos);
-                if (UltimoResumen.TryGetValue(clave, out var anterior) && anterior == huella) continue;
-
-                datos["actualizado"] = DateTime.Now;
-                using var pet = new HttpRequestMessage(HttpMethod.Patch, $"{Documentos}/usuarios/{uid}/resumen/{clave}") { Content = Cuerpo(datos) };
-                pet.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
-                using var resp = await Http.SendAsync(pet);
-                if (resp.IsSuccessStatusCode) UltimoResumen[clave] = huella;
-            }
         }
 
         // ---------- Formato de Firestore ----------

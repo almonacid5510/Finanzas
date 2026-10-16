@@ -2,7 +2,7 @@
   "hoy": "2026-10-16",
   "gastos": [
     {
-      "id": "3a3c3da3d6be49dbbf6f00470525ffa8",
+      "id": "28a22fea08ed45bc8b0680fa932a4c52",
       "fecha": "2026-10-01T18:00:00.0000000-05:00",
       "monto": 30000.0,
       "categoria": "Veh\u00EDculos",
@@ -11,7 +11,7 @@
       "cuotas": 1
     },
     {
-      "id": "af9468f56533416680172cdeaa2da5c6",
+      "id": "55cfb02e563a4d99b0fee71965ac944c",
       "fecha": "2026-10-01T13:00:00.0000000-05:00",
       "monto": 20000.0,
       "categoria": "Alimentaci\u00F3n",
@@ -20,7 +20,7 @@
       "cuotas": 1
     },
     {
-      "id": "a06ed06d7f0b4f5fae4a8dc09e21965e",
+      "id": "f18fc91a65764f1fa9da64ca19e99cb6",
       "fecha": "2026-09-25T00:00:00.0000000-05:00",
       "monto": 120000.0,
       "categoria": "Alimentaci\u00F3n",
@@ -29,7 +29,7 @@
       "cuotas": 1
     },
     {
-      "id": "da544c84889740a2a480a129e8f93e9a",
+      "id": "55bf2f44bb0e4402b2baf2ffa11fbda7",
       "fecha": "2026-09-08T00:00:00.0000000-05:00",
       "monto": 82000.0,
       "categoria": "Alimentaci\u00F3n",
@@ -38,7 +38,7 @@
       "cuotas": 1
     },
     {
-      "id": "d2369d9202604bcd943fa8d42df334c3",
+      "id": "e5413f3e62124a4baa4dcfd842ee3a84",
       "fecha": "2026-08-03T00:00:00.0000000-05:00",
       "monto": 1400000.0,
       "categoria": "Hogar",
@@ -47,7 +47,7 @@
       "cuotas": 6
     },
     {
-      "id": "7c2bcbb43a9f4cd0bde2412f0e5ea972",
+      "id": "804757076cc94941909953646e426042",
       "fecha": "2026-10-01T20:00:00.0000000-05:00",
       "monto": 62000.0,
       "categoria": "Alimentaci\u00F3n",
@@ -59,7 +59,7 @@
   "colecciones": {
     "movimientos": [
       {
-        "id": "c370bef64238435387e78d5e750bd3ab",
+        "id": "ff45c2b94f8f4d378aee3549485705b0",
         "fields": {
           "categoria": {
             "stringValue": "Hogar"
@@ -95,7 +95,7 @@
             "integerValue": "1200000"
           },
           "actualizada": {
-            "timestampValue": "2026-10-16T14:26:44.236Z"
+            "timestampValue": "2026-10-16T15:46:26.836Z"
           },
           "borrado": {
             "booleanValue": false
@@ -106,7 +106,7 @@
         }
       },
       {
-        "id": "39a89b05a8644904906bc01cb089d2e9",
+        "id": "76a238e6898843c5971fb5a39fd5a176",
         "fields": {
           "categoria": {
             "stringValue": "Servicios"
@@ -142,7 +142,7 @@
             "integerValue": "40000"
           },
           "actualizada": {
-            "timestampValue": "2026-10-16T14:26:44.236Z"
+            "timestampValue": "2026-10-16T15:46:26.836Z"
           },
           "borrado": {
             "booleanValue": false
@@ -153,7 +153,7 @@
         }
       },
       {
-        "id": "fb2170c3b57a4def835da80b5d82825c",
+        "id": "576f072522d84977973083c783a4609d",
         "fields": {
           "categoria": {
             "stringValue": "Transporte"
@@ -189,7 +189,7 @@
             "integerValue": "50000"
           },
           "actualizada": {
-            "timestampValue": "2026-10-16T14:26:44.236Z"
+            "timestampValue": "2026-10-16T15:46:26.836Z"
           },
           "borrado": {
             "booleanValue": false
@@ -200,7 +200,7 @@
         }
       },
       {
-        "id": "938e1e60af28474dbf1591986f940e9b",
+        "id": "b9671886c2a24ac498e72f3ed85cca51",
         "fields": {
           "categoria": {
             "stringValue": "Impuestos"
@@ -236,7 +236,7 @@
             "integerValue": "900000"
           },
           "actualizada": {
-            "timestampValue": "2026-10-16T14:26:44.236Z"
+            "timestampValue": "2026-10-16T15:46:26.836Z"
           },
           "borrado": {
             "booleanValue": false
@@ -247,7 +247,7 @@
         }
       },
       {
-        "id": "554a3704dd0247a6a83b076e9408e27d",
+        "id": "2c55665e0e584b87a29663aee03aabd3",
         "fields": {
           "categoria": {
             "stringValue": "Servicios"
@@ -283,7 +283,7 @@
             "integerValue": "210000"
           },
           "actualizada": {
-            "timestampValue": "2026-10-16T14:26:44.236Z"
+            "timestampValue": "2026-10-16T15:46:26.836Z"
           },
           "borrado": {
             "booleanValue": false
@@ -294,7 +294,7 @@
         }
       },
       {
-        "id": "3b70b79c03a243e79c3f0cce8d33d3fa",
+        "id": "5f0bbfdcfca745d58f595208d2bbc3d9",
         "fields": {
           "categoria": {
             "stringValue": "Servicios"
@@ -330,7 +330,7 @@
             "integerValue": "250000"
           },
           "actualizada": {
-            "timestampValue": "2026-10-16T14:26:44.236Z"
+            "timestampValue": "2026-10-16T15:46:26.836Z"
           },
           "borrado": {
             "booleanValue": false
@@ -341,7 +341,7 @@
         }
       },
       {
-        "id": "6ad529e33021488eae94fe9f38f3b369",
+        "id": "876055bef54649308df8100adb501119",
         "fields": {
           "categoria": {
             "stringValue": "Servicios"
@@ -377,7 +377,7 @@
             "integerValue": "90000"
           },
           "actualizada": {
-            "timestampValue": "2026-10-16T14:26:44.236Z"
+            "timestampValue": "2026-10-16T15:46:26.836Z"
           },
           "borrado": {
             "booleanValue": false
@@ -388,7 +388,7 @@
         }
       },
       {
-        "id": "b2f25bf8101043b99e8430f41306dbed",
+        "id": "fe22fb413d5c41df9a1fb0dc75d3a119",
         "fields": {
           "categoria": {
             "stringValue": ""
@@ -424,7 +424,7 @@
             "integerValue": "65000"
           },
           "actualizada": {
-            "timestampValue": "2026-10-16T14:26:44.236Z"
+            "timestampValue": "2026-10-16T15:46:26.836Z"
           },
           "borrado": {
             "booleanValue": false
@@ -435,7 +435,7 @@
         }
       },
       {
-        "id": "5f2c087406904284b7e6b3e095eded94",
+        "id": "df96fc53d0c0464ab70d262a62e05cff",
         "fields": {
           "categoria": {
             "stringValue": ""
@@ -471,7 +471,7 @@
             "integerValue": "6395000"
           },
           "actualizada": {
-            "timestampValue": "2026-10-16T14:26:44.236Z"
+            "timestampValue": "2026-10-16T15:46:26.836Z"
           },
           "borrado": {
             "booleanValue": false
@@ -482,7 +482,7 @@
         }
       },
       {
-        "id": "9dc79efe66804aa786e3d2eebd27e4c5",
+        "id": "02f9dac0bf554ae0943e17838ab9ea60",
         "fields": {
           "categoria": {
             "stringValue": ""
@@ -518,7 +518,7 @@
             "integerValue": "300000"
           },
           "actualizada": {
-            "timestampValue": "2026-10-16T14:26:44.236Z"
+            "timestampValue": "2026-10-16T15:46:26.836Z"
           },
           "borrado": {
             "booleanValue": false
@@ -529,7 +529,7 @@
         }
       },
       {
-        "id": "9f2621a323b34b4fa8704696be199fdc",
+        "id": "d7a62c8475f540fbbeee3ccfea28d559",
         "fields": {
           "categoria": {
             "stringValue": ""
@@ -565,7 +565,7 @@
             "integerValue": "0"
           },
           "actualizada": {
-            "timestampValue": "2026-10-16T14:26:44.236Z"
+            "timestampValue": "2026-10-16T15:46:26.836Z"
           },
           "borrado": {
             "booleanValue": false
@@ -576,7 +576,7 @@
         }
       },
       {
-        "id": "52f4bf6ea8784248bb9d87006a752a44",
+        "id": "c97a202442754b6996f9dc37e48b2924",
         "fields": {
           "categoria": {
             "stringValue": ""
@@ -612,7 +612,7 @@
             "integerValue": "0"
           },
           "actualizada": {
-            "timestampValue": "2026-10-16T14:26:44.236Z"
+            "timestampValue": "2026-10-16T15:46:26.836Z"
           },
           "borrado": {
             "booleanValue": false
@@ -625,7 +625,7 @@
     ],
     "creditos": [
       {
-        "id": "53d3b96a9e8c408cbd84c1e631afc662",
+        "id": "f09baaae593245578d228ad05c86cc8c",
         "fields": {
           "cuotaMensual": {
             "integerValue": "1526000"
@@ -658,7 +658,7 @@
             "integerValue": "100000000"
           },
           "actualizada": {
-            "timestampValue": "2026-10-16T14:26:44.236Z"
+            "timestampValue": "2026-10-16T15:46:26.836Z"
           },
           "borrado": {
             "booleanValue": false
@@ -669,7 +669,7 @@
         }
       },
       {
-        "id": "a59db6b1377744dc8cdc1447189aea8a",
+        "id": "cc62690718d34ae7a88696cadc8bb767",
         "fields": {
           "cuotaMensual": {
             "integerValue": "420000"
@@ -702,7 +702,7 @@
             "integerValue": "8000000"
           },
           "actualizada": {
-            "timestampValue": "2026-10-16T14:26:44.307Z"
+            "timestampValue": "2026-10-16T15:46:26.915Z"
           },
           "borrado": {
             "booleanValue": false
@@ -713,7 +713,7 @@
         }
       },
       {
-        "id": "cad9b2e6e9644138879eeb88ed4384f6",
+        "id": "2325cbe8872e4f458f4ee55b22e2a4f5",
         "fields": {
           "cuotaMensual": {
             "integerValue": "0"
@@ -746,7 +746,7 @@
             "integerValue": "20000000"
           },
           "actualizada": {
-            "timestampValue": "2026-10-16T14:26:44.236Z"
+            "timestampValue": "2026-10-16T15:46:26.836Z"
           },
           "borrado": {
             "booleanValue": false
@@ -759,7 +759,7 @@
     ],
     "metas": [
       {
-        "id": "242b9eaced4e4bf0876679b7ec2d8d55",
+        "id": "5cce8fcf958547f39a0b9dae8c8215ef",
         "fields": {
           "montoActual": {
             "integerValue": "2000000"
@@ -777,7 +777,7 @@
             "integerValue": "12"
           },
           "actualizada": {
-            "timestampValue": "2026-10-16T14:26:44.236Z"
+            "timestampValue": "2026-10-16T15:46:26.836Z"
           },
           "borrado": {
             "booleanValue": false
@@ -790,10 +790,10 @@
     ],
     "vehiculos": [
       {
-        "id": "ff411980e2e8469285a0bdbc494b858d",
+        "id": "7c2ff026840d452b8334866f374eaf96",
         "fields": {
           "fecha": {
-            "timestampValue": "2026-10-16T14:26:44.219Z"
+            "timestampValue": "2026-10-16T15:46:26.821Z"
           },
           "nombre": {
             "stringValue": "Kia"
@@ -805,7 +805,7 @@
             "stringValue": "Carro"
           },
           "actualizada": {
-            "timestampValue": "2026-10-16T14:26:44.236Z"
+            "timestampValue": "2026-10-16T15:46:26.836Z"
           },
           "borrado": {
             "booleanValue": false
@@ -819,7 +819,7 @@
     "etiquetas": [],
     "pagosCuenta": [
       {
-        "id": "793d9554b4a542f6b95c615ddd32d1d6",
+        "id": "6b5eb780c6cf4478ada9b5f366ecec26",
         "fields": {
           "mes": {
             "stringValue": "2026-10"
@@ -828,13 +828,13 @@
             "integerValue": "1250000"
           },
           "movimientoUid": {
-            "stringValue": "c370bef64238435387e78d5e750bd3ab"
+            "stringValue": "ff45c2b94f8f4d378aee3549485705b0"
           },
           "quincena": {
             "integerValue": "0"
           },
           "actualizada": {
-            "timestampValue": "2026-10-16T14:26:44.270Z"
+            "timestampValue": "2026-10-16T15:46:26.872Z"
           },
           "borrado": {
             "booleanValue": false
@@ -845,7 +845,7 @@
         }
       },
       {
-        "id": "fef3196844ee463499c1f00e138b5336",
+        "id": "52b19f2fd914463c881bddfc63bea8e6",
         "fields": {
           "mes": {
             "stringValue": "2026-10"
@@ -854,13 +854,13 @@
             "integerValue": "50000"
           },
           "movimientoUid": {
-            "stringValue": "fb2170c3b57a4def835da80b5d82825c"
+            "stringValue": "576f072522d84977973083c783a4609d"
           },
           "quincena": {
             "integerValue": "0"
           },
           "actualizada": {
-            "timestampValue": "2026-10-16T14:26:44.270Z"
+            "timestampValue": "2026-10-16T15:46:26.872Z"
           },
           "borrado": {
             "booleanValue": false
@@ -871,7 +871,7 @@
         }
       },
       {
-        "id": "5565841cdade4cd2891a8878a682c74b",
+        "id": "2a11b2ac49a745f29c90f2271919c9e5",
         "fields": {
           "mes": {
             "stringValue": "2026-09"
@@ -880,13 +880,13 @@
             "integerValue": "38000"
           },
           "movimientoUid": {
-            "stringValue": "39a89b05a8644904906bc01cb089d2e9"
+            "stringValue": "76a238e6898843c5971fb5a39fd5a176"
           },
           "quincena": {
             "integerValue": "0"
           },
           "actualizada": {
-            "timestampValue": "2026-10-16T14:26:44.270Z"
+            "timestampValue": "2026-10-16T15:46:26.872Z"
           },
           "borrado": {
             "booleanValue": false
@@ -897,7 +897,7 @@
         }
       },
       {
-        "id": "4d8f8c53891b44a4a623a5d20c465c04",
+        "id": "cecd240e283849ccb323acfb616b6b96",
         "fields": {
           "mes": {
             "stringValue": "2026-09"
@@ -906,13 +906,13 @@
             "integerValue": "1200000"
           },
           "movimientoUid": {
-            "stringValue": "c370bef64238435387e78d5e750bd3ab"
+            "stringValue": "ff45c2b94f8f4d378aee3549485705b0"
           },
           "quincena": {
             "integerValue": "0"
           },
           "actualizada": {
-            "timestampValue": "2026-10-16T14:26:44.270Z"
+            "timestampValue": "2026-10-16T15:46:26.872Z"
           },
           "borrado": {
             "booleanValue": false
@@ -925,13 +925,13 @@
     ],
     "pagosCredito": [
       {
-        "id": "93bd2e88699447cda0211dbcd7649818",
+        "id": "4d56143568fc4998bc5020e44ec3ea3e",
         "fields": {
           "capital": {
             "integerValue": "806000"
           },
           "creditoUid": {
-            "stringValue": "53d3b96a9e8c408cbd84c1e631afc662"
+            "stringValue": "f09baaae593245578d228ad05c86cc8c"
           },
           "fecha": {
             "timestampValue": "2026-09-20T05:00:00.000Z"
@@ -958,7 +958,7 @@
             "stringValue": "Cuota"
           },
           "actualizada": {
-            "timestampValue": "2026-10-16T14:26:44.270Z"
+            "timestampValue": "2026-10-16T15:46:26.872Z"
           },
           "borrado": {
             "booleanValue": false
@@ -969,13 +969,13 @@
         }
       },
       {
-        "id": "e1ef55716a1c4d0e81f38d3bc95c9135",
+        "id": "c03bc58bd6724ff8ba6b5304b6f93992",
         "fields": {
           "capital": {
             "integerValue": "362000"
           },
           "creditoUid": {
-            "stringValue": "a59db6b1377744dc8cdc1447189aea8a"
+            "stringValue": "cc62690718d34ae7a88696cadc8bb767"
           },
           "fecha": {
             "timestampValue": "2026-10-02T05:00:00.000Z"
@@ -1002,7 +1002,7 @@
             "stringValue": "Cuota"
           },
           "actualizada": {
-            "timestampValue": "2026-10-16T14:26:44.270Z"
+            "timestampValue": "2026-10-16T15:46:26.872Z"
           },
           "borrado": {
             "booleanValue": false
@@ -1015,19 +1015,19 @@
     ],
     "abonosMeta": [
       {
-        "id": "009a7755ff8244028de5d1dc45dd7331",
+        "id": "3d03a0e7f19c4ddca66a716e5622d0e2",
         "fields": {
           "fecha": {
             "timestampValue": "2026-10-01T14:00:00.000Z"
           },
           "metaUid": {
-            "stringValue": "242b9eaced4e4bf0876679b7ec2d8d55"
+            "stringValue": "5cce8fcf958547f39a0b9dae8c8215ef"
           },
           "monto": {
             "integerValue": "500000"
           },
           "actualizada": {
-            "timestampValue": "2026-10-16T14:26:44.270Z"
+            "timestampValue": "2026-10-16T15:46:26.872Z"
           },
           "borrado": {
             "booleanValue": false
@@ -1038,19 +1038,19 @@
         }
       },
       {
-        "id": "5454957f20bc4af683073170440dcf40",
+        "id": "b6f078c6f0324b20bda10e1f37b409af",
         "fields": {
           "fecha": {
             "timestampValue": "2026-09-15T05:00:00.000Z"
           },
           "metaUid": {
-            "stringValue": "242b9eaced4e4bf0876679b7ec2d8d55"
+            "stringValue": "5cce8fcf958547f39a0b9dae8c8215ef"
           },
           "monto": {
             "integerValue": "1500000"
           },
           "actualizada": {
-            "timestampValue": "2026-10-16T14:26:44.270Z"
+            "timestampValue": "2026-10-16T15:46:26.872Z"
           },
           "borrado": {
             "booleanValue": false
@@ -1063,7 +1063,7 @@
     ],
     "gastosVehiculo": [
       {
-        "id": "9a491007763040a1bad12980ea31abc9",
+        "id": "3f58e768ff2843f59c4a970562673bc9",
         "fields": {
           "concepto": {
             "stringValue": "SOAT"
@@ -1078,10 +1078,10 @@
             "integerValue": "230000"
           },
           "vehiculoUid": {
-            "stringValue": "ff411980e2e8469285a0bdbc494b858d"
+            "stringValue": "7c2ff026840d452b8334866f374eaf96"
           },
           "actualizada": {
-            "timestampValue": "2026-10-16T14:26:44.292Z"
+            "timestampValue": "2026-10-16T15:46:26.899Z"
           },
           "borrado": {
             "booleanValue": false
@@ -1092,7 +1092,7 @@
         }
       },
       {
-        "id": "fc589623ee0a460dae66dec6d548a226",
+        "id": "cb9b22c30bd14946b18146826ed9c2bb",
         "fields": {
           "concepto": {
             "stringValue": "Repuestos"
@@ -1101,16 +1101,16 @@
             "timestampValue": "2026-10-01T23:00:00.000Z"
           },
           "gastoDiarioUid": {
-            "stringValue": "3a3c3da3d6be49dbbf6f00470525ffa8"
+            "stringValue": "28a22fea08ed45bc8b0680fa932a4c52"
           },
           "valor": {
             "integerValue": "30000"
           },
           "vehiculoUid": {
-            "stringValue": "ff411980e2e8469285a0bdbc494b858d"
+            "stringValue": "7c2ff026840d452b8334866f374eaf96"
           },
           "actualizada": {
-            "timestampValue": "2026-10-16T14:26:44.292Z"
+            "timestampValue": "2026-10-16T15:46:26.899Z"
           },
           "borrado": {
             "booleanValue": false
@@ -1121,7 +1121,7 @@
         }
       },
       {
-        "id": "53ddc9a49ba34d05b8d98b3e7aeedae2",
+        "id": "2544c8a9ae2a4a1aac421fd8ea8b8159",
         "fields": {
           "concepto": {
             "stringValue": "Compra"
@@ -1136,10 +1136,10 @@
             "integerValue": "0"
           },
           "vehiculoUid": {
-            "stringValue": "ff411980e2e8469285a0bdbc494b858d"
+            "stringValue": "7c2ff026840d452b8334866f374eaf96"
           },
           "actualizada": {
-            "timestampValue": "2026-10-16T14:26:44.292Z"
+            "timestampValue": "2026-10-16T15:46:26.899Z"
           },
           "borrado": {
             "booleanValue": false
@@ -1152,13 +1152,13 @@
     ],
     "inicioRegistro": [
       {
-        "id": "2bd0c3a5556547159b422f6739b0f44e",
+        "id": "b4477b0c473c4031958f933749e06a64",
         "fields": {
           "fecha": {
             "timestampValue": "2026-07-05T05:00:00.000Z"
           },
           "actualizada": {
-            "timestampValue": "2026-10-16T14:26:44.236Z"
+            "timestampValue": "2026-10-16T15:46:26.836Z"
           },
           "borrado": {
             "booleanValue": false
@@ -1187,11 +1187,11 @@
         },
         "gastosIncluidos": [
           {
-            "id": "a06ed06d7f0b4f5fae4a8dc09e21965e",
+            "id": "f18fc91a65764f1fa9da64ca19e99cb6",
             "monto": 120000.0
           },
           {
-            "id": "da544c84889740a2a480a129e8f93e9a",
+            "id": "55bf2f44bb0e4402b2baf2ffa11fbda7",
             "monto": 0
           }
         ]
@@ -1302,15 +1302,15 @@
         },
         "gastosIncluidos": [
           {
-            "id": "3a3c3da3d6be49dbbf6f00470525ffa8",
+            "id": "28a22fea08ed45bc8b0680fa932a4c52",
             "monto": 30000.0
           },
           {
-            "id": "af9468f56533416680172cdeaa2da5c6",
+            "id": "55cfb02e563a4d99b0fee71965ac944c",
             "monto": 20000.0
           },
           {
-            "id": "7c2bcbb43a9f4cd0bde2412f0e5ea972",
+            "id": "804757076cc94941909953646e426042",
             "monto": 0
           }
         ]
@@ -1439,15 +1439,15 @@
         },
         "gastosIncluidos": [
           {
-            "id": "3a3c3da3d6be49dbbf6f00470525ffa8",
+            "id": "28a22fea08ed45bc8b0680fa932a4c52",
             "monto": 30000.0
           },
           {
-            "id": "af9468f56533416680172cdeaa2da5c6",
+            "id": "55cfb02e563a4d99b0fee71965ac944c",
             "monto": 20000.0
           },
           {
-            "id": "7c2bcbb43a9f4cd0bde2412f0e5ea972",
+            "id": "804757076cc94941909953646e426042",
             "monto": 0
           }
         ]
@@ -1543,14 +1543,14 @@
     }
   },
   "pagosCuota": {
-    "53d3b96a9e8c408cbd84c1e631afc662": {
+    "f09baaae593245578d228ad05c86cc8c": {
       "monto": 1526000.0,
       "interes": 723629,
       "capital": 802371.0,
       "saldoNuevo": 71197629.0,
       "plazoMeses": 119
     },
-    "a59db6b1377744dc8cdc1447189aea8a": null,
-    "cad9b2e6e9644138879eeb88ed4384f6": null
+    "cc62690718d34ae7a88696cadc8bb767": null,
+    "2325cbe8872e4f458f4ee55b22e2a4f5": null
   }
 }

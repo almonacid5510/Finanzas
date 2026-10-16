@@ -67,11 +67,7 @@
           <strong>{{ v.nombre }} · {{ pesos(v.monto) }}</strong>
           <span>{{ v.detalle }}</span>
         </div>
-        @if (servicio.fueEnviada(v)) {
-          <span class="enviada">Enviado al PC</span>
-        } @else {
-          <button (click)="pagar(v)">Pagado</button>
-        }
+        <button (click)="pagar(v)">Pagado</button>
       </section>
     }
 

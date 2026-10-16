@@ -52,7 +52,6 @@
 .vencida strong { display: block; font-size: 16px; }
 .vencida .info span { color: var(--rojo); font-size: 14px; }
 .vencida button { border: 0; background: var(--verde); color: #fff; font-weight: 800; border-radius: 11px; padding: 11px 16px; flex: none; }
-.enviada { color: var(--verde); font-weight: 700; font-size: 13px; text-align: right; flex: none; }
 
 /* Por pagar */
 .por-pagar h2 { font-size: 17px; font-weight: 800; margin: 0; }

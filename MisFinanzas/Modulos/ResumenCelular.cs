@@ -11,9 +11,10 @@ using System.Linq;
 namespace MisFinanzas.Modulos
 {
     /// <summary>
-    /// Resumen de un mes para la pestaña "Resumen" del celular: los mismos números del Dashboard
-    /// (disponible, vencidas, por pagar, ahorro, inversiones, deuda y vehículos).
-    /// SincronizacionCelular lo publica en la nube (usuarios/{uid}/resumen/{yyyy-MM}) cuando cambia.
+    /// Resumen de un mes con los mismos números del Dashboard (disponible, vencidas, por pagar, ahorro,
+    /// inversiones, deuda y vehículos). El celular lo calcula por su cuenta con los datos de la nube
+    /// (Celular/app/src/app/nucleo/calculo.ts); este cálculo es la referencia de la prueba cruzada
+    /// (Pruebas/Nomina/ResumenCruzadoTest.cs) que comprueba que los dos dan lo mismo.
     /// Debe llamarse desde el hilo de la interfaz (usa las listas globales de créditos y vehículos).
     /// </summary>
     public static class ResumenCelular

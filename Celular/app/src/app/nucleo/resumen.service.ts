@@ -4,9 +4,9 @@
 //  Copyright (c) 2026 Juan Almonacid. Todos los derechos reservados.
 // ============================================================
 // Resumen de cada mes que publica Mis Finanzas del PC (usuarios/{uid}/resumen/{yyyy-MM}):
-// los mismos números del Dashboard. "Pagado" guarda el pago en la nube (o, sin datos allá, deja una acción para el PC).
-import { DestroyRef, Injectable, computed, effect, inject, signal, untracked } from '@angular/core';
-import { Timestamp, addDoc, collection, deleteDoc, doc, onSnapshot, serverTimestamp, setDoc, writeBatch } from 'firebase/firestore';
+// los mismos números del Dashboard, calculados aquí con los datos de la nube. "Pagado" guarda el pago allá.
+import { DestroyRef, Injectable, computed, effect, inject, signal } from '@angular/core';
+import { Timestamp, collection, deleteDoc, doc, onSnapshot, serverTimestamp, setDoc, writeBatch } from 'firebase/firestore';
 import { db, marcarCambio } from './firebase';
 import { claveMes } from './formato';
 import { mesesVisibles } from './periodos';
@@ -23,7 +23,7 @@ export interface PorPagar {
   vencida: boolean; proxima: boolean; credito: boolean;
 }
 export interface Tarjeta { total: number; detalle?: string; progreso?: number; }
-/** Tarjeta de crédito publicada por el PC (cupo, deuda y disponible al momento de sincronizar) */
+/** Tarjeta de crédito (cupo, deuda y disponible), calculada con los datos de la nube */
 export interface TarjetaCredito { id: number; nombre: string; cupo: number; deuda: number; disponible: number; tasaEA?: number; }
 
 export interface Resumen {
@@ -50,7 +50,6 @@ export interface Resumen {
 @Injectable({ providedIn: 'root' })
 export class ResumenService {
   private readonly sesion = inject(SesionService);
-  private cancelar?: () => void;
   private cancelarCobros?: () => void;
   private cancelarNomina?: () => void;
   readonly nomina = signal<PlanNomina | null>(null);
@@ -61,9 +60,6 @@ export class ResumenService {
   readonly errorCobros = signal('');
 
   private readonly nube = inject(DatosNubeService);
-  /** Resumen que publica el PC (respaldo mientras la nube no tiene los datos del PC). */
-  private readonly publicados = signal<Map<string, Resumen>>(new Map());
-  private readonly publicadosCargados = signal(false);
   /**
    * Resumen calculado aquí con los datos de la nube (la base principal): está al día aunque el PC esté
    * apagado. Mismo cálculo que el PC (calculo.ts ↔ ResumenCelular.cs).
@@ -79,8 +75,9 @@ export class ResumenService {
     }
     return mapa;
   });
-  readonly resumenes = computed(() => this.calculados() ?? this.publicados());
-  readonly cargado = computed(() => this.publicadosCargados() || this.calculados() !== null);
+  readonly resumenes = computed(() => this.calculados() ?? new Map<string, Resumen>());
+  /** Ya llegaron los datos de la nube (si el PC aún no los subió, el Resumen queda vacío). */
+  readonly cargado = computed(() => this.nube.listo());
   readonly mes = signal(claveMes(new Date()));
   private readonly hoy = signal(new Date());
   readonly inicioRegistro = computed(() => {
@@ -99,37 +96,25 @@ export class ResumenService {
   /** Tarjetas de crédito del PC (para pagar con ellas y ver su cupo) */
   readonly tarjetas = computed<TarjetaCredito[]>(() =>
     (this.resumenes().get(claveMes(new Date())) ?? [...this.resumenes().values()].pop())?.listaTarjetas ?? []);
-  /** Vencidas que ya se marcaron como pagadas aquí y esperan a que el PC las aplique */
-  readonly enviadas = signal<Set<string>>(new Set());
 
   constructor() {
     const actualizar = () => this.hoy.set(new Date());
     const intervalo = window.setInterval(actualizar, 60000);
     document.addEventListener('visibilitychange', actualizar);
     inject(DestroyRef).onDestroy(() => { clearInterval(intervalo); document.removeEventListener('visibilitychange', actualizar); });
-    // Las vencidas que ya se pagaron dejan de estar "enviadas"
-    effect(() => {
-      const vigentes = new Set((this.resumenes().get(claveMes(new Date()))?.vencidas ?? []).map(clave));
-      untracked(() => this.enviadas.update((s) => new Set([...s].filter((k) => vigentes.has(k)))));
-    });
     effect(() => {
       const lista = this.meses();
       if (!lista.includes(this.mes())) this.mes.set(lista.includes(claveMes(this.hoy())) ? claveMes(this.hoy()) : lista[0] ?? claveMes(this.hoy()));
     });
     effect(() => {
       const u = this.sesion.usuario();
-      this.cancelar?.();
-      this.cancelar = undefined;
       this.cancelarCobros?.();
       this.cancelarNomina?.();
       this.nomina.set(null); this.nominaCargada.set(false); this.errorNomina.set('');
       this.cobros.set([]);
       this.cobrosCargados.set(false);
       this.errorCobros.set('');
-      this.publicados.set(new Map());
-      this.publicadosCargados.set(false);
       if (u) {
-        this.escuchar(u.uid);
         this.cancelarNomina = onSnapshot(doc(db, 'usuarios', u.uid, 'configuracion', 'nomina'), snap => {
           this.nomina.set(snap.exists() ? snap.data() as PlanNomina : null);
           this.nominaCargada.set(true);
@@ -142,18 +127,6 @@ export class ResumenService {
           this.cobrosCargados.set(true);
         }, () => { this.errorCobros.set('No se pudieron cargar los cobros. Comprueba la conexión y las reglas de acceso.'); });
       }
-    });
-  }
-
-  private escuchar(uid: string) {
-    this.cancelar = onSnapshot(collection(db, 'usuarios', uid, 'resumen'), (snap) => {
-      const mapa = new Map<string, Resumen>();
-      for (const d of snap.docs) {
-        const x = d.data();
-        mapa.set(d.id, { ...(x as Resumen), mes: d.id, actualizado: x['actualizado']?.toDate?.() ?? null });
-      }
-      this.publicados.set(mapa);
-      this.publicadosCargados.set(true);
     });
   }
 
@@ -195,23 +168,13 @@ export class ResumenService {
     if (i >= 0 && i < lista.length) this.mes.set(lista[i]);
   }
 
-  /** Pide al PC marcar la vencida como pagada (cuenta del mes o cuota de crédito) */
-  /** Devuelve true si el pago quedó guardado en la nube; false si se le pidió al PC. */
+  /** Marca la vencida como pagada guardando el pago en la nube (el PC lo recibe por la réplica). Devuelve true si se guardó. */
   pagar(v: Vencida): boolean {
     const u = this.sesion.usuario();
-    if (!u) return false;
-    // Con los datos en la nube, el pago se guarda allá directamente (el PC lo recibe por la réplica)
-    if (this.calculados() && v.uid && this.pagarEnNube(u.uid, v)) { marcarCambio(u.uid); return true; }
-    addDoc(collection(db, 'usuarios', u.uid, 'acciones'), {
-      tipo: v.tipo === 'cuenta' ? 'pagarCuenta' : 'pagarCuota',
-      id: v.id, mes: v.mes, monto: v.monto, quincena: v.quincena ?? 0, creado: serverTimestamp(),
-    });
+    if (!u || !this.pagarEnNube(u.uid, v)) return false;
     marcarCambio(u.uid);
-    this.enviadas.update((s) => new Set(s).add(clave(v)));
-    return false;
+    return true;
   }
-
-  fueEnviada = (v: Vencida) => this.enviadas().has(clave(v));
 
   /**
    * Guarda en la nube el pago de una vencida, como lo haría el PC: la cuenta queda pagada en su mes
@@ -243,4 +206,3 @@ export class ResumenService {
   }
 }
 
-const clave = (v: Vencida) => `${v.tipo}-${v.id}-${v.mes}-${v.quincena ?? 0}`;

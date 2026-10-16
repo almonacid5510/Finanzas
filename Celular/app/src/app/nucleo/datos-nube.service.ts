@@ -31,7 +31,7 @@ export class DatosNubeService {
   /** Ya llegó al menos una vez cada colección (de la caché local o de la red). */
   readonly listo = computed(() => this.recibidas().size >= COLECCIONES_NUBE.length + 1);
   readonly datos = computed<DatosNube | null>(() => this.listo() ? desdeDocumentos(this.docs(), this.gastos()) : null);
-  /** El PC ya subió sus datos: si no, se sigue usando el resumen que publica el PC. */
+  /** El PC ya subió sus datos a la nube (la primera vez que se abre conectado). */
   readonly hayDatos = computed(() => {
     const d = this.datos();
     return !!d && (d.movimientos.length > 0 || d.creditos.length > 0 || d.inicioRegistro !== null);
