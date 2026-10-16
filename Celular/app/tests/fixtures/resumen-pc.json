@@ -1,0 +1,1545 @@
+{
+  "hoy": "2026-10-16",
+  "gastos": [
+    {
+      "id": "e50900f1de1d4b36877752b4e902500c",
+      "fecha": "2026-10-01T18:00:00.0000000-05:00",
+      "monto": 30000.0,
+      "categoria": "Veh\u00EDculos",
+      "descripcion": "Repuestos",
+      "tarjetaId": null,
+      "cuotas": 1
+    },
+    {
+      "id": "d49849b9e8944486b85f722e3bdf2246",
+      "fecha": "2026-10-01T13:00:00.0000000-05:00",
+      "monto": 20000.0,
+      "categoria": "Alimentaci\u00F3n",
+      "descripcion": "Almuerzo",
+      "tarjetaId": null,
+      "cuotas": 1
+    },
+    {
+      "id": "2715a8e3c9fe40128426a9e42ccb4bb2",
+      "fecha": "2026-09-25T00:00:00.0000000-05:00",
+      "monto": 120000.0,
+      "categoria": "Alimentaci\u00F3n",
+      "descripcion": "Mercado",
+      "tarjetaId": null,
+      "cuotas": 1
+    },
+    {
+      "id": "266ec42ceaf440c7874075e2401cec22",
+      "fecha": "2026-09-08T00:00:00.0000000-05:00",
+      "monto": 82000.0,
+      "categoria": "Alimentaci\u00F3n",
+      "descripcion": "Cena",
+      "tarjetaId": 3,
+      "cuotas": 1
+    },
+    {
+      "id": "8bb9aca6c93c475d8aed41465ec39dc7",
+      "fecha": "2026-08-03T00:00:00.0000000-05:00",
+      "monto": 1400000.0,
+      "categoria": "Hogar",
+      "descripcion": "Nevera",
+      "tarjetaId": 3,
+      "cuotas": 6
+    },
+    {
+      "id": "4bab361876dd4607b7c0a4f7cafc18e7",
+      "fecha": "2026-10-01T20:00:00.0000000-05:00",
+      "monto": 62000.0,
+      "categoria": "Alimentaci\u00F3n",
+      "descripcion": "Hamburguesa",
+      "tarjetaId": 3,
+      "cuotas": 1
+    }
+  ],
+  "colecciones": {
+    "movimientos": [
+      {
+        "id": "bc22750e229c4abebc83f70aeb237c49",
+        "fields": {
+          "categoria": {
+            "stringValue": "Hogar"
+          },
+          "costo": {
+            "integerValue": "0"
+          },
+          "descripcion": {
+            "stringValue": "Arriendo"
+          },
+          "diaPago": {
+            "integerValue": "5"
+          },
+          "estaPagado": {
+            "booleanValue": false
+          },
+          "fecha": {
+            "timestampValue": "2026-07-01T05:00:00.000Z"
+          },
+          "frecuencia": {
+            "stringValue": "Mensual"
+          },
+          "intervaloMeses": {
+            "integerValue": "1"
+          },
+          "mesFin": {
+            "stringValue": ""
+          },
+          "tipo": {
+            "stringValue": "Cuenta"
+          },
+          "venta": {
+            "integerValue": "1200000"
+          },
+          "actualizada": {
+            "timestampValue": "2026-10-16T14:19:56.610Z"
+          },
+          "borrado": {
+            "booleanValue": false
+          },
+          "idPc": {
+            "integerValue": "1"
+          }
+        }
+      },
+      {
+        "id": "3c68e7e94a5941fc9b60ae6c8132f94d",
+        "fields": {
+          "categoria": {
+            "stringValue": "Servicios"
+          },
+          "costo": {
+            "integerValue": "0"
+          },
+          "descripcion": {
+            "stringValue": "Agua"
+          },
+          "diaPago": {
+            "integerValue": "18"
+          },
+          "estaPagado": {
+            "booleanValue": false
+          },
+          "fecha": {
+            "timestampValue": "2026-07-01T05:00:00.000Z"
+          },
+          "frecuencia": {
+            "stringValue": "Mensual"
+          },
+          "intervaloMeses": {
+            "integerValue": "1"
+          },
+          "mesFin": {
+            "stringValue": ""
+          },
+          "tipo": {
+            "stringValue": "Cuenta"
+          },
+          "venta": {
+            "integerValue": "40000"
+          },
+          "actualizada": {
+            "timestampValue": "2026-10-16T14:19:56.610Z"
+          },
+          "borrado": {
+            "booleanValue": false
+          },
+          "idPc": {
+            "integerValue": "2"
+          }
+        }
+      },
+      {
+        "id": "0a8ea6ca0c3245f1ad3a328a5eb786ac",
+        "fields": {
+          "categoria": {
+            "stringValue": "Transporte"
+          },
+          "costo": {
+            "integerValue": "0"
+          },
+          "descripcion": {
+            "stringValue": "Buses"
+          },
+          "diaPago": {
+            "integerValue": "15"
+          },
+          "estaPagado": {
+            "booleanValue": false
+          },
+          "fecha": {
+            "timestampValue": "2026-07-01T05:00:00.000Z"
+          },
+          "frecuencia": {
+            "stringValue": "Quincenal"
+          },
+          "intervaloMeses": {
+            "integerValue": "1"
+          },
+          "mesFin": {
+            "stringValue": ""
+          },
+          "tipo": {
+            "stringValue": "Cuenta"
+          },
+          "venta": {
+            "integerValue": "50000"
+          },
+          "actualizada": {
+            "timestampValue": "2026-10-16T14:19:56.610Z"
+          },
+          "borrado": {
+            "booleanValue": false
+          },
+          "idPc": {
+            "integerValue": "3"
+          }
+        }
+      },
+      {
+        "id": "3003da373b7248cfba5c4989aa847acc",
+        "fields": {
+          "categoria": {
+            "stringValue": "Impuestos"
+          },
+          "costo": {
+            "integerValue": "0"
+          },
+          "descripcion": {
+            "stringValue": "Impuesto predial"
+          },
+          "diaPago": {
+            "integerValue": "10"
+          },
+          "estaPagado": {
+            "booleanValue": false
+          },
+          "fecha": {
+            "timestampValue": "2026-11-01T05:00:00.000Z"
+          },
+          "frecuencia": {
+            "stringValue": "Anual"
+          },
+          "intervaloMeses": {
+            "integerValue": "1"
+          },
+          "mesFin": {
+            "stringValue": ""
+          },
+          "tipo": {
+            "stringValue": "Cuenta"
+          },
+          "venta": {
+            "integerValue": "900000"
+          },
+          "actualizada": {
+            "timestampValue": "2026-10-16T14:19:56.610Z"
+          },
+          "borrado": {
+            "booleanValue": false
+          },
+          "idPc": {
+            "integerValue": "4"
+          }
+        }
+      },
+      {
+        "id": "73c810c6758245e6ac172d9285e736c0",
+        "fields": {
+          "categoria": {
+            "stringValue": "Servicios"
+          },
+          "costo": {
+            "integerValue": "0"
+          },
+          "descripcion": {
+            "stringValue": "Seguro"
+          },
+          "diaPago": {
+            "integerValue": "15"
+          },
+          "estaPagado": {
+            "booleanValue": false
+          },
+          "fecha": {
+            "timestampValue": "2026-08-01T05:00:00.000Z"
+          },
+          "frecuencia": {
+            "stringValue": "Mensual"
+          },
+          "intervaloMeses": {
+            "integerValue": "2"
+          },
+          "mesFin": {
+            "stringValue": ""
+          },
+          "tipo": {
+            "stringValue": "Cuenta"
+          },
+          "venta": {
+            "integerValue": "210000"
+          },
+          "actualizada": {
+            "timestampValue": "2026-10-16T14:19:56.610Z"
+          },
+          "borrado": {
+            "booleanValue": false
+          },
+          "idPc": {
+            "integerValue": "5"
+          }
+        }
+      },
+      {
+        "id": "e9eb7087a92d40bc889b5b5402707cfd",
+        "fields": {
+          "categoria": {
+            "stringValue": "Servicios"
+          },
+          "costo": {
+            "integerValue": "0"
+          },
+          "descripcion": {
+            "stringValue": "Revisi\u00F3n t\u00E9cnico"
+          },
+          "diaPago": {
+            "integerValue": "28"
+          },
+          "estaPagado": {
+            "booleanValue": false
+          },
+          "fecha": {
+            "timestampValue": "2026-10-01T05:00:00.000Z"
+          },
+          "frecuencia": {
+            "stringValue": "\u00DAnica"
+          },
+          "intervaloMeses": {
+            "integerValue": "1"
+          },
+          "mesFin": {
+            "stringValue": ""
+          },
+          "tipo": {
+            "stringValue": "Cuenta"
+          },
+          "venta": {
+            "integerValue": "250000"
+          },
+          "actualizada": {
+            "timestampValue": "2026-10-16T14:19:56.610Z"
+          },
+          "borrado": {
+            "booleanValue": false
+          },
+          "idPc": {
+            "integerValue": "6"
+          }
+        }
+      },
+      {
+        "id": "07be5c043dd34be5a08a550208d78a0d",
+        "fields": {
+          "categoria": {
+            "stringValue": "Servicios"
+          },
+          "costo": {
+            "integerValue": "0"
+          },
+          "descripcion": {
+            "stringValue": "Gimnasio"
+          },
+          "diaPago": {
+            "integerValue": "3"
+          },
+          "estaPagado": {
+            "booleanValue": false
+          },
+          "fecha": {
+            "timestampValue": "2026-07-01T05:00:00.000Z"
+          },
+          "frecuencia": {
+            "stringValue": "Mensual"
+          },
+          "intervaloMeses": {
+            "integerValue": "1"
+          },
+          "mesFin": {
+            "stringValue": "2026-09"
+          },
+          "tipo": {
+            "stringValue": "Cuenta"
+          },
+          "venta": {
+            "integerValue": "90000"
+          },
+          "actualizada": {
+            "timestampValue": "2026-10-16T14:19:56.610Z"
+          },
+          "borrado": {
+            "booleanValue": false
+          },
+          "idPc": {
+            "integerValue": "7"
+          }
+        }
+      },
+      {
+        "id": "4f1dd486ba3c4f65a3aef4ac421a51f9",
+        "fields": {
+          "categoria": {
+            "stringValue": ""
+          },
+          "costo": {
+            "integerValue": "0"
+          },
+          "descripcion": {
+            "stringValue": "Plan celular"
+          },
+          "diaPago": {
+            "integerValue": "19"
+          },
+          "estaPagado": {
+            "booleanValue": false
+          },
+          "fecha": {
+            "timestampValue": "2026-07-01T05:00:00.000Z"
+          },
+          "frecuencia": {
+            "stringValue": "Mensual"
+          },
+          "intervaloMeses": {
+            "integerValue": "1"
+          },
+          "mesFin": {
+            "stringValue": ""
+          },
+          "tipo": {
+            "stringValue": "Cuenta"
+          },
+          "venta": {
+            "integerValue": "65000"
+          },
+          "actualizada": {
+            "timestampValue": "2026-10-16T14:19:56.610Z"
+          },
+          "borrado": {
+            "booleanValue": false
+          },
+          "idPc": {
+            "integerValue": "8"
+          }
+        }
+      },
+      {
+        "id": "714ee80900e2405b933df2c9b0d49497",
+        "fields": {
+          "categoria": {
+            "stringValue": ""
+          },
+          "costo": {
+            "integerValue": "0"
+          },
+          "descripcion": {
+            "stringValue": "Salario Mensual"
+          },
+          "diaPago": {
+            "integerValue": "0"
+          },
+          "estaPagado": {
+            "booleanValue": false
+          },
+          "fecha": {
+            "timestampValue": "2026-07-01T05:00:00.000Z"
+          },
+          "frecuencia": {
+            "stringValue": "Mensual"
+          },
+          "intervaloMeses": {
+            "integerValue": "1"
+          },
+          "mesFin": {
+            "stringValue": ""
+          },
+          "tipo": {
+            "stringValue": "Ingreso"
+          },
+          "venta": {
+            "integerValue": "6395000"
+          },
+          "actualizada": {
+            "timestampValue": "2026-10-16T14:19:56.610Z"
+          },
+          "borrado": {
+            "booleanValue": false
+          },
+          "idPc": {
+            "integerValue": "9"
+          }
+        }
+      },
+      {
+        "id": "20dd07b5b7bf4a14b259f4978b825961",
+        "fields": {
+          "categoria": {
+            "stringValue": ""
+          },
+          "costo": {
+            "integerValue": "0"
+          },
+          "descripcion": {
+            "stringValue": "Freelance"
+          },
+          "diaPago": {
+            "integerValue": "0"
+          },
+          "estaPagado": {
+            "booleanValue": false
+          },
+          "fecha": {
+            "timestampValue": "2026-09-01T05:00:00.000Z"
+          },
+          "frecuencia": {
+            "stringValue": "Mensual"
+          },
+          "intervaloMeses": {
+            "integerValue": "1"
+          },
+          "mesFin": {
+            "stringValue": ""
+          },
+          "tipo": {
+            "stringValue": "IngresoExtra"
+          },
+          "venta": {
+            "integerValue": "300000"
+          },
+          "actualizada": {
+            "timestampValue": "2026-10-16T14:19:56.610Z"
+          },
+          "borrado": {
+            "booleanValue": false
+          },
+          "idPc": {
+            "integerValue": "10"
+          }
+        }
+      },
+      {
+        "id": "8f3420f350a5436c8eac0fdf03ec8af4",
+        "fields": {
+          "categoria": {
+            "stringValue": ""
+          },
+          "costo": {
+            "integerValue": "5000000"
+          },
+          "descripcion": {
+            "stringValue": "CDT"
+          },
+          "diaPago": {
+            "integerValue": "0"
+          },
+          "estaPagado": {
+            "booleanValue": false
+          },
+          "fecha": {
+            "timestampValue": "2026-08-01T05:00:00.000Z"
+          },
+          "frecuencia": {
+            "stringValue": "Mensual"
+          },
+          "intervaloMeses": {
+            "integerValue": "1"
+          },
+          "mesFin": {
+            "stringValue": ""
+          },
+          "tipo": {
+            "stringValue": "Inversion"
+          },
+          "venta": {
+            "integerValue": "0"
+          },
+          "actualizada": {
+            "timestampValue": "2026-10-16T14:19:56.610Z"
+          },
+          "borrado": {
+            "booleanValue": false
+          },
+          "idPc": {
+            "integerValue": "11"
+          }
+        }
+      },
+      {
+        "id": "708a396adf8b4b9288bdcc46182803ec",
+        "fields": {
+          "categoria": {
+            "stringValue": ""
+          },
+          "costo": {
+            "integerValue": "1200000"
+          },
+          "descripcion": {
+            "stringValue": "Acciones"
+          },
+          "diaPago": {
+            "integerValue": "0"
+          },
+          "estaPagado": {
+            "booleanValue": false
+          },
+          "fecha": {
+            "timestampValue": "2026-09-01T05:00:00.000Z"
+          },
+          "frecuencia": {
+            "stringValue": "Mensual"
+          },
+          "intervaloMeses": {
+            "integerValue": "1"
+          },
+          "mesFin": {
+            "stringValue": ""
+          },
+          "tipo": {
+            "stringValue": "Inversion"
+          },
+          "venta": {
+            "integerValue": "0"
+          },
+          "actualizada": {
+            "timestampValue": "2026-10-16T14:19:56.610Z"
+          },
+          "borrado": {
+            "booleanValue": false
+          },
+          "idPc": {
+            "integerValue": "12"
+          }
+        }
+      }
+    ],
+    "creditos": [
+      {
+        "id": "9abfca673dbf4e04af3393ddbf8240bb",
+        "fields": {
+          "cuotaMensual": {
+            "integerValue": "1526000"
+          },
+          "diaPago": {
+            "integerValue": "14"
+          },
+          "disponible": {
+            "integerValue": "72000000"
+          },
+          "mesPagado": {
+            "stringValue": ""
+          },
+          "modalidad": {
+            "stringValue": ""
+          },
+          "nombreCustom": {
+            "stringValue": "Hipotecario"
+          },
+          "pagado": {
+            "booleanValue": false
+          },
+          "plazoMeses": {
+            "integerValue": "120"
+          },
+          "tasaEA": {
+            "doubleValue": 12.75
+          },
+          "total": {
+            "integerValue": "100000000"
+          },
+          "actualizada": {
+            "timestampValue": "2026-10-16T14:19:56.610Z"
+          },
+          "borrado": {
+            "booleanValue": false
+          },
+          "idPc": {
+            "integerValue": "1"
+          }
+        }
+      },
+      {
+        "id": "5c636cd0b5ba4d78b00adaaa884a7ff7",
+        "fields": {
+          "cuotaMensual": {
+            "integerValue": "420000"
+          },
+          "diaPago": {
+            "integerValue": "0"
+          },
+          "disponible": {
+            "integerValue": "3100000"
+          },
+          "mesPagado": {
+            "stringValue": "2026-10"
+          },
+          "modalidad": {
+            "stringValue": ""
+          },
+          "nombreCustom": {
+            "stringValue": "Libre inversi\u00F3n"
+          },
+          "pagado": {
+            "booleanValue": true
+          },
+          "plazoMeses": {
+            "integerValue": "0"
+          },
+          "tasaEA": {
+            "doubleValue": 24.5
+          },
+          "total": {
+            "integerValue": "8000000"
+          },
+          "actualizada": {
+            "timestampValue": "2026-10-16T14:19:56.715Z"
+          },
+          "borrado": {
+            "booleanValue": false
+          },
+          "idPc": {
+            "integerValue": "2"
+          }
+        }
+      },
+      {
+        "id": "761ad85c9d564ee5b6ae99e09780eaa8",
+        "fields": {
+          "cuotaMensual": {
+            "integerValue": "0"
+          },
+          "diaPago": {
+            "integerValue": "12"
+          },
+          "disponible": {
+            "integerValue": "1482000"
+          },
+          "mesPagado": {
+            "stringValue": ""
+          },
+          "modalidad": {
+            "stringValue": "Tarjeta de cr\u00E9dito"
+          },
+          "nombreCustom": {
+            "stringValue": "visa"
+          },
+          "pagado": {
+            "booleanValue": false
+          },
+          "plazoMeses": {
+            "integerValue": "0"
+          },
+          "tasaEA": {
+            "doubleValue": 28.9
+          },
+          "total": {
+            "integerValue": "20000000"
+          },
+          "actualizada": {
+            "timestampValue": "2026-10-16T14:19:56.610Z"
+          },
+          "borrado": {
+            "booleanValue": false
+          },
+          "idPc": {
+            "integerValue": "3"
+          }
+        }
+      }
+    ],
+    "metas": [
+      {
+        "id": "cbce33aa26a6446d9b35c9c990c37cc0",
+        "fields": {
+          "montoActual": {
+            "integerValue": "2000000"
+          },
+          "montoObjetivo": {
+            "integerValue": "6000000"
+          },
+          "nombre": {
+            "stringValue": "Viaje"
+          },
+          "nombreCustom": {
+            "stringValue": "Viaje"
+          },
+          "plazoMeses": {
+            "integerValue": "12"
+          },
+          "actualizada": {
+            "timestampValue": "2026-10-16T14:19:56.610Z"
+          },
+          "borrado": {
+            "booleanValue": false
+          },
+          "idPc": {
+            "integerValue": "1"
+          }
+        }
+      }
+    ],
+    "vehiculos": [
+      {
+        "id": "d22319b8ebf44baba9681788b3bf38be",
+        "fields": {
+          "fecha": {
+            "timestampValue": "2026-10-16T14:19:56.591Z"
+          },
+          "nombre": {
+            "stringValue": "Kia"
+          },
+          "placa": {
+            "stringValue": "ABC123"
+          },
+          "tipo": {
+            "stringValue": "Carro"
+          },
+          "actualizada": {
+            "timestampValue": "2026-10-16T14:19:56.610Z"
+          },
+          "borrado": {
+            "booleanValue": false
+          },
+          "idPc": {
+            "integerValue": "1"
+          }
+        }
+      }
+    ],
+    "etiquetas": [],
+    "pagosCuenta": [
+      {
+        "id": "7e485501046c44bbb37ae9252afdeb79",
+        "fields": {
+          "mes": {
+            "stringValue": "2026-10"
+          },
+          "monto": {
+            "integerValue": "1250000"
+          },
+          "movimientoUid": {
+            "stringValue": "bc22750e229c4abebc83f70aeb237c49"
+          },
+          "quincena": {
+            "integerValue": "0"
+          },
+          "actualizada": {
+            "timestampValue": "2026-10-16T14:19:56.673Z"
+          },
+          "borrado": {
+            "booleanValue": false
+          },
+          "idPc": {
+            "integerValue": "1"
+          }
+        }
+      },
+      {
+        "id": "30ce642a7fbd4f0daf031c1787b80928",
+        "fields": {
+          "mes": {
+            "stringValue": "2026-10"
+          },
+          "monto": {
+            "integerValue": "50000"
+          },
+          "movimientoUid": {
+            "stringValue": "0a8ea6ca0c3245f1ad3a328a5eb786ac"
+          },
+          "quincena": {
+            "integerValue": "0"
+          },
+          "actualizada": {
+            "timestampValue": "2026-10-16T14:19:56.673Z"
+          },
+          "borrado": {
+            "booleanValue": false
+          },
+          "idPc": {
+            "integerValue": "2"
+          }
+        }
+      },
+      {
+        "id": "26d44a979eab4b528a5aeb0586649bfd",
+        "fields": {
+          "mes": {
+            "stringValue": "2026-09"
+          },
+          "monto": {
+            "integerValue": "38000"
+          },
+          "movimientoUid": {
+            "stringValue": "3c68e7e94a5941fc9b60ae6c8132f94d"
+          },
+          "quincena": {
+            "integerValue": "0"
+          },
+          "actualizada": {
+            "timestampValue": "2026-10-16T14:19:56.673Z"
+          },
+          "borrado": {
+            "booleanValue": false
+          },
+          "idPc": {
+            "integerValue": "3"
+          }
+        }
+      },
+      {
+        "id": "69703cb0026b471595a113b3efbd7cd7",
+        "fields": {
+          "mes": {
+            "stringValue": "2026-09"
+          },
+          "monto": {
+            "integerValue": "1200000"
+          },
+          "movimientoUid": {
+            "stringValue": "bc22750e229c4abebc83f70aeb237c49"
+          },
+          "quincena": {
+            "integerValue": "0"
+          },
+          "actualizada": {
+            "timestampValue": "2026-10-16T14:19:56.673Z"
+          },
+          "borrado": {
+            "booleanValue": false
+          },
+          "idPc": {
+            "integerValue": "4"
+          }
+        }
+      }
+    ],
+    "pagosCredito": [
+      {
+        "id": "459d8a3871c746dd909d599f3e7ea02f",
+        "fields": {
+          "capital": {
+            "integerValue": "806000"
+          },
+          "creditoUid": {
+            "stringValue": "9abfca673dbf4e04af3393ddbf8240bb"
+          },
+          "fecha": {
+            "timestampValue": "2026-09-20T05:00:00.000Z"
+          },
+          "interes": {
+            "integerValue": "720000"
+          },
+          "mes": {
+            "stringValue": "2026-09"
+          },
+          "mesesReducidos": {
+            "integerValue": "0"
+          },
+          "monto": {
+            "integerValue": "1526000"
+          },
+          "saldoAnterior": {
+            "integerValue": "0"
+          },
+          "saldoNuevo": {
+            "integerValue": "0"
+          },
+          "tipo": {
+            "stringValue": "Cuota"
+          },
+          "actualizada": {
+            "timestampValue": "2026-10-16T14:19:56.673Z"
+          },
+          "borrado": {
+            "booleanValue": false
+          },
+          "idPc": {
+            "integerValue": "1"
+          }
+        }
+      },
+      {
+        "id": "38e8293e073143e8879a5cd080665ce1",
+        "fields": {
+          "capital": {
+            "integerValue": "362000"
+          },
+          "creditoUid": {
+            "stringValue": "5c636cd0b5ba4d78b00adaaa884a7ff7"
+          },
+          "fecha": {
+            "timestampValue": "2026-10-02T05:00:00.000Z"
+          },
+          "interes": {
+            "integerValue": "58000"
+          },
+          "mes": {
+            "stringValue": "2026-10"
+          },
+          "mesesReducidos": {
+            "integerValue": "0"
+          },
+          "monto": {
+            "integerValue": "420000"
+          },
+          "saldoAnterior": {
+            "integerValue": "0"
+          },
+          "saldoNuevo": {
+            "integerValue": "0"
+          },
+          "tipo": {
+            "stringValue": "Cuota"
+          },
+          "actualizada": {
+            "timestampValue": "2026-10-16T14:19:56.673Z"
+          },
+          "borrado": {
+            "booleanValue": false
+          },
+          "idPc": {
+            "integerValue": "2"
+          }
+        }
+      }
+    ],
+    "abonosMeta": [
+      {
+        "id": "b119b80696544c98b1677bf49c007d17",
+        "fields": {
+          "fecha": {
+            "timestampValue": "2026-10-01T14:00:00.000Z"
+          },
+          "metaUid": {
+            "stringValue": "cbce33aa26a6446d9b35c9c990c37cc0"
+          },
+          "monto": {
+            "integerValue": "500000"
+          },
+          "actualizada": {
+            "timestampValue": "2026-10-16T14:19:56.673Z"
+          },
+          "borrado": {
+            "booleanValue": false
+          },
+          "idPc": {
+            "integerValue": "1"
+          }
+        }
+      },
+      {
+        "id": "2f5a761c40f44bf5b620369dfa0326ba",
+        "fields": {
+          "fecha": {
+            "timestampValue": "2026-09-15T05:00:00.000Z"
+          },
+          "metaUid": {
+            "stringValue": "cbce33aa26a6446d9b35c9c990c37cc0"
+          },
+          "monto": {
+            "integerValue": "1500000"
+          },
+          "actualizada": {
+            "timestampValue": "2026-10-16T14:19:56.673Z"
+          },
+          "borrado": {
+            "booleanValue": false
+          },
+          "idPc": {
+            "integerValue": "2"
+          }
+        }
+      }
+    ],
+    "gastosVehiculo": [
+      {
+        "id": "3a4c107520984162b82d50939f0bf670",
+        "fields": {
+          "concepto": {
+            "stringValue": "SOAT"
+          },
+          "fecha": {
+            "timestampValue": "2026-10-01T05:00:00.000Z"
+          },
+          "gastoDiarioUid": {
+            "stringValue": ""
+          },
+          "valor": {
+            "integerValue": "230000"
+          },
+          "vehiculoUid": {
+            "stringValue": "d22319b8ebf44baba9681788b3bf38be"
+          },
+          "actualizada": {
+            "timestampValue": "2026-10-16T14:19:56.699Z"
+          },
+          "borrado": {
+            "booleanValue": false
+          },
+          "idPc": {
+            "integerValue": "1"
+          }
+        }
+      },
+      {
+        "id": "ae74357fb0264ec38b1a585846523f5e",
+        "fields": {
+          "concepto": {
+            "stringValue": "Repuestos"
+          },
+          "fecha": {
+            "timestampValue": "2026-10-01T23:00:00.000Z"
+          },
+          "gastoDiarioUid": {
+            "stringValue": "e50900f1de1d4b36877752b4e902500c"
+          },
+          "valor": {
+            "integerValue": "30000"
+          },
+          "vehiculoUid": {
+            "stringValue": "d22319b8ebf44baba9681788b3bf38be"
+          },
+          "actualizada": {
+            "timestampValue": "2026-10-16T14:19:56.699Z"
+          },
+          "borrado": {
+            "booleanValue": false
+          },
+          "idPc": {
+            "integerValue": "2"
+          }
+        }
+      },
+      {
+        "id": "6bc5f71355a14781b02fb8bfd7622afb",
+        "fields": {
+          "concepto": {
+            "stringValue": "Compra"
+          },
+          "fecha": {
+            "timestampValue": "2026-07-01T05:00:00.000Z"
+          },
+          "gastoDiarioUid": {
+            "stringValue": ""
+          },
+          "valor": {
+            "integerValue": "0"
+          },
+          "vehiculoUid": {
+            "stringValue": "d22319b8ebf44baba9681788b3bf38be"
+          },
+          "actualizada": {
+            "timestampValue": "2026-10-16T14:19:56.699Z"
+          },
+          "borrado": {
+            "booleanValue": false
+          },
+          "idPc": {
+            "integerValue": "3"
+          }
+        }
+      }
+    ],
+    "inicioRegistro": [
+      {
+        "id": "26cc0cb654344dbeafb1d46cd9a1178b",
+        "fields": {
+          "fecha": {
+            "timestampValue": "2026-07-05T05:00:00.000Z"
+          },
+          "actualizada": {
+            "timestampValue": "2026-10-16T14:19:56.610Z"
+          },
+          "borrado": {
+            "booleanValue": false
+          },
+          "idPc": {
+            "integerValue": "1"
+          }
+        }
+      }
+    ]
+  },
+  "resumenes": {
+    "2026-09": {
+      "mes": "2026-09",
+      "inicioRegistro": "2026-07",
+      "nombre": "Septiembre 2026",
+      "ingresos": 6695000.0,
+      "gastos": 3160933.0,
+      "ahorroMes": 1500000.0,
+      "disponible": 2034067.0,
+      "caja": {
+        "hasta": "2026-09-30",
+        "egresosPorMes": {
+          "2026-09": 4384000.0,
+          "2026-07": 0.0
+        },
+        "gastosIncluidos": [
+          {
+            "id": "2715a8e3c9fe40128426a9e42ccb4bb2",
+            "monto": 120000.0
+          },
+          {
+            "id": "266ec42ceaf440c7874075e2401cec22",
+            "monto": 0
+          }
+        ]
+      },
+      "saludable": true,
+      "vencidas": [],
+      "porPagar": [
+        {
+          "dia": "15",
+          "mesCorto": "SEPT",
+          "titulo": "Buses",
+          "detalle": "Vencida el 15/09",
+          "monto": 50000.0,
+          "vencida": true,
+          "proxima": false,
+          "credito": false
+        },
+        {
+          "dia": "19",
+          "mesCorto": "SEPT",
+          "titulo": "Plan celular",
+          "detalle": "Vencida el 19/09",
+          "monto": 65000.0,
+          "vencida": true,
+          "proxima": false,
+          "credito": false
+        },
+        {
+          "dia": "30",
+          "mesCorto": "SEPT",
+          "titulo": "Buses",
+          "detalle": "Vencida el 30/09",
+          "monto": 50000.0,
+          "vencida": true,
+          "proxima": false,
+          "credito": false
+        },
+        {
+          "dia": "15",
+          "mesCorto": "OCT",
+          "titulo": "Seguro",
+          "detalle": "Servicios \u00B7 15/10/2026",
+          "monto": 210000.0,
+          "vencida": false,
+          "proxima": true,
+          "credito": false
+        },
+        {
+          "dia": "18",
+          "mesCorto": "OCT",
+          "titulo": "Agua",
+          "detalle": "Servicios \u00B7 en 2 d\u00EDas",
+          "monto": 40000.0,
+          "vencida": false,
+          "proxima": true,
+          "credito": false
+        }
+      ],
+      "ahorro": {
+        "total": 2000000.0,
+        "detalle": "Meta al 33 %"
+      },
+      "inversiones": {
+        "total": 6200000.0,
+        "detalle": "CDT \u00B7 Acciones"
+      },
+      "deuda": {
+        "total": 76582000.0,
+        "progreso": 0.30462962962962964
+      },
+      "vehiculos": {
+        "total": 260000.0,
+        "detalle": "Kia"
+      },
+      "listaTarjetas": [
+        {
+          "id": 3,
+          "nombre": "visa",
+          "cupo": 20000000.0,
+          "deuda": 1482000.0,
+          "disponible": 18518000.0,
+          "tasaEA": 28.9
+        }
+      ],
+      "listaVehiculos": [
+        {
+          "id": 1,
+          "nombre": "Kia",
+          "tipo": "Carro",
+          "placa": "ABC123"
+        }
+      ]
+    },
+    "2026-10": {
+      "mes": "2026-10",
+      "inicioRegistro": "2026-07",
+      "nombre": "Octubre 2026",
+      "ingresos": 6695000.0,
+      "gastos": 4228205.0,
+      "ahorroMes": 500000.0,
+      "disponible": 1966795.0,
+      "caja": {
+        "hasta": "2026-10-16",
+        "egresosPorMes": {
+          "2026-10": 2500000.0,
+          "2026-09": 4384000.0,
+          "2026-07": 0.0
+        },
+        "gastosIncluidos": [
+          {
+            "id": "e50900f1de1d4b36877752b4e902500c",
+            "monto": 30000.0
+          },
+          {
+            "id": "d49849b9e8944486b85f722e3bdf2246",
+            "monto": 20000.0
+          },
+          {
+            "id": "4bab361876dd4607b7c0a4f7cafc18e7",
+            "monto": 0
+          }
+        ]
+      },
+      "saludable": true,
+      "vencidas": [
+        {
+          "tipo": "cuenta",
+          "id": 5,
+          "mes": "2026-10",
+          "quincena": 0,
+          "nombre": "Seguro",
+          "monto": 210000.0,
+          "detalle": "Vencida el 15/10"
+        },
+        {
+          "tipo": "credito",
+          "id": 1,
+          "mes": "2026-10",
+          "nombre": "Cuota cr\u00E9dito \u00B7 Hipotecario",
+          "monto": 1526000.0,
+          "detalle": "Vencida el 14/10"
+        }
+      ],
+      "porPagar": [
+        {
+          "dia": "12",
+          "mesCorto": "OCT",
+          "titulo": "Cuota tarjeta \u00B7 visa",
+          "detalle": "Vencida el 12/10",
+          "monto": 333102,
+          "vencida": true,
+          "proxima": false,
+          "credito": true
+        },
+        {
+          "dia": "14",
+          "mesCorto": "OCT",
+          "titulo": "Cuota cr\u00E9dito \u00B7 Hipotecario",
+          "detalle": "Vencida el 14/10",
+          "monto": 1526000.0,
+          "vencida": true,
+          "proxima": false,
+          "credito": true
+        },
+        {
+          "dia": "15",
+          "mesCorto": "OCT",
+          "titulo": "Seguro",
+          "detalle": "Vencida el 15/10",
+          "monto": 210000.0,
+          "vencida": true,
+          "proxima": false,
+          "credito": false
+        },
+        {
+          "dia": "18",
+          "mesCorto": "OCT",
+          "titulo": "Agua",
+          "detalle": "Vence el 18/10",
+          "monto": 40000.0,
+          "vencida": false,
+          "proxima": false,
+          "credito": false
+        },
+        {
+          "dia": "19",
+          "mesCorto": "OCT",
+          "titulo": "Plan celular",
+          "detalle": "Vence el 19/10",
+          "monto": 65000.0,
+          "vencida": false,
+          "proxima": false,
+          "credito": false
+        }
+      ],
+      "ahorro": {
+        "total": 2000000.0,
+        "detalle": "Meta al 33 %"
+      },
+      "inversiones": {
+        "total": 6200000.0,
+        "detalle": "CDT \u00B7 Acciones"
+      },
+      "deuda": {
+        "total": 76582000.0,
+        "progreso": 0.30462962962962964
+      },
+      "vehiculos": {
+        "total": 260000.0,
+        "detalle": "Kia"
+      },
+      "listaTarjetas": [
+        {
+          "id": 3,
+          "nombre": "visa",
+          "cupo": 20000000.0,
+          "deuda": 1482000.0,
+          "disponible": 18518000.0,
+          "tasaEA": 28.9
+        }
+      ],
+      "listaVehiculos": [
+        {
+          "id": 1,
+          "nombre": "Kia",
+          "tipo": "Carro",
+          "placa": "ABC123"
+        }
+      ]
+    },
+    "2026-11": {
+      "mes": "2026-11",
+      "inicioRegistro": "2026-07",
+      "nombre": "Noviembre 2026",
+      "ingresos": 6695000.0,
+      "gastos": 4271375.0,
+      "ahorroMes": 0,
+      "disponible": 2423625.0,
+      "caja": {
+        "hasta": "2026-10-16",
+        "egresosPorMes": {
+          "2026-10": 2500000.0,
+          "2026-09": 4384000.0,
+          "2026-07": 0.0
+        },
+        "gastosIncluidos": [
+          {
+            "id": "e50900f1de1d4b36877752b4e902500c",
+            "monto": 30000.0
+          },
+          {
+            "id": "d49849b9e8944486b85f722e3bdf2246",
+            "monto": 20000.0
+          },
+          {
+            "id": "4bab361876dd4607b7c0a4f7cafc18e7",
+            "monto": 0
+          }
+        ]
+      },
+      "saludable": true,
+      "vencidas": [],
+      "porPagar": [
+        {
+          "dia": "\u2014",
+          "mesCorto": "NOV",
+          "titulo": "Cuota cr\u00E9dito \u00B7 Libre inversi\u00F3n",
+          "detalle": "Cuota de noviembre",
+          "monto": 420000.0,
+          "vencida": false,
+          "proxima": false,
+          "credito": true
+        },
+        {
+          "dia": "05",
+          "mesCorto": "NOV",
+          "titulo": "Arriendo",
+          "detalle": "Vence el 05/11",
+          "monto": 1200000.0,
+          "vencida": false,
+          "proxima": false,
+          "credito": false
+        },
+        {
+          "dia": "10",
+          "mesCorto": "NOV",
+          "titulo": "Impuesto predial",
+          "detalle": "Vence el 10/11",
+          "monto": 900000.0,
+          "vencida": false,
+          "proxima": false,
+          "credito": false
+        },
+        {
+          "dia": "14",
+          "mesCorto": "NOV",
+          "titulo": "Cuota cr\u00E9dito \u00B7 Hipotecario",
+          "detalle": "Vence el 14/11",
+          "monto": 1526000.0,
+          "vencida": false,
+          "proxima": false,
+          "credito": true
+        },
+        {
+          "dia": "15",
+          "mesCorto": "NOV",
+          "titulo": "Buses",
+          "detalle": "Vence el 15/11",
+          "monto": 50000.0,
+          "vencida": false,
+          "proxima": false,
+          "credito": false
+        }
+      ],
+      "ahorro": {
+        "total": 2000000.0,
+        "detalle": "Meta al 33 %"
+      },
+      "inversiones": {
+        "total": 6200000.0,
+        "detalle": "CDT \u00B7 Acciones"
+      },
+      "deuda": {
+        "total": 76582000.0,
+        "progreso": 0.30462962962962964
+      },
+      "vehiculos": {
+        "total": 260000.0,
+        "detalle": "Kia"
+      },
+      "listaTarjetas": [
+        {
+          "id": 3,
+          "nombre": "visa",
+          "cupo": 20000000.0,
+          "deuda": 1482000.0,
+          "disponible": 18518000.0,
+          "tasaEA": 28.9
+        }
+      ],
+      "listaVehiculos": [
+        {
+          "id": 1,
+          "nombre": "Kia",
+          "tipo": "Carro",
+          "placa": "ABC123"
+        }
+      ]
+    }
+  }
+}

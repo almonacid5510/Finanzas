@@ -58,6 +58,7 @@ class Program {
  // Verificar carga del XAML real con sus estilos, sin usar la base personal.
  var app=new Application{ShutdownMode=ShutdownMode.OnExplicitShutdown};
  app.Resources.MergedDictionaries.Add(new ResourceDictionary { Source=new Uri("pack://application:,,,/MisFinanzas;component/Estilos/AppTheme.xaml") });
+ ResumenCruzadoTest.Run(); // necesita la aplicación WPF (listas en memoria del PC)
  var vista=new NominaView();var win=new Window{Content=vista,Width=1000,Height=950,Left=-20000,ShowInTaskbar=false,ShowActivated=false};win.Show();
  var frame=new DispatcherFrame();Dispatcher.CurrentDispatcher.BeginInvoke(DispatcherPriority.ApplicationIdle,()=>frame.Continue=false);Dispatcher.PushFrame(frame);
  Check(vista.IsLoaded,"Formulario WPF carga y valida sus recursos");

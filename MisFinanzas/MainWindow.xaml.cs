@@ -240,6 +240,10 @@ namespace MisFinanzas
                         );
                         VehiculosView.listaVehiculos.Add(v);
                     }
+
+                    // Metas de ahorro: el Dashboard las usa para el ahorro del mes aunque no se haya abierto Ingresos
+                    IngresosView.ListaMetas.Clear();
+                    foreach (var m in db.Metas.ToList()) IngresosView.ListaMetas.Add(m);
                 }
             }
             catch (Exception ex)

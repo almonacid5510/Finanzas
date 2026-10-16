@@ -32,7 +32,8 @@ static class ReplicaNubeTest
             db.PagosCuenta.Add(new PagoCuenta { MovimientoId = agua.Id, Mes = "2026-10", Monto = 41000 });
             db.SaveChanges();
             idCuenta = agua.Id; idCredito = hipoteca.Id;
-            Check(agua.Uid.Length > 0 && db.CambiosReplica.Count() == 3, "Guardar da identidad al registro y lo anota para subir a la nube");
+            var cola = db.CambiosReplica.Select(c => c.Coleccion).ToList();
+            Check(agua.Uid.Length > 0 && new[] { "movimientos", "creditos", "pagosCuenta" }.All(cola.Contains), "Guardar da identidad al registro y lo anota para subir a la nube");
         }
 
         await Replicar(primeraVez: true);

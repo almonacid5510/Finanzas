@@ -3,9 +3,13 @@ using System.Linq;
 
 namespace MisFinanzas.Modulos
 {
-    public class InicioRegistro
+    public class InicioRegistro : IReplicable
     {
         public int Id { get; set; }
+        /// <summary>Identidad en la nube (igual en el PC y el celular).</summary>
+        public string Uid { get; set; } = string.Empty;
+        /// <summary>Último cambio (UTC): en la nube gana el más reciente.</summary>
+        public DateTime ActualizadaUtc { get; set; }
         public DateTime Fecha { get; set; }
 
         // Se guarda una vez por base, para que el inicio no avance al cambiar de mes.

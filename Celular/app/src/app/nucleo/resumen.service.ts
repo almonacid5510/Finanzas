@@ -5,12 +5,14 @@
 // ============================================================
 // Resumen de cada mes que publica Mis Finanzas del PC (usuarios/{uid}/resumen/{yyyy-MM}):
 // los mismos números del Dashboard. "Pagado" deja una acción para que el PC la marque.
-import { DestroyRef, Injectable, computed, effect, inject, signal } from '@angular/core';
+import { DestroyRef, Injectable, computed, effect, inject, signal, untracked } from '@angular/core';
 import { Timestamp, addDoc, collection, deleteDoc, doc, onSnapshot, serverTimestamp, setDoc } from 'firebase/firestore';
 import { db, marcarCambio } from './firebase';
 import { claveMes } from './formato';
 import { mesesVisibles } from './periodos';
 import { PlanNomina, validarNomina } from './nomina';
+import { DatosNubeService } from './datos-nube.service';
+import { construirResumen, mesesDelRegistro } from './calculo';
 import { CajaPC, Cobro } from './caja';
 import { VehiculoBasico } from './interprete';
 import { SesionService } from './sesion.service';
@@ -58,8 +60,27 @@ export class ResumenService {
   readonly cobrosCargados = signal(false);
   readonly errorCobros = signal('');
 
-  readonly resumenes = signal<Map<string, Resumen>>(new Map());
-  readonly cargado = signal(false);
+  private readonly nube = inject(DatosNubeService);
+  /** Resumen que publica el PC (respaldo mientras la nube no tiene los datos del PC). */
+  private readonly publicados = signal<Map<string, Resumen>>(new Map());
+  private readonly publicadosCargados = signal(false);
+  /**
+   * Resumen calculado aquí con los datos de la nube (la base principal): está al día aunque el PC esté
+   * apagado. Mismo cálculo que el PC (calculo.ts ↔ ResumenCelular.cs).
+   */
+  private readonly calculados = computed(() => {
+    const datos = this.nube.datos();
+    if (!datos || !this.nube.hayDatos()) return null;
+    const hoy = this.hoy();
+    const mapa = new Map<string, Resumen>();
+    for (const m of mesesDelRegistro(datos, hoy)) {
+      const [y, mm] = m.split('-').map(Number);
+      mapa.set(m, { ...construirResumen(datos, new Date(y, mm - 1, 1), hoy), actualizado: this.nube.actualizado() } as Resumen);
+    }
+    return mapa;
+  });
+  readonly resumenes = computed(() => this.calculados() ?? this.publicados());
+  readonly cargado = computed(() => this.publicadosCargados() || this.calculados() !== null);
   readonly mes = signal(claveMes(new Date()));
   private readonly hoy = signal(new Date());
   readonly inicioRegistro = computed(() => {
@@ -86,6 +107,11 @@ export class ResumenService {
     const intervalo = window.setInterval(actualizar, 60000);
     document.addEventListener('visibilitychange', actualizar);
     inject(DestroyRef).onDestroy(() => { clearInterval(intervalo); document.removeEventListener('visibilitychange', actualizar); });
+    // Las vencidas que ya se pagaron dejan de estar "enviadas"
+    effect(() => {
+      const vigentes = new Set((this.resumenes().get(claveMes(new Date()))?.vencidas ?? []).map(clave));
+      untracked(() => this.enviadas.update((s) => new Set([...s].filter((k) => vigentes.has(k)))));
+    });
     effect(() => {
       const lista = this.meses();
       if (!lista.includes(this.mes())) this.mes.set(lista.includes(claveMes(this.hoy())) ? claveMes(this.hoy()) : lista[0] ?? claveMes(this.hoy()));
@@ -100,8 +126,8 @@ export class ResumenService {
       this.cobros.set([]);
       this.cobrosCargados.set(false);
       this.errorCobros.set('');
-      this.resumenes.set(new Map());
-      this.cargado.set(false);
+      this.publicados.set(new Map());
+      this.publicadosCargados.set(false);
       if (u) {
         this.escuchar(u.uid);
         this.cancelarNomina = onSnapshot(doc(db, 'usuarios', u.uid, 'configuracion', 'nomina'), snap => {
@@ -126,11 +152,8 @@ export class ResumenService {
         const x = d.data();
         mapa.set(d.id, { ...(x as Resumen), mes: d.id, actualizado: x['actualizado']?.toDate?.() ?? null });
       }
-      this.resumenes.set(mapa);
-      this.cargado.set(true);
-      // Las que el PC ya aplicó dejan de estar "enviadas"
-      const vigentes = new Set((mapa.get(claveMes(new Date()))?.vencidas ?? []).map(clave));
-      this.enviadas.update((s) => new Set([...s].filter((k) => vigentes.has(k))));
+      this.publicados.set(mapa);
+      this.publicadosCargados.set(true);
     });
   }
 

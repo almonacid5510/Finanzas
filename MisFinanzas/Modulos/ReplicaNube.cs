@@ -34,6 +34,7 @@ namespace MisFinanzas.Modulos
             new("pagosCredito", typeof(PagoCredito), db => db.PagosCredito),
             new("abonosMeta", typeof(AbonoMeta), db => db.AbonosMeta),
             new("gastosVehiculo", typeof(GastoVehiculo), db => db.GastosVehiculo),
+            new("inicioRegistro", typeof(InicioRegistro), db => db.IniciosRegistro),
         };
 
         /// <summary>Columnas que apuntan a otra tabla: en la nube van como el Uid del registro referido.</summary>
@@ -130,6 +131,9 @@ namespace MisFinanzas.Modulos
             }
             campos["actualizada"] = ValorNube(DateTime.SpecifyKind(r.ActualizadaUtc, DateTimeKind.Utc));
             campos["borrado"] = ValorNube(false);
+            // Número de este registro en el PC: los gastos del día a día y las acciones del celular aún lo usan
+            // (tarjetaId, vehiculoId, id). Solo informativo: al bajar no se aplica.
+            campos["idPc"] = ValorNube(IdDe(r));
             return campos;
         }
 
