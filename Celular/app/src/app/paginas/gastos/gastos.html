@@ -1,0 +1,89 @@
+<main class="pagina">
+  <div class="encabezado">
+    <h1>Mis gastos</h1>
+    <button class="boton-icono redondo" (click)="alternarBusqueda()" [attr.aria-label]="buscando() ? 'Cerrar búsqueda' : 'Buscar'">
+      <app-icono [nombre]="buscando() ? 'cerrar' : 'buscar'" [tamano]="20" />
+    </button>
+  </div>
+
+  @if (buscando()) {
+    <input #campoBusqueda class="campo busqueda" placeholder="Buscar por descripción o categoría" autocomplete="off"
+           [value]="busqueda()" (input)="busqueda.set(campoBusqueda.value)" aria-label="Buscar gastos" />
+  }
+
+  <div class="segmentos" role="tablist">
+    <button class="segmento" [class.activo]="periodo() === 'hoy'" (click)="periodo.set('hoy')">Hoy</button>
+    <button class="segmento" [class.activo]="periodo() === 'semana'" (click)="periodo.set('semana')">Semana</button>
+    <button class="segmento" [class.activo]="periodo() === 'mes'" (click)="periodo.set('mes')">Mes</button>
+  </div>
+
+  <!-- Total del periodo y reparto por categoría -->
+  <section class="tarjeta-oscura bloque resumen">
+    <span class="rotulo">Total {{ nombrePeriodo() }}</span>
+    <div class="fila-total">
+      <strong class="total">{{ pesos(total()) }}</strong>
+      <span class="cuantos">{{ filtrados().length }} {{ filtrados().length === 1 ? 'gasto' : 'gastos' }}</span>
+    </div>
+    @if (total() > 0) {
+      <div class="barra">
+        @for (c of porCategoria(); track c.nombre) {
+          <span [style.flex-grow]="c.proporcion" [style.background]="c.color" [title]="c.nombre"></span>
+        }
+      </div>
+      <div class="leyenda">
+        @for (c of porCategoria().slice(0, 3); track c.nombre) {
+          <span><i [style.background]="c.color"></i>{{ c.nombre }} <b>{{ pesos(c.monto) }}</b></span>
+        }
+      </div>
+    }
+  </section>
+
+  <!-- Lo que aún no sale del celular -->
+  @if (servicio.sinEnviar(); as n) {
+    <section class="aviso-envio bloque">
+      <app-icono nombre="recargar" [tamano]="22" />
+      <span><b>{{ n }} {{ n === 1 ? 'gasto' : 'gastos' }}</b> sin enviar al PC</span>
+      <button (click)="enviarAhora()">Enviar ahora</button>
+    </section>
+  }
+
+  @if (!servicio.cargado()) {
+    <p class="cargando">Cargando tus gastos…</p>
+  } @else if (grupos().length === 0) {
+    <p class="vacio bloque">
+      @if (busqueda()) { No hay gastos que coincidan con "{{ busqueda() }}". }
+      @else { Aún no hay gastos {{ nombrePeriodo() }}. Regístralos en la pestaña Registrar. }
+    </p>
+  }
+
+  @for (grupo of grupos(); track grupo.titulo; let primero = $first) {
+    <div class="titulo-dia">
+      <span>{{ grupo.titulo }}</span>
+      @if (primero) { <span class="pista">Desliza ← para borrar</span> }
+    </div>
+    @for (g of grupo.gastos; track g.id) {
+      <div class="deslizable" [class.abierta]="desplazamiento(g.id) < 0">
+        <button class="borrar" (click)="borrar(g)" [attr.aria-label]="'Borrar ' + g.descripcion" tabindex="-1">
+          <app-icono nombre="borrar" [tamano]="22" />
+          <span>Borrar</span>
+        </button>
+        <article class="gasto" [class.arrastrando]="arrastre()?.id === g.id" [class.con-borrar]="desplazamiento(g.id) < 0"
+                 [style.transform]="'translateX(' + desplazamiento(g.id) + 'px)'"
+                 (pointerdown)="alTocar($event, g.id)" (pointermove)="alMover($event, g.id)"
+                 (pointerup)="alSoltar(g.id)" (pointercancel)="alSoltar(g.id)">
+          <span class="icono-cat" [style.background]="colorCategoria(g.categoria).fondo" [style.color]="colorCategoria(g.categoria).texto">
+            <app-icono [nombre]="iconoCategoria(g.categoria)" [tamano]="22" />
+          </span>
+          <div class="info">
+            <strong>{{ g.descripcion }}</strong>
+            <span>@if (g.tarjeta) { 💳 {{ g.tarjeta }}@if (g.cuotas > 1) { ×{{ g.cuotas }}} · }@if (g.vehiculo) { {{ g.vehiculo }} · }{{ mostrarCategoria(g.categoria) }} · {{ hora(g.fecha) }}</span>
+          </div>
+          <div class="lado">
+            <strong>{{ pesos(g.monto) }}</strong>
+            <span class="estado" [class]="'estado ' + estado(g).clase">{{ estado(g).texto }}</span>
+          </div>
+        </article>
+      </div>
+    }
+  }
+</main>

@@ -96,12 +96,15 @@
                     </StackPanel>
                 </StackPanel>
 
-                <!-- Pie: autoría -->
-                <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal">
-                    <TextBlock Text="©" FontSize="13" Foreground="#9AA6B6" Width="48" TextAlignment="Center"/>
-                    <TextBlock Text="2026 Juan Almonacid" FontSize="12" Foreground="#9AA6B6" VerticalAlignment="Center"
-                               Opacity="{Binding Opacity, ElementName=panelNombreApp}"/>
-                </StackPanel>
+                <!-- Autoría al pie del menú (solo con el menú abierto) -->
+                <TextBlock DockPanel.Dock="Bottom" Text="© 2026 Juan Almonacid" FontSize="11.5" Foreground="#9AA6B6"
+                           Margin="10,14,0,0" TextWrapping="NoWrap" Opacity="{Binding Opacity, ElementName=panelNombreApp}"/>
+
+                <!-- Cuenta (nómina, avisos, celular y versión) permanece al pie del menú. -->
+                <Button x:Name="btnNavConfiguracion" DockPanel.Dock="Bottom"
+                        Content="Cuenta" ToolTip="Cuenta" AutomationProperties.Name="Cuenta"
+                        Tag="{StaticResource IcoPersona}" Style="{StaticResource NavButtonStyle}"
+                        Click="NavConfiguracion_Click"/>
 
                 <StackPanel>
                     <Button x:Name="btnNavDashboard" Content="Dashboard" ToolTip="Dashboard" Tag="{StaticResource IcoDashboard}"
@@ -133,6 +136,17 @@
         </Border>
 
         <!-- ============ CONTENIDO ============ -->
-        <ContentControl x:Name="ContenedorPrincipal" Grid.Column="1" Focusable="False"/>
+        <DockPanel Grid.Column="1">
+         <Border x:Name="avisoActualizacion" DockPanel.Dock="Top" Background="#E7F5EF" Padding="18,10" Visibility="Collapsed">
+          <DockPanel>
+           <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+            <Button Content="Más tarde" Click="PosponerActualizacion_Click" Style="{StaticResource BotonSecundario}" Margin="0,0,8,0"/>
+            <Button Content="Actualizar ahora" Click="AbrirActualizacion_Click" Style="{StaticResource BotonVerde}"/>
+           </StackPanel>
+           <TextBlock Text="{Binding VersionNueva, StringFormat=Hay una actualización disponible: {0}}" VerticalAlignment="Center" FontWeight="Bold" TextWrapping="Wrap"/>
+          </DockPanel>
+         </Border>
+         <ContentControl x:Name="ContenedorPrincipal" Focusable="False"/>
+        </DockPanel>
     </Grid>
 </Window>

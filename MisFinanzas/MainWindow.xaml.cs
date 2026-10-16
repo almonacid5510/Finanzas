@@ -4,6 +4,7 @@
 //  Copyright (c) 2026 Juan Almonacid. Todos los derechos reservados.
 // ============================================================
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Media;
@@ -29,6 +30,99 @@ namespace MisFinanzas
             VerificarVencimientosCuentas();
             ContenedorPrincipal.Content = new DashboardView();
             SetActiveNav(btnNavDashboard);
+            IniciarSincronizacionCelular();
+            avisoActualizacion.DataContext=Actualizaciones.Instancia;
+            Actualizaciones.Instancia.PropertyChanged += Actualizaciones_Cambio;
+            Closed += (_,_) => Actualizaciones.Instancia.PropertyChanged -= Actualizaciones_Cambio;
+            ContentRendered += async (_,_) => await Actualizaciones.Instancia.BuscarAsync();
+            // La app puede quedar abierta varios días: vuelve a buscar versiones nuevas cada 6 horas
+            var relojActualizaciones = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromHours(6) };
+            relojActualizaciones.Tick += async (_,_) => { if (!Actualizaciones.Instancia.Disponible) await Actualizaciones.Instancia.BuscarAsync(); };
+            relojActualizaciones.Start();
+            Closed += (_,_) => relojActualizaciones.Stop();
+            ContentRendered += (_,_) => Dispatcher.BeginInvoke(MostrarAvisosAlAbrir, System.Windows.Threading.DispatcherPriority.ApplicationIdle);
+        }
+
+        // Avisos y reglas de Cuenta: pagos vencidos (para pagarlos ahí mismo) y los que vencen en los próximos días
+        private void MostrarAvisosAlAbrir()
+        {
+            try
+            {
+                var preferencias = Preferencias.Actual;
+                var hoy = DateTime.Today;
+                List<CuentaMes> vencidas, proximas;
+                using (var db = new AppDbContext())
+                {
+                    vencidas = CuentasMensuales.DelMes(db, hoy).Where(c => !c.Pagada && c.Vence <= hoy).OrderBy(c => c.Vence).ToList();
+                    proximas = Preferencias.PagosProximos(db, hoy);
+                }
+
+                if (preferencias.MostrarVencidosAlAbrir && vencidas.Count > 0)
+                {
+                    new VentanaRecordatorioPagos(vencidas) { Owner = this }.ShowDialog();
+                    VerificarVencimientosCuentas();
+                    (ContenedorPrincipal.Content as DashboardView)?.CargarResumen();
+                }
+
+                if (preferencias.RecordarPagos && proximas.Count > 0)
+                {
+                    var lineas = proximas.Select(c =>
+                        $"• {c.Descripcion}: {NumeroHelper.Moneda(c.Venta)}, vence {((c.Vence - hoy).Days == 1 ? "mañana" : $"el {c.Vence:dd/MM}")}");
+                    MisFinanzas.Controles.Aviso.Mostrar((proximas.Count == 1 ? "Tienes un pago próximo:" : "Tienes pagos próximos:")
+                                            + Environment.NewLine + string.Join(Environment.NewLine, lineas));
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Error en los avisos al abrir: " + ex.Message);
+            }
+        }
+
+        private void Actualizaciones_Cambio(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+            => avisoActualizacion.Visibility=Actualizaciones.Instancia.MostrarAviso ? Visibility.Visible : Visibility.Collapsed;
+        private void PosponerActualizacion_Click(object sender, RoutedEventArgs e) => Actualizaciones.Instancia.MasTarde();
+        private void AbrirActualizacion_Click(object sender, RoutedEventArgs e)
+        {
+            if (ContenedorPrincipal.Content is ConfiguracionView configuracion) { configuracion.MostrarActualizacion(); return; }
+            if (ContenedorPrincipal.Content is not DashboardView)
+            {
+                MessageBox.Show("Guarda tus cambios y abre Cuenta para instalar la actualización.","Mis Finanzas"); return;
+            }
+            new VentanaActualizacion(Actualizaciones.Instancia) { Owner=this }.ShowDialog();
+        }
+
+        // Gastos del celular, sin que el usuario haga nada: al abrir la app, cada minuto, al volver a la
+        // ventana y al recuperar internet. Una revisión sin gastos nuevos cuesta 1 lectura de Firestore
+        // (cada minuto ≈ 1.440 al día por PC; el plan gratuito da 50.000 al día para todo el proyecto).
+        private System.Windows.Threading.DispatcherTimer? _relojCelular;
+        private DateTime _ultimaRevisionCelular = DateTime.MinValue;
+
+        private void IniciarSincronizacionCelular()
+        {
+            ContentRendered += (s, e) => RevisarCelular();
+            _relojCelular = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromMinutes(1) };
+            _relojCelular.Tick += (s, e) => RevisarCelular();
+            _relojCelular.Start();
+
+            // Al volver a la ventana (si no se revisó hace poco)
+            Activated += (s, e) =>
+            {
+                if (DateTime.Now - _ultimaRevisionCelular > TimeSpan.FromSeconds(20)) RevisarCelular();
+            };
+            // Al recuperar internet
+            System.Net.NetworkInformation.NetworkChange.NetworkAvailabilityChanged += (s, e) =>
+            {
+                if (e.IsAvailable) Dispatcher.BeginInvoke(RevisarCelular);
+            };
+            // Algo pagado desde el celular cambia los avisos de vencidos del menú
+            SincronizacionCelular.AccionesAplicadas += _ => Dispatcher.BeginInvoke(VerificarVencimientosCuentas);
+        }
+
+        private async void RevisarCelular()
+        {
+            if (!SincronizacionCelular.Conectado) return;
+            _ultimaRevisionCelular = DateTime.Now;
+            await SincronizacionCelular.SincronizarAsync();
         }
 
         /// <summary>La ventana principal de la app (para navegar desde otras pantallas).</summary>
@@ -72,7 +166,7 @@ namespace MisFinanzas
         // Marca visualmente el botón de navegación activo y limpia los demás
         private void SetActiveNav(System.Windows.Controls.Button activo)
         {
-            foreach (var btn in new[] { btnNavDashboard, btnNavIngresos, btnNavCuentas, btnNavDiario, btnNavCreditos, btnNavVehiculo, btnNavNegocio })
+            foreach (var btn in new[] { btnNavDashboard, btnNavIngresos, btnNavCuentas, btnNavDiario, btnNavCreditos, btnNavVehiculo, btnNavNegocio, btnNavConfiguracion })
             {
                 NavState.SetIsActive(btn, btn == activo);
             }
@@ -161,6 +255,12 @@ namespace MisFinanzas
         private void NavDiario_Click(object sender, RoutedEventArgs e) { ContenedorPrincipal.Content = new GastosDiariosView(); SetActiveNav(btnNavDiario); }
         private void NavCreditos_Click(object sender, RoutedEventArgs e) { ContenedorPrincipal.Content = new CreditosView(); SetActiveNav(btnNavCreditos); }
         private void NavVehiculo_Click(object sender, RoutedEventArgs e) { ContenedorPrincipal.Content = new VehiculosView(); SetActiveNav(btnNavVehiculo); }
+        private void NavConfiguracion_Click(object sender, RoutedEventArgs e) { ContenedorPrincipal.Content = new ConfiguracionView(); SetActiveNav(btnNavConfiguracion); }
+        public void IrAConfiguracion(bool editarNomina = false)
+        {
+            NavConfiguracion_Click(this, new RoutedEventArgs());
+            if (editarNomina && ContenedorPrincipal.Content is ConfiguracionView cuenta) cuenta.EditarNomina();
+        }
         private void NavNegocio_Click(object sender, RoutedEventArgs e) { ContenedorPrincipal.Content = new NegocioView(); SetActiveNav(btnNavNegocio); }
 
         // Accesos desde otras pantallas (enlaces "Ver cuentas", "Ver crédito", tarjetas del Dashboard)

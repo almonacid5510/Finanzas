@@ -226,6 +226,7 @@ namespace MisFinanzas.Modulos
 
         private void EliminarVehiculo(Vehiculo vehiculo)
         {
+            List<GastoDiario> sinVehiculo = new();
             try
             {
                 using (var db = new AppDbContext())
@@ -233,9 +234,13 @@ namespace MisFinanzas.Modulos
                     // Se eliminan también sus gastos para no dejar registros huérfanos.
                     // Un solo SaveChanges: o se borra todo o no se borra nada.
                     db.GastosVehiculo.RemoveRange(db.GastosVehiculo.Where(g => g.VehiculoId == vehiculo.Id));
+                    // Los gastos de Día a día de este vehículo se conservan (son gasto del mes), sin vehículo
+                    sinVehiculo = db.GastosDiarios.Where(g => g.VehiculoId == vehiculo.Id).ToList();
+                    foreach (var g in sinVehiculo) g.VehiculoId = null;
                     db.Vehiculos.Remove(vehiculo);
                     db.SaveChanges();
                 }
+                foreach (var g in sinVehiculo) SincronizacionCelular.RegistrarCambio(g, borrado: false);
                 listaVehiculos.Remove(vehiculo);
                 if (_editando == vehiculo) LimpiarFormulario();
                 Seleccionar(listaVehiculos.FirstOrDefault());

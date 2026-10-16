@@ -15,30 +15,29 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="2*"/>
+            <ColumnDefinition Width="2.6*"/>
             <ColumnDefinition Width="14"/>
-            <ColumnDefinition Width="1*" MinWidth="300"/>
+            <ColumnDefinition Width="1*" MinWidth="270"/>
         </Grid.ColumnDefinitions>
 
         <!-- ===== ENCABEZADO ===== -->
         <DockPanel Grid.ColumnSpan="3" Margin="0,0,0,14">
             <Border DockPanel.Dock="Right" Style="{StaticResource CapsulaMes}">
                 <StackPanel Orientation="Horizontal">
-                    <Button Style="{StaticResource BotonFlecha}" c:Ui.Icono="{StaticResource IcoIzquierda}" Click="BtnMesAnterior_Click"
+                    <Button x:Name="btnMesAnterior" Style="{StaticResource BotonFlecha}" c:Ui.Icono="{StaticResource IcoIzquierda}" Click="BtnMesAnterior_Click"
                             AutomationProperties.Name="Mes anterior" ToolTip="Mes anterior"/>
                     <TextBlock x:Name="lblPeriodo" Width="150" TextAlignment="Center" FontSize="15" FontWeight="Bold" VerticalAlignment="Center"/>
-                    <Button Style="{StaticResource BotonFlecha}" c:Ui.Icono="{StaticResource IcoDerecha}" Click="BtnMesSiguiente_Click"
+                    <Button x:Name="btnMesSiguiente" Style="{StaticResource BotonFlecha}" c:Ui.Icono="{StaticResource IcoDerecha}" Click="BtnMesSiguiente_Click"
                             AutomationProperties.Name="Mes siguiente" ToolTip="Mes siguiente"/>
                 </StackPanel>
             </Border>
             <Button x:Name="btnMesActual" DockPanel.Dock="Right" Click="BtnMesActual_Click" Style="{StaticResource BotonMesActual}" Margin="0,0,10,0"/>
             <StackPanel>
                 <TextBlock Text="Gastos del día a día" Style="{StaticResource TituloPagina}"/>
-                <TextBlock Text="Registra lo que gastas cada día y descubre a dónde se va tu dinero" Style="{StaticResource SubtituloPagina}"/>
+                <TextBlock Text="Comida, transporte, antojos y todo lo que registras desde el celular" Style="{StaticResource SubtituloPagina}"/>
             </StackPanel>
         </DockPanel>
 
@@ -47,130 +46,89 @@
             <Border Style="{StaticResource TarjetaOscura}" Padding="18,16">
                 <StackPanel>
                     <TextBlock x:Name="lblTituloTotal" Text="GASTADO EN EL MES" Style="{StaticResource EtiquetaSeccion}" Foreground="{StaticResource TextoMenu}"/>
-                    <TextBlock x:Name="lblTotal" Style="{StaticResource CifraKpi}" Foreground="White" Margin="0,10,0,2"/>
+                    <TextBlock x:Name="lblTotal" Style="{StaticResource CifraKpi}" Foreground="White" Margin="0,8,0,2"/>
                     <TextBlock x:Name="lblTotalDetalle" Style="{StaticResource TextoSecundario}" Foreground="{StaticResource TextoMenu}"/>
                 </StackPanel>
             </Border>
             <Border Style="{StaticResource Card}" Padding="18,16">
                 <StackPanel>
                     <TextBlock Text="PROMEDIO POR DÍA" Style="{StaticResource EtiquetaSeccion}"/>
-                    <TextBlock x:Name="lblPromedio" Style="{StaticResource CifraKpi}" Margin="0,10,0,2"/>
+                    <TextBlock x:Name="lblPromedio" Style="{StaticResource CifraKpi}" Margin="0,8,0,2"/>
                     <TextBlock x:Name="lblPromedioDetalle" Style="{StaticResource TextoSecundario}"/>
                 </StackPanel>
             </Border>
             <Border Style="{StaticResource Card}" Padding="18,16">
                 <StackPanel>
                     <TextBlock Text="CATEGORÍA PRINCIPAL" Style="{StaticResource EtiquetaSeccion}"/>
-                    <TextBlock x:Name="lblCategoriaTop" Style="{StaticResource CifraKpi}" FontSize="24" Margin="0,12,0,4" TextTrimming="CharacterEllipsis"/>
-                    <TextBlock x:Name="lblCategoriaTopDetalle" Style="{StaticResource TextoSecundario}"/>
+                    <TextBlock x:Name="lblCategoriaTop" Style="{StaticResource CifraKpi}" FontSize="22" Margin="0,9,0,3" TextTrimming="CharacterEllipsis"/>
+                    <TextBlock x:Name="lblCategoriaTopDetalle" Style="{StaticResource TextoSecundario}" TextTrimming="CharacterEllipsis"/>
                 </StackPanel>
             </Border>
             <Border Style="{StaticResource Card}" Padding="18,16"
                     ToolTip="Gastos pequeños (hasta $ 20.000) que, sumados, se notan">
                 <StackPanel>
                     <TextBlock Text="GASTOS HORMIGA" Style="{StaticResource EtiquetaSeccion}"/>
-                    <TextBlock x:Name="lblHormiga" Style="{StaticResource CifraKpi}" Foreground="{StaticResource NaranjaTexto}" Margin="0,10,0,2"/>
+                    <TextBlock x:Name="lblHormiga" Style="{StaticResource CifraKpi}" Foreground="#C4320A" Margin="0,8,0,2"/>
                     <TextBlock x:Name="lblHormigaDetalle" Style="{StaticResource TextoSecundario}"/>
                 </StackPanel>
             </Border>
         </c:GrillaAdaptable>
 
-        <!-- ===== REGISTRAR GASTO ===== -->
-        <Border Grid.Row="2" Style="{StaticResource Card}" Margin="0,0,0,14">
-            <StackPanel>
-                <TextBlock x:Name="lblTituloFormulario" Text="Registrar gasto" Style="{StaticResource TituloTarjeta}" Margin="0,0,0,4"/>
-                <TextBlock Text="Escríbelo como lo dirías y los campos se llenan solos; revísalos antes de agregar."
-                           Style="{StaticResource TextoSecundario}" FontSize="13" Margin="0,0,0,10"/>
-                <TextBox x:Name="txtFrase" Style="{StaticResource ModernInput}" c:Ui.Pista="Ej. gasté 25 mil en almuerzo · ayer 18 lucas en uber"
-                         TextChanged="TxtFrase_TextChanged" KeyDown="TxtFrase_KeyDown" Margin="0,0,0,10"
-                         AutomationProperties.Name="Frase del gasto"/>
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" MinWidth="130"/>
-                        <ColumnDefinition Width="8"/>
-                        <ColumnDefinition Width="150"/>
-                        <ColumnDefinition Width="8"/>
-                        <ColumnDefinition Width="120"/>
-                        <ColumnDefinition Width="8"/>
-                        <ColumnDefinition Width="130"/>
-                        <ColumnDefinition Width="8"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-                    <Label Content="Descripción" Target="{Binding ElementName=txtDescripcion}" Style="{StaticResource Etiqueta}"/>
-                    <TextBox Grid.Row="1" x:Name="txtDescripcion" Style="{StaticResource ModernInput}" c:Ui.Pista="Ej. Almuerzo"/>
-                    <Label Grid.Column="2" Content="Categoría" Target="{Binding ElementName=cbCategoria}" Style="{StaticResource Etiqueta}"/>
-                    <ComboBox Grid.Row="1" Grid.Column="2" x:Name="cbCategoria" IsEditable="True" Style="{StaticResource ModernCombo}"
-                              MaxDropDownHeight="260" ToolTip="Elige una categoría o escribe una nueva"/>
-                    <Label Grid.Column="4" Content="Valor" Target="{Binding ElementName=txtMonto}" Style="{StaticResource Etiqueta}"/>
-                    <TextBox Grid.Row="1" Grid.Column="4" x:Name="txtMonto" Style="{StaticResource ModernInputNumeric}" local:NumeroHelper.EsMoneda="True" c:Ui.Pista="$ 0"/>
-                    <Label Grid.Column="6" Content="Fecha" Target="{Binding ElementName=dpFecha}" Style="{StaticResource Etiqueta}"/>
-                    <DatePicker Grid.Row="1" Grid.Column="6" x:Name="dpFecha" Style="{StaticResource ModernDatePicker}" SelectedDateFormat="Short"/>
-                    <StackPanel Grid.Row="1" Grid.Column="8" Orientation="Horizontal">
-                        <Button x:Name="btnCancelarEdicion" Content="Cancelar" Click="BtnCancelarEdicion_Click" Style="{StaticResource BotonSecundario}"
-                                Margin="0,0,8,0" Visibility="Collapsed"/>
-                        <Button x:Name="btnGuardar" Content="Agregar" Click="BtnGuardar_Click" Style="{StaticResource BotonAzul}"
-                                c:Ui.Icono="{StaticResource IcoPlus}"/>
-                    </StackPanel>
-                </Grid>
-            </StackPanel>
-        </Border>
-
         <!-- ===== MOVIMIENTOS DEL MES, POR DÍA ===== -->
-        <Border Grid.Row="3" Style="{StaticResource Card}" VerticalAlignment="Top">
+        <Border Grid.Row="2" Style="{StaticResource Card}" VerticalAlignment="Top">
             <StackPanel>
-                <TextBlock x:Name="lblTituloLista" Text="Movimientos" Style="{StaticResource TituloTarjeta}" Margin="0,0,0,8"/>
+                <TextBlock x:Name="lblTituloLista" Text="Movimientos" Style="{StaticResource TituloTarjeta}" Margin="0,0,0,6"/>
                 <ContentControl x:Name="lblSinGastos" Style="{StaticResource TarjetaPunteada}" Height="140" Margin="0,4,0,0">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                        <c:Icono Geometria="{StaticResource IcoMasCirculo}" Tamano="17" Foreground="{StaticResource Texto2}" Margin="0,0,9,0"/>
+                        <c:Icono Geometria="{StaticResource IcoCelular}" Tamano="17" Foreground="{StaticResource Texto2}" Margin="0,0,9,0"/>
                         <TextBlock x:Name="txtSinGastos" Text="Aún no registras gastos este mes." FontSize="13.5" Foreground="{StaticResource Texto2}"/>
                     </StackPanel>
                 </ContentControl>
                 <ItemsControl x:Name="icDias">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <StackPanel Margin="0,8,0,4">
-                                <!-- Encabezado del día: nombre y total -->
-                                <DockPanel Margin="4,0,4,2">
-                                    <TextBlock DockPanel.Dock="Right" Text="{Binding Total, StringFormat='{}{0:$&#160;#,##0}'}" FontSize="13" FontWeight="Bold"
+                            <StackPanel Margin="0,10,0,0">
+                                <!-- Encabezado del día: "Hoy · jueves 15 de octubre" y total -->
+                                <DockPanel Margin="2,0,2,4">
+                                    <TextBlock DockPanel.Dock="Right" Text="{Binding Total, StringFormat='{}{0:$&#160;#,##0}'}" FontSize="12.5" FontWeight="SemiBold"
                                                Foreground="{StaticResource Texto2}"/>
-                                    <TextBlock Text="{Binding Titulo}" Style="{StaticResource EtiquetaSeccion}" FontSize="11.5"/>
+                                    <TextBlock FontSize="12.5" Foreground="{StaticResource Texto2}">
+                                        <Run Text="{Binding Relativo, Mode=OneWay}" FontWeight="Bold" Foreground="{StaticResource Texto}"/><Run Text="{Binding Fecha, Mode=OneWay}"/>
+                                    </TextBlock>
                                 </DockPanel>
                                 <ItemsControl ItemsSource="{Binding Gastos}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
-                                            <Border Style="{StaticResource LineaTabla}" Padding="4,8">
-                                                <Grid>
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="72"/>
-                                                        <ColumnDefinition Width="*"/>
-                                                        <ColumnDefinition Width="Auto"/>
-                                                        <ColumnDefinition Width="120"/>
-                                                        <ColumnDefinition Width="88"/>
-                                                    </Grid.ColumnDefinitions>
-                                                    <TextBlock Text="{Binding Fecha, StringFormat='{}{0:h:mm tt}'}" Style="{StaticResource TextoSecundario}" VerticalAlignment="Center"/>
-                                                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                                                        <TextBlock Text="{Binding Descripcion}" FontSize="13.5" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"
-                                                                   ToolTip="{Binding TextoOriginal}"/>
-                                                        <!-- Llegó desde el celular -->
-                                                        <c:Icono Geometria="{StaticResource IcoCelular}" Tamano="13" Foreground="{StaticResource Texto2}" Margin="8,0,0,0"
-                                                                 Visibility="{Binding DesdeCelular, Converter={StaticResource BoolAVisible}}" ToolTip="Registrado desde el celular"/>
-                                                    </StackPanel>
-                                                    <Border Grid.Column="2" Style="{StaticResource Chip}" Background="{Binding FondoCategoria}" Margin="8,0,0,0">
-                                                        <TextBlock Text="{Binding Categoria}" Style="{StaticResource TextoChip}" Foreground="{Binding ColorCategoria}"/>
+                                            <Border Padding="2,8">
+                                                <DockPanel>
+                                                    <!-- Ícono de la categoría -->
+                                                    <Border DockPanel.Dock="Left" Width="34" Height="34" CornerRadius="9" Background="{Binding FondoCategoria}" Margin="0,0,12,0">
+                                                        <c:Icono Geometria="{Binding Icono}" Tamano="16" Grosor="1.8" Foreground="{Binding ColorCategoria}"
+                                                                 HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                                     </Border>
-                                                    <TextBlock Grid.Column="3" Text="{Binding Monto, StringFormat='{}{0:$&#160;#,##0}'}" FontSize="13.5" FontWeight="Bold"
-                                                               TextAlignment="Right" VerticalAlignment="Center"/>
-                                                    <StackPanel Grid.Column="4" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                                                        <Button Click="BtnEditar_Click" Style="{StaticResource BotonIcono}" c:Ui.Icono="{StaticResource IcoEditar}"
-                                                                AutomationProperties.Name="Editar gasto" ToolTip="Editar gasto"/>
-                                                        <Button Click="BtnEliminar_Click" Style="{StaticResource BotonIconoPeligro}" c:Ui.Icono="{StaticResource IcoEliminar}"
-                                                                Margin="6,0,0,0" AutomationProperties.Name="Eliminar gasto" ToolTip="Eliminar gasto"/>
+                                                    <Button DockPanel.Dock="Right" Click="BtnEliminar_Click" Style="{StaticResource BotonIconoPeligro}" c:Ui.Icono="{StaticResource IcoEliminar}"
+                                                            Margin="12,0,0,0" VerticalAlignment="Center" AutomationProperties.Name="Eliminar gasto" ToolTip="Eliminar gasto"/>
+                                                    <TextBlock DockPanel.Dock="Right" Text="{Binding Monto, StringFormat='{}{0:$&#160;#,##0}'}" FontSize="14" FontWeight="Bold"
+                                                               VerticalAlignment="Center"/>
+                                                    <StackPanel VerticalAlignment="Center" Margin="0,0,10,0">
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <TextBlock Text="{Binding Descripcion}" FontSize="13.5" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"
+                                                                       ToolTip="{Binding TextoOriginal}"/>
+                                                            <!-- Gasto directo de un vehículo: también está en su historial -->
+                                                            <Border Background="{StaticResource AzulSuave}" CornerRadius="6" Padding="6,1" Margin="8,0,0,0" VerticalAlignment="Center"
+                                                                    Visibility="{Binding TieneVehiculo, Converter={StaticResource BoolAVisible}}"
+                                                                    ToolTip="También está en el historial del vehículo">
+                                                                <StackPanel Orientation="Horizontal">
+                                                                    <c:Icono Geometria="{StaticResource IcoVehiculos}" Tamano="12" Grosor="1.6" Foreground="{StaticResource Azul}" Margin="0,0,4,0"/>
+                                                                    <TextBlock Text="{Binding Vehiculo}" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource Azul}"/>
+                                                                </StackPanel>
+                                                            </Border>
+                                                        </StackPanel>
+                                                        <TextBlock FontSize="12" Foreground="{StaticResource Texto2}" Margin="0,2,0,0">
+                                                            <Run Text="{Binding Fecha, StringFormat='{}{0:h:mm tt}', Mode=OneWay}"/><Run Text="  ·  "/><Run Text="{Binding Categoria, Mode=OneWay}" FontWeight="SemiBold" Foreground="{Binding ColorCategoria}"/>
+                                                        </TextBlock>
                                                     </StackPanel>
-                                                </Grid>
+                                                </DockPanel>
                                             </Border>
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
@@ -183,42 +141,41 @@
         </Border>
 
         <!-- ===== ANÁLISIS (columna derecha) ===== -->
-        <StackPanel Grid.Row="2" Grid.RowSpan="2" Grid.Column="2">
-            <!-- A dónde se va el dinero: por categoría -->
+        <StackPanel Grid.Row="2" Grid.Column="2">
+            <!-- A dónde se va el dinero: una barra con todas las categorías y su detalle -->
             <Border Style="{StaticResource Card}" Margin="0,0,0,14">
                 <StackPanel>
                     <TextBlock Text="¿A dónde se va tu dinero?" Style="{StaticResource TituloTarjeta}" Margin="0,0,0,12"/>
                     <TextBlock x:Name="lblSinCategorias" Text="Sin gastos este mes." Style="{StaticResource TextoSecundario}" Visibility="Collapsed"/>
+                    <Grid x:Name="barraCategorias" Height="8" Margin="0,0,0,12"/>
                     <ItemsControl x:Name="icCategorias">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <StackPanel Margin="0,0,0,11">
-                                    <DockPanel>
-                                        <TextBlock DockPanel.Dock="Right" Text="{Binding Total, StringFormat='{}{0:$&#160;#,##0}'}" FontSize="13.5" FontWeight="Bold"/>
-                                        <TextBlock Text="{Binding Nombre}" FontSize="13.5" TextTrimming="CharacterEllipsis"/>
-                                    </DockPanel>
-                                    <!-- Barra proporcional al total del mes -->
-                                    <Grid Height="6" Margin="0,5,0,3">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="{Binding Proporcion, Converter={StaticResource Estrella}}"/>
-                                            <ColumnDefinition Width="{Binding Resto, Converter={StaticResource Estrella}}"/>
-                                        </Grid.ColumnDefinitions>
-                                        <Border Grid.ColumnSpan="2" Background="#EEF1F5" CornerRadius="3"/>
-                                        <Border Background="{Binding Color}" CornerRadius="3"/>
-                                    </Grid>
-                                    <TextBlock Text="{Binding Detalle}" Style="{StaticResource TextoSecundario}" FontSize="12"/>
-                                </StackPanel>
+                                <DockPanel Margin="0,0,0,9">
+                                    <Border DockPanel.Dock="Left" Width="8" Height="8" CornerRadius="2" Background="{Binding Color}" VerticalAlignment="Top" Margin="0,5,8,0"/>
+                                    <TextBlock DockPanel.Dock="Right" Text="{Binding Total, StringFormat='{}{0:$&#160;#,##0}'}" FontSize="13" FontWeight="Bold" VerticalAlignment="Center"/>
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Nombre}" FontSize="13" TextTrimming="CharacterEllipsis"/>
+                                        <TextBlock Text="{Binding Detalle}" FontSize="11.5" Foreground="{StaticResource Texto2}"/>
+                                    </StackPanel>
+                                </DockPanel>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
                 </StackPanel>
             </Border>
 
-            <!-- En qué gastas más seguido -->
+            <!-- Lo que más se repite -->
             <Border Style="{StaticResource Card}">
                 <StackPanel>
-                    <TextBlock Text="En qué gastas más seguido" Style="{StaticResource TituloTarjeta}" Margin="0,0,0,12"/>
-                    <TextBlock x:Name="lblSinFrecuentes" Text="Cuando repitas un gasto lo verás aquí." Style="{StaticResource TextoSecundario}" Visibility="Collapsed"/>
+                    <TextBlock Text="Lo que más repites" Style="{StaticResource TituloTarjeta}" Margin="0,0,0,12"/>
+                    <ContentControl x:Name="lblSinFrecuentes" Style="{StaticResource TarjetaPunteada}" Visibility="Collapsed">
+                        <StackPanel HorizontalAlignment="Center" Margin="12,18">
+                            <c:Icono Geometria="{StaticResource IcoRepetir}" Tamano="20" Foreground="{StaticResource Texto2}" HorizontalAlignment="Center" Margin="0,0,0,8"/>
+                            <TextBlock Text="Cuando un gasto se repita, aquí verás cuánto te cuesta al mes." FontSize="12.5" Foreground="{StaticResource Texto2}"
+                                       TextWrapping="Wrap" TextAlignment="Center"/>
+                        </StackPanel>
+                    </ContentControl>
                     <ItemsControl x:Name="icFrecuentes">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>

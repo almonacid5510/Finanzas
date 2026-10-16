@@ -1,0 +1,89 @@
+<UserControl x:Class="MisFinanzas.Controles.NominaView"
+ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:local="clr-namespace:MisFinanzas"
+ xmlns:c="clr-namespace:MisFinanzas.Controles">
+ <Border Style="{StaticResource Card}">
+  <StackPanel>
+   <StackPanel x:Name="reglas" Visibility="Collapsed">
+   <DockPanel Margin="0,0,0,12"><Button x:Name="btnEditar" DockPanel.Dock="Right" Content="Editar" Click="Editar_Click" Style="{StaticResource BotonSecundario}" Height="34" Padding="14,0"/>
+    <TextBlock Text="Tu nómina" Style="{StaticResource TituloTarjeta}" VerticalAlignment="Center"/></DockPanel>
+   <!-- Resumen: frecuencia, monto por pago y días -->
+   <TextBlock x:Name="txtResumen" TextWrapping="Wrap" FontSize="12.5" Foreground="{StaticResource Texto2}"/>
+   <TextBlock x:Name="txtMontoNomina" FontSize="26" FontWeight="ExtraBold" Foreground="{StaticResource VerdeTexto}" Margin="0,2,0,0"/>
+   <StackPanel x:Name="filaDias" Orientation="Horizontal" Margin="0,10,0,0">
+    <TextBlock x:Name="txtEtiquetaDias" Text="Días de pago" FontSize="12.5" Foreground="{StaticResource Texto2}" VerticalAlignment="Center" Margin="0,0,10,0"/>
+    <ItemsControl x:Name="chipsDias">
+     <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Orientation="Horizontal"/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+     <ItemsControl.ItemTemplate><DataTemplate>
+      <Border Background="{StaticResource GrisSuave}" BorderBrush="{StaticResource Borde}" BorderThickness="1" CornerRadius="6" Padding="9,2" Margin="0,0,6,0">
+       <TextBlock Text="{Binding}" FontSize="12.5" FontWeight="Bold"/>
+      </Border>
+     </DataTemplate></ItemsControl.ItemTemplate>
+    </ItemsControl>
+   </StackPanel>
+   <!-- El cambio aún no llega al celular -->
+   <Border x:Name="avisoPendiente" Background="#FFFAEB" BorderBrush="#FEDF89" BorderThickness="1" CornerRadius="10" Padding="12,8" Margin="0,14,0,0" Visibility="Collapsed">
+    <DockPanel>
+     <Button x:Name="btnEnviarCelular" DockPanel.Dock="Right" Content="Enviar al celular" Click="EnviarCelular_Click" Style="{StaticResource Boton}"
+             Background="#B54708" Height="32" Padding="12,0" FontSize="12.5"/>
+     <TextBlock Text="Tu celular aún no tiene este cambio." FontSize="12.5" FontWeight="SemiBold" Foreground="#93370D" VerticalAlignment="Center" TextWrapping="Wrap"/>
+    </DockPanel>
+   </Border>
+   <!-- El celular ya tiene la nómina -->
+   <StackPanel x:Name="avisoSincronizado" Orientation="Horizontal" Margin="0,14,0,0" Visibility="Collapsed">
+    <Border x:Name="iconoSincronizado" Width="20" Height="20" CornerRadius="10" Background="{StaticResource VerdeSuave}" Margin="0,0,8,0">
+     <c:Icono Geometria="{StaticResource IcoCheck}" Tamano="12" Grosor="2.6" Foreground="{StaticResource Verde}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+    </Border>
+    <TextBlock x:Name="txtSincronizado" Text="Sincronizado con tu celular" FontSize="12.5" FontWeight="SemiBold" Foreground="{StaticResource VerdeTexto}" VerticalAlignment="Center"/>
+   </StackPanel>
+   <StackPanel x:Name="editor" Visibility="Collapsed" Margin="0,14,0,0">
+    <!-- Tres columnas iguales: el segundo pago (quincenal) queda justo debajo del primero -->
+    <Grid>
+     <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+     <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+     <StackPanel Margin="0,0,12,10"><TextBlock Text="Frecuencia" Style="{StaticResource FieldLabel}"/><ComboBox x:Name="frecuencia" Style="{StaticResource ModernCombo}" SelectionChanged="Frecuencia_Changed"/></StackPanel>
+     <StackPanel x:Name="panelDias" Grid.Column="1" Margin="0,0,12,10"><TextBlock x:Name="etiquetaDia" Text="Día de pago" Style="{StaticResource FieldLabel}"/><ComboBox x:Name="dias" Style="{StaticResource ModernCombo}"/></StackPanel>
+     <StackPanel x:Name="panelSemana" Grid.Column="1" Margin="0,0,12,10"><TextBlock Text="Día de la semana" Style="{StaticResource FieldLabel}"/><ComboBox x:Name="semana" Style="{StaticResource ModernCombo}"/></StackPanel>
+     <StackPanel Grid.Column="2" Margin="0,0,0,10"><TextBlock x:Name="etiquetaMonto" Text="Monto neto por pago" Style="{StaticResource FieldLabel}"/><TextBox x:Name="montoEsperado" Style="{StaticResource ModernInputNumeric}" local:NumeroHelper.EsMoneda="True"/></StackPanel>
+     <StackPanel x:Name="panelSegundoDia" Grid.Row="1" Grid.Column="1" Margin="0,0,12,10"><TextBlock Text="Segundo pago (día)" Style="{StaticResource FieldLabel}"/><ComboBox x:Name="segundoDia" Style="{StaticResource ModernCombo}"/></StackPanel>
+     <StackPanel x:Name="panelSegundoPago" Grid.Row="1" Grid.Column="2" Margin="0,0,0,10"><TextBlock Text="Valor del segundo pago" Style="{StaticResource FieldLabel}"/><TextBox x:Name="montoSegundo" Style="{StaticResource ModernInputNumeric}" local:NumeroHelper.EsMoneda="True"/></StackPanel>
+    </Grid>
+    <TextBlock Text="Elige un día para pago mensual o dos días diferentes para pago quincenal, cada uno con su valor neto. El salario mensual de Ingresos se actualiza con la suma. Usa 31 para el último día en meses cortos. Las fechas nunca confirman depósitos automáticamente." TextWrapping="Wrap" Style="{StaticResource TextoSecundario}"/>
+    <Button Content="Guardar configuración" Click="GuardarPlan_Click" Style="{StaticResource BotonVerde}" HorizontalAlignment="Left" Margin="0,10,0,14"/>
+   </StackPanel>
+   </StackPanel>
+   <StackPanel x:Name="movimientos">
+   <DockPanel Margin="0,0,0,10"><Button DockPanel.Dock="Right" Content="Configurar fechas de pago" Click="Configuracion_Click" Style="{StaticResource BotonSecundario}"/><TextBlock Text="Dinero recibido" Style="{StaticResource TituloTarjeta}" VerticalAlignment="Center"/></DockPanel>
+   <TextBlock Text="Pagos esperados de este mes · selecciona uno para confirmar lo recibido" Style="{StaticResource TextoSecundario}" Margin="0,0,0,6"/>
+   <ItemsControl x:Name="esperados"><ItemsControl.ItemTemplate><DataTemplate>
+    <DockPanel Margin="0,3"><Button DockPanel.Dock="Right" Content="Registrar recibido" Click="Recibir_Click" Style="{StaticResource BotonSecundario}" Height="32"/>
+     <TextBlock Text="{Binding Descripcion}" VerticalAlignment="Center" TextWrapping="Wrap"/></DockPanel>
+   </DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
+   <TextBlock x:Name="txtSaldo" FontWeight="Bold" Margin="0,12,0,8" TextWrapping="Wrap"/>
+   <TextBlock Text="Registrar dinero recibido (nómina, extra o saldo inicial)" Style="{StaticResource TituloTarjeta}" Margin="0,6,0,10"/>
+   <WrapPanel>
+    <StackPanel Width="190" Margin="0,0,12,10"><TextBlock Text="Concepto" Style="{StaticResource FieldLabel}"/><TextBox x:Name="concepto" Text="Nómina" Style="{StaticResource ModernInput}" MaxLength="120"/></StackPanel>
+    <StackPanel Width="150" Margin="0,0,12,10"><TextBlock Text="Valor recibido" Style="{StaticResource FieldLabel}"/><TextBox x:Name="monto" Style="{StaticResource ModernInputNumeric}" local:NumeroHelper.EsMoneda="True"/></StackPanel>
+    <StackPanel Width="150" Margin="0,0,12,10"><TextBlock Text="Fecha real de recepción" Style="{StaticResource FieldLabel}"/><DatePicker x:Name="fecha" Style="{StaticResource ModernDatePicker}"/></StackPanel>
+   </WrapPanel>
+   <CheckBox x:Name="inicial" Content="Es el saldo que tenía al comenzar el mes de esa fecha" Margin="0,0,0,8"/>
+   <TextBlock Text="El salario mensual es tu presupuesto. Solo lo recibido aumenta el disponible. El saldo inicial es el del comienzo del mes, no el de hoy si ya registraste gastos." TextWrapping="Wrap" Style="{StaticResource TextoSecundario}"/>
+   <Button Content="Confirmar dinero recibido" Click="Confirmar_Click" Style="{StaticResource BotonVerde}" HorizontalAlignment="Left" Margin="0,10,0,8"/>
+   <ItemsControl x:Name="recibidos"><ItemsControl.ItemTemplate><DataTemplate><DockPanel Margin="0,5">
+    <Button DockPanel.Dock="Right" Content="Eliminar" Click="Eliminar_Click" Style="{StaticResource BotonPeligro}" Height="30"/>
+    <TextBlock Text="{Binding Monto, StringFormat={}{0:C0}}" DockPanel.Dock="Right" FontWeight="Bold" VerticalAlignment="Center" Margin="12,0"/>
+    <StackPanel><TextBlock Text="{Binding Concepto}"/><TextBlock Text="{Binding Detalle}" Style="{StaticResource TextoSecundario}"/></StackPanel>
+   </DockPanel></DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
+   </StackPanel>
+   <!-- Solo ocupa espacio cuando hay un error -->
+   <TextBlock x:Name="error" Foreground="#B42318" TextWrapping="Wrap" Margin="0,8,0,0">
+    <TextBlock.Style>
+     <Style TargetType="TextBlock">
+      <Style.Triggers><Trigger Property="Text" Value=""><Setter Property="Visibility" Value="Collapsed"/></Trigger></Style.Triggers>
+     </Style>
+    </TextBlock.Style>
+   </TextBlock>
+  </StackPanel>
+ </Border>
+</UserControl>

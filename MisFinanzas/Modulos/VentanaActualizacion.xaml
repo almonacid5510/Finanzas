@@ -1,0 +1,18 @@
+<Window x:Class="MisFinanzas.Modulos.VentanaActualizacion"
+ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ Title="Actualizar Mis Finanzas" Width="520" SizeToContent="Height" ResizeMode="NoResize"
+ WindowStartupLocation="CenterOwner" Background="{StaticResource Fondo}" FontFamily="{StaticResource FuenteApp}">
+ <StackPanel Margin="24">
+  <TextBlock Text="Hay una actualización disponible" Style="{StaticResource TituloTarjeta}"/>
+  <TextBlock Text="{Binding VersionNueva, StringFormat=Versión {0}}" Margin="0,10"/>
+  <ScrollViewer MaxHeight="180" VerticalScrollBarVisibility="Auto"><TextBlock Text="{Binding Novedades}" TextWrapping="Wrap"/></ScrollViewer>
+  <TextBlock Text="Se creará un respaldo de tus registros y se reiniciará la aplicación." TextWrapping="Wrap" Style="{StaticResource TextoSecundario}" Margin="0,14"/>
+  <ProgressBar Minimum="0" Maximum="100" Value="{Binding Progreso}" Height="8"/>
+  <TextBlock Text="{Binding Mensaje}" TextWrapping="Wrap" Margin="0,10"/>
+  <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+   <Button x:Name="btnLuego" Content="Más tarde" Click="Luego_Click" Style="{StaticResource BotonSecundario}" Margin="0,0,10,0"/>
+   <Button x:Name="btnActualizar" Content="Actualizar ahora" Click="Actualizar_Click" Style="{StaticResource BotonVerde}"/>
+  </StackPanel>
+ </StackPanel>
+</Window>

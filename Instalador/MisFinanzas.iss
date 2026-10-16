@@ -1,3 +1,4 @@
+; LEGADO: para instaladores con actualizaciones usar Preparar-Version.ps1 (Velopack).
 ; ============================================================
 ;  Instalador de Mis Finanzas (WPF / .NET 8)
 ;  Genera un instalador .exe tipo asistente (Next-Next-Finish)

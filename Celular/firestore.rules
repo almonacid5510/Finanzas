@@ -1,0 +1,60 @@
+rules_version = '2';
+// Cada usuario solo puede leer y escribir lo suyo (usuarios/{su uid}/...).
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function esDueno(uid) { return request.auth != null && request.auth.uid == uid; }
+
+    // Gastos del día a día (los registra el celular o el PC)
+    match /usuarios/{uid}/gastos/{gastoId} {
+      allow read, delete: if esDueno(uid);
+      allow create, update: if esDueno(uid)
+        && request.resource.data.monto is number && request.resource.data.monto > 0
+        && request.resource.data.descripcion is string && request.resource.data.descripcion.size() <= 200
+        && request.resource.data.fecha is timestamp;
+    }
+
+    // Dinero que el usuario confirma haber recibido (nómina, extras o saldo inicial).
+    match /usuarios/{uid}/ingresosRecibidos/{ingresoId} {
+      allow read, delete: if esDueno(uid);
+      allow create, update: if esDueno(uid)
+        && request.resource.data.keys().hasOnly(['monto', 'concepto', 'fecha', 'inicial', 'borrado', 'actualizada'])
+        && request.resource.data.monto is number
+        && request.resource.data.monto >= 0 && request.resource.data.monto <= 1000000000000
+        && request.resource.data.inicial is bool
+        && (!('borrado' in request.resource.data) || request.resource.data.borrado is bool)
+        && (!('actualizada' in request.resource.data) || request.resource.data.actualizada is timestamp)
+        && (request.resource.data.inicial || request.resource.data.monto > 0)
+        && request.resource.data.concepto is string && request.resource.data.concepto.size() > 0
+        && request.resource.data.concepto.size() <= 120
+        && request.resource.data.fecha is timestamp && request.resource.data.fecha <= request.time;
+    }
+
+    // Calendario personal editable desde el celular y el PC.
+    match /usuarios/{uid}/configuracion/nomina {
+      allow read: if esDueno(uid);
+      allow create, update: if esDueno(uid)
+        && request.resource.data.keys().hasOnly(['frecuencia', 'dias', 'diaSemana', 'fechaBase', 'montoPorPago', 'montoSegundoPago', 'confirmada', 'actualizada'])
+        && request.resource.data.frecuencia in ['Mensual', 'Quincenal', 'Semanal', 'Cada 14 días', 'Variable']
+        && request.resource.data.dias is string && request.resource.data.dias.size() <= 30
+        && request.resource.data.diaSemana is int && request.resource.data.diaSemana >= 0 && request.resource.data.diaSemana <= 6
+        && request.resource.data.fechaBase is string && request.resource.data.fechaBase.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+        && request.resource.data.montoPorPago is number && request.resource.data.montoPorPago >= 0
+        && (request.resource.data.frecuencia == 'Variable' || request.resource.data.montoPorPago > 0) && request.resource.data.montoPorPago <= 1000000000000
+        && (!('montoSegundoPago' in request.resource.data) || (request.resource.data.montoSegundoPago is number
+            && request.resource.data.montoSegundoPago >= 0 && request.resource.data.montoSegundoPago <= 1000000000000))
+        && request.resource.data.confirmada is bool && request.resource.data.actualizada is timestamp;
+    }
+
+    // Resumen de cada mes que publica el PC para la pestaña "Resumen"
+    match /usuarios/{uid}/resumen/{mes} {
+      allow read, write: if esDueno(uid);
+    }
+
+    // Acciones pedidas desde el celular ("Pagado", borrar un gasto que ya está en el PC); el PC las aplica y las borra
+    match /usuarios/{uid}/acciones/{accionId} {
+      allow read, delete: if esDueno(uid);
+      allow create: if esDueno(uid)
+        && request.resource.data.tipo in ['pagarCuenta', 'pagarCuota', 'borrarGasto'];
+    }
+  }
+}

@@ -29,10 +29,9 @@ namespace MisFinanzas.Modulos
             {
                 // Ahora icMetas ya no es null
                 icMetas.ItemsSource = ListaMetas;
-                lblPeriodo.Text = Periodo.Nombre(_mesSeleccionado);
                 CargarMetasDesdeBD();
                 CargarSalarioDesdeBD();
-                CargarIngresosExtra();
+                CambiarMes(_mesSeleccionado);
             };
         }
 
@@ -45,7 +44,11 @@ namespace MisFinanzas.Modulos
 
         private void CambiarMes(DateTime mes)
         {
-            _mesSeleccionado = Periodo.InicioMes(mes);
+            using var dbInicio = new AppDbContext();
+            var inicio = InicioRegistro.Obtener(dbInicio);
+            _mesSeleccionado = Periodo.LimitarMes(mes, inicio, DateTime.Today);
+            btnMesAnterior.IsEnabled = _mesSeleccionado > Periodo.PrimerMesVisible(inicio, DateTime.Today);
+            btnMesSiguiente.IsEnabled = _mesSeleccionado < Periodo.InicioMes(DateTime.Today).AddMonths(1);
             lblPeriodo.Text = Periodo.Nombre(_mesSeleccionado);
             btnMesActual.Visibility = Periodo.EsMesActual(_mesSeleccionado) ? Visibility.Collapsed : Visibility.Visible;
             CargarIngresosExtra();
@@ -96,73 +99,9 @@ namespace MisFinanzas.Modulos
             }
         }
 
-        // --- LÓGICA DE EDICIÓN DE SALARIO (IN-PLACE) ---
-
-        private void BtnActivarEdicion_Click(object sender, RoutedEventArgs e)
-        {
-            // Oculta el texto y muestra el cuadro de edición
-            pnlLecturaSalario.Visibility = Visibility.Collapsed;
-            pnlEdicionSalario.Visibility = Visibility.Visible;
-
-            // Pre-cargamos el valor ya formateado con separadores de miles
-            NumeroHelper.TryParseMoneda(lblIngresoTotal.Text, out var actual);
-            txtEditarSalario.Text = actual > 0 ? NumeroHelper.FormatearMoneda(actual) : "";
-            txtEditarSalario.Focus();
-        }
-
-        private void BtnConfirmarSalario_Click(object sender, RoutedEventArgs e)
-        {
-            if (NumeroHelper.TryParseMoneda(txtEditarSalario.Text, out decimal nuevoSalario))
-            {
-                try
-                {
-                    using (var db = new AppDbContext())
-                    {
-                        var ingreso = db.Movimientos.FirstOrDefault(m => m.Tipo == "Ingreso");
-                        if (ingreso != null)
-                        {
-                            ingreso.Venta = nuevoSalario;
-                            ingreso.Fecha = DateTime.Now;
-                            db.Movimientos.Update(ingreso);
-                        }
-                        else
-                        {
-                            var nuevoIngreso = new Movimiento
-                            {
-                                Descripcion = "Salario Mensual",
-                                Venta = nuevoSalario,
-                                Costo = 0,
-                                Tipo = "Ingreso",
-                                EstaPagado = true,
-                                Fecha = DateTime.Now
-                            };
-                            db.Movimientos.Add(nuevoIngreso);
-                        }
-                        db.SaveChanges();
-                    }
-
-                    SalarioGuardado = nuevoSalario.ToString("C0");
-                    lblIngresoTotal.Text = SalarioGuardado;
-                    FinalizarEdicion();
-                    CargarIngresosExtra(); // actualiza el total del mes
-                }
-                catch (Exception ex)
-                {
-                    MisFinanzas.Controles.Aviso.Mostrar($"Error al guardar salario: {ex.Message}");
-                }
-            }
-        }
-
-        private void BtnCancelarEdicion_Click(object sender, RoutedEventArgs e)
-        {
-            FinalizarEdicion();
-        }
-
-        private void FinalizarEdicion()
-        {
-            pnlLecturaSalario.Visibility = Visibility.Visible;
-            pnlEdicionSalario.Visibility = Visibility.Collapsed;
-        }
+        // --- SALARIO ---
+        // El salario mensual sale de la nómina (suma de los pagos del mes): se edita en Cuenta → Tu nómina
+        private void BtnActivarEdicion_Click(object sender, RoutedEventArgs e) => MainWindow.Actual?.IrAConfiguracion(editarNomina: true);
 
         // --- LÓGICA DE METAS ---
 

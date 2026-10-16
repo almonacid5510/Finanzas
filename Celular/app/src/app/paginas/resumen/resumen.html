@@ -1,0 +1,171 @@
+<main class="pagina">
+  <div class="encabezado">
+    <div>
+      <h1>Resumen</h1>
+      <div class="sub sincronizado"><i class="punto"></i>{{ actualizado() }}</div>
+    </div>
+    @if (r()) {
+      <div class="selector-mes">
+        <button (click)="servicio.irA(-1)" [disabled]="!hayAnterior()" aria-label="Mes anterior"><app-icono nombre="izquierda" [tamano]="20" /></button>
+        <span>{{ nombreMes() }}</span>
+        <button (click)="servicio.irA(1)" [disabled]="!haySiguiente()" aria-label="Mes siguiente"><app-icono nombre="derecha" [tamano]="20" /></button>
+      </div>
+    }
+  </div>
+
+  @if (!servicio.cargado()) {
+    <p class="cargando">Cargando tu resumen…</p>
+  } @else if (!r()) {
+    <div class="vacio sin-datos">
+      <app-icono nombre="resumen" [tamano]="28" />
+      <strong>Aún no hay resumen del PC</strong>
+      <span>Abre Mis Finanzas en el computador y conecta esta cuenta en <b>Cuenta → Conectar tu celular</b>.
+        Tu resumen aparecerá aquí en menos de un minuto.</span>
+    </div>
+  } @else {
+    @let datos = r()!;
+
+    <!-- El presupuesto no es dinero depositado: solo sumamos cobros confirmados. -->
+    <section class="tarjeta-oscura disponible">
+      <div class="fila"><span class="rotulo">Disponible</span>
+        @if (balanceMes(); as b) { <span class="salud" [class.mal]="b.saldo < 0">{{ b.saldo < 0 ? 'En déficit' : 'Dinero real' }}</span> }</div>
+      @if (balanceMes(); as balance) {
+        <strong class="cifra" [class.negativa]="balance.saldo < 0">{{ pesos(balance.saldo) }}</strong>
+        <p class="estado" [class.negativa]="balance.saldo < 0">Lo que has recibido menos lo que ya pagaste</p>
+        <div class="cajitas">
+          <div><span>Recibido</span><strong class="verde-claro">{{ pesos(balance.recibidoTotal) }}</strong>
+            <small>{{ balance.porRecibir ? 'Por recibir ' + pesos(balance.porRecibir) : 'Nómina del mes confirmada' }}</small></div>
+          <div><span>Pagado</span><strong>{{ pesos(balance.egresos) }}</strong>
+            <small>{{ balance.porPagar ? 'Por pagar ' + pesos(balance.porPagar) : 'Nada pendiente' }}</small></div>
+        </div>
+        @if (balance.porPagar) {
+          <p class="tras-pagar" [class.negativa]="balance.saldo - balance.porPagar < 0">Tras pagar lo pendiente te quedarían <b>{{ pesos(balance.saldo - balance.porPagar) }}</b></p>
+        }
+        @if (balance.saldo < 0 && !balance.inicial) {
+          <p class="aviso-inicial">¿Pagaste algo con dinero que ya tenías antes de la quincena? Regístralo como saldo inicial en <b>Dinero recibido</b> y se suma aquí.</p>
+        }
+        <div class="fila pie">
+          <span>Ingresos del mes <b>{{ pesos(balance.ingresos) }}</b></span>
+          <button type="button" class="como" (click)="verCalculo.set(!verCalculo())" [attr.aria-expanded]="verCalculo()">¿Cómo se calcula?</button>
+        </div>
+        @if (verCalculo()) {
+          <p class="explicacion calculo">Igual que en el PC: saldo inicial {{ pesos(balance.inicial) }} + recibido {{ pesos(balance.recibidos) }} − pagado {{ pesos(balance.egresos) }}, desde {{ balance.desde }}; el saldo pasa de un mes al siguiente.
+            Solo cuenta lo que confirmaste como recibido y lo que ya pagaste (cuentas, cuotas, abonos a metas y gastos en efectivo o débito).
+            Lo pendiente no se descuenta hasta que lo pagues y las compras con tarjeta cuentan al pagar su cuota.</p>
+        }
+      } @else {
+        <strong class="cifra">—</strong>
+        <p class="explicacion">Los meses futuros aún no tienen dinero recibido ni pagos. Ingresos previstos {{ pesos(datos.ingresos) }}.</p>
+      }
+    </section>
+
+    <!-- Vencidas: se marcan como pagadas en el PC -->
+    @for (v of datos.vencidas; track v.tipo + v.id + '-' + (v.quincena ?? 0)) {
+      <section class="vencida bloque">
+        <span class="alerta"><app-icono nombre="alerta" [tamano]="24" /></span>
+        <div class="info">
+          <strong>{{ v.nombre }} · {{ pesos(v.monto) }}</strong>
+          <span>{{ v.detalle }}</span>
+        </div>
+        @if (servicio.fueEnviada(v)) {
+          <span class="enviada">Enviado al PC</span>
+        } @else {
+          <button (click)="pagar(v)">Pagado</button>
+        }
+      </section>
+    }
+
+    <!-- Por pagar -->
+    @if (datos.porPagar.length) {
+      <section class="tarjeta bloque por-pagar">
+        <div class="fila titulo-bloque"><h2>Por pagar</h2><strong class="total-rojo">{{ pesos(totalPorPagar()) }}</strong></div>
+        @for (p of datos.porPagar; track $index) {
+          <div class="pago" [class.proxima]="p.proxima">
+            <div class="fecha" [class.urgente]="p.vencida">
+              @if (p.dia === '—') { <i class="raya"></i> } @else { <b>{{ p.dia }}</b> }
+              <span>{{ p.mesCorto }}</span>
+            </div>
+            <div class="info">
+              <strong>{{ p.titulo }}</strong>
+              <span [class.roja]="p.vencida">{{ p.detalle }}</span>
+            </div>
+            <strong class="monto">{{ pesos(p.monto) }}</strong>
+          </div>
+        }
+      </section>
+    }
+
+    <!-- Tarjetas de crédito: cupo disponible, con el logo de su marca -->
+    @for (t of tarjetas(); track t.id) {
+      <section class="tarjeta bloque tarjeta-credito">
+        <div class="tc-cabeza">
+          <app-marca-tarjeta [nombre]="t.nombre" />
+          <div class="tc-nombre">
+            <strong>{{ tituloTarjeta(t.nombre) }}</strong>
+            <small>Debes {{ pesos(t.cupo - t.disponible) }}</small>
+          </div>
+          <div class="tc-disponible">
+            <small>Disponible</small>
+            <strong>{{ pesos(t.disponible) }}</strong>
+          </div>
+        </div>
+        <div class="tc-barra"><i [style.width.%]="t.uso * 100" [class.alto]="t.uso >= 0.8"></i></div>
+        <small class="tc-cupo">Cupo {{ pesos(t.cupo) }} · usas el {{ porcentaje(t.uso) }}</small>
+      </section>
+    }
+
+    <!-- Tarjetas -->
+    <section class="cuadricula bloque">
+      <div class="tarjeta mini">
+        <span>Ahorro</span>
+        <strong class="verde">{{ pesos(datos.ahorro.total) }}</strong>
+        <small>{{ datos.ahorro.detalle }}</small>
+      </div>
+      <div class="tarjeta mini">
+        <span>Inversiones</span>
+        <strong>{{ pesos(datos.inversiones.total) }}</strong>
+        <small>{{ datos.inversiones.detalle }}</small>
+      </div>
+      <div class="tarjeta mini">
+        <span>Deuda</span>
+        <strong class="roja">{{ pesos(datos.deuda.total) }}</strong>
+        <div class="progreso"><i [style.width.%]="(datos.deuda.progreso ?? 0) * 100"></i></div>
+      </div>
+      <div class="tarjeta mini">
+        <span>Vehículos</span>
+        <strong class="azul">{{ pesos(datos.vehiculos.total) }}</strong>
+        <small>{{ datos.vehiculos.detalle }}</small>
+      </div>
+    </section>
+    <section class="tarjeta bloque cobros">
+      <div class="fila"><h2>Pagos esperados</h2><a routerLink="/configuracion">Configurar fechas</a></div>
+      <p>Confirma cada pago cuando recibas el dinero. Las fechas se editan en Cuenta.</p>
+      @if (servicio.errorNomina()) { <p role="alert">{{ servicio.errorNomina() }}</p> }
+      @if (!servicio.nominaCargada()) { <p>Cargando tus fechas de pago…</p> }
+      @for (p of esperados(); track p.id) {
+        <div class="fila cobro"><div><strong>Pago del {{ fechaLarga(p.fecha) }}</strong><small>{{ pesos(p.monto) }} · sin confirmar</small></div><button class="agregar-cobro" (click)="recibirEsperado(p)">Registrar recibido</button></div>
+      }
+    </section>
+
+    <section class="tarjeta bloque cobros">
+      <div class="fila"><h2>Dinero recibido</h2><button class="agregar-cobro" (click)="nuevoCobro()">{{ formularioCobro() ? 'Cancelar' : '+ Registrar ingreso' }}</button></div>
+      <p>Registra cada quincena por su valor neto, solo cuando llegue. Incluye aquí los ingresos extra que ya cobraste.</p>
+      @if (servicio.errorCobros()) { <p role="alert">{{ servicio.errorCobros() }}</p> }
+      @if (errorCobro()) { <p role="alert">{{ errorCobro() }}</p> }
+      @if (formularioCobro()) {
+        <form #formularioCobro (submit)="$event.preventDefault(); guardarCobro(monto.value, concepto.value, dia.value, inicial.checked)">
+          <label>Concepto<input #concepto name="concepto" [value]="cobroElegido() ? 'Nómina del ' + fechaLarga(cobroElegido()!.fecha) : ''" required maxlength="120" placeholder="Ej. primera quincena" /></label>
+          <label>Valor recibido<input #monto name="monto" [value]="miles(cobroElegido()?.monto)" (input)="monto.value = miles(soloDigitos(monto.value))" required inputmode="numeric" placeholder="Ej. 1.500.000" /></label>
+          <label>Fecha de recepción<input #dia name="dia" type="date" [value]="hoy" [max]="hoy" required /></label>
+          <label class="opcion-saldo"><input #inicial name="inicial" type="checkbox" /> Es mi saldo al comenzar el mes de esa fecha</label>
+          <small>Usa el saldo inicial una vez para incluir el dinero que ya tenías. Si lo registras otra vez para el mismo mes, se reemplaza.</small>
+          <button class="agregar-cobro" type="submit">Guardar ingreso recibido</button>
+        </form>
+      }
+      @for (c of cobrosMes(); track c.id) {
+        <div class="fila cobro"><div><strong>{{ c.concepto }}</strong><small>{{ c.inicial ? 'Saldo al iniciar el mes' : fecha(c.fecha) }}</small></div><strong>{{ pesos(c.monto) }}</strong><button (click)="borrarCobro(c)" aria-label="Eliminar ingreso">×</button></div>
+      } @empty { <p>Aún no registraste dinero recibido en este mes.</p> }
+    </section>
+
+  }
+</main>

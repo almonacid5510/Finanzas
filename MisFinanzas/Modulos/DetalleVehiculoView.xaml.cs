@@ -121,11 +121,26 @@ namespace MisFinanzas.Modulos
 
                 try
                 {
+                    GastoDiario? diario = null;
                     using (var db = new AppDbContext())
                     {
                         db.GastosVehiculo.Update(gasto);
+                        // Si vino de Día a día, el gasto de allá queda igual (y llega al celular)
+                        if (gasto.DesdeDiaADia)
+                        {
+                            diario = db.GastosDiarios.FirstOrDefault(d => d.Uid == gasto.GastoDiarioUid);
+                            if (diario != null)
+                            {
+                                VinculoTarjeta.Ajustar(db, diario.TarjetaId, diario.Monto, diario.TarjetaId, gasto.Valor);
+                                diario.Descripcion = gasto.Concepto;
+                                diario.Monto = gasto.Valor;
+                                diario.Fecha = gasto.Fecha;
+                            }
+                        }
                         db.SaveChanges();
                     }
+                    if (diario != null) SincronizacionCelular.RegistrarCambio(diario, borrado: false);
+                    if (diario?.TarjetaId != null) VinculoTarjeta.RecargarCreditos();
                     gasto.Editando = false;
                     VehiculoActual.NotificarCambioTotal();
                     toast.Show("Cambios guardados correctamente");
@@ -155,15 +170,28 @@ namespace MisFinanzas.Modulos
         {
             try
             {
+                GastoDiario? diario = null;
                 using (var db = new AppDbContext())
                 {
                     var dbGasto = db.GastosVehiculo.Find(gasto.Id);
                     if (dbGasto != null)
                     {
                         db.GastosVehiculo.Remove(dbGasto);
+                        // Si vino de Día a día, también se borra allá (y en el celular)
+                        if (dbGasto.DesdeDiaADia)
+                        {
+                            diario = db.GastosDiarios.FirstOrDefault(d => d.Uid == dbGasto.GastoDiarioUid);
+                            if (diario != null)
+                            {
+                                db.GastosDiarios.Remove(diario);
+                                VinculoTarjeta.Ajustar(db, diario.TarjetaId, diario.Monto, null, 0);
+                            }
+                        }
                         db.SaveChanges();
                     }
                 }
+                if (diario != null) SincronizacionCelular.RegistrarCambio(diario, borrado: true);
+                if (diario?.TarjetaId != null) VinculoTarjeta.RecargarCreditos();
                 VehiculoActual.Gastos.Remove(gasto);
                 VehiculoActual.NotificarCambioTotal();
                 ActualizarVacio();

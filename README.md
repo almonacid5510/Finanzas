@@ -80,12 +80,14 @@ MisFinanzas/
 │   ├── CuentasMensuales.cs     Recurrencia de gastos e ingresos y pagos por mes
 │   ├── Amortizacion.cs         Cálculo de créditos (cuota fija)
 │   ├── GastoDiario.cs          Gastos del día a día e intérprete de frases ("gasté 25 mil en almuerzo")
+│   ├── SincronizacionCelular.cs Trae los gastos registrados desde el celular (Firebase)
 │   ├── Analisis.cs             Historial, predicción y proyección
 │   └── Etiquetas.cs            Categorías de gastos e ingresos con color
 ├── Periodo.cs                  Manejo del mes ("yyyy-MM")
 ├── NumeroHelper.cs             Formato y lectura de valores en pesos
 └── Recursos/app.ico            Ícono de la app
 Instalador/MisFinanzas.iss      Script de Inno Setup
+Celular/                        App web del celular para registrar gastos (ver Celular/README.md)
 Herramientas/                   Scripts de mantenimiento (PowerShell)
 ├── GenerarIcono.ps1            Regenera Recursos/app.ico
 ├── AgregarEncabezados.ps1      Agrega el encabezado de autoría a .cs y .xaml

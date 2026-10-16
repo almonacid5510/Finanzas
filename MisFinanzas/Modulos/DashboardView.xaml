@@ -66,11 +66,11 @@
                 <StackPanel>
                     <Border Style="{StaticResource CapsulaMes}">
                         <StackPanel Orientation="Horizontal">
-                            <Button Style="{StaticResource BotonFlecha}" c:Ui.Icono="{StaticResource IcoIzquierda}" Click="BtnMesAnterior_Click"
+                            <Button x:Name="btnMesAnterior" Style="{StaticResource BotonFlecha}" c:Ui.Icono="{StaticResource IcoIzquierda}" Click="BtnMesAnterior_Click"
                                     AutomationProperties.Name="Mes anterior" ToolTip="Mes anterior"/>
                             <TextBlock x:Name="lblPeriodo" Width="150" TextAlignment="Center" FontSize="15" FontWeight="Bold"
                                        VerticalAlignment="Center"/>
-                            <Button Style="{StaticResource BotonFlecha}" c:Ui.Icono="{StaticResource IcoDerecha}" Click="BtnMesSiguiente_Click"
+                            <Button x:Name="btnMesSiguiente" Style="{StaticResource BotonFlecha}" c:Ui.Icono="{StaticResource IcoDerecha}" Click="BtnMesSiguiente_Click"
                                     AutomationProperties.Name="Mes siguiente" ToolTip="Mes siguiente"/>
                         </StackPanel>
                     </Border>
@@ -91,7 +91,8 @@
                 </Border>
                 <Button x:Name="btnMarcarPagado" DockPanel.Dock="Right" Style="{StaticResource BotonVerde}" Height="36"
                         c:Ui.Icono="{StaticResource IcoCheck}" Content="Marcar pagado" Click="BtnMarcarPagado_Click"/>
-                <Button x:Name="lnkVencidos" DockPanel.Dock="Right" Style="{StaticResource BotonEnlace}" Content="Ver cuentas" Margin="0,0,18,0"
+                <Button x:Name="lnkVencidos" DockPanel.Dock="Right" Style="{StaticResource BotonSecundario}" Content="Ver cuentas" Margin="0,0,10,0"
+                        c:Ui.Icono="{StaticResource IcoCuentas}" Height="36" Padding="12,0"
                         VerticalAlignment="Center" Click="LnkVencidos_Click"/>
                 <TextBlock x:Name="lblVencidos" FontSize="13.5" Foreground="#7A271A" VerticalAlignment="Center"
                            TextTrimming="CharacterEllipsis"/>
@@ -132,7 +133,11 @@
                     <StackPanel>
                         <TextBlock Text="DISPONIBLE" Style="{StaticResource EtiquetaSeccion}" Foreground="{StaticResource TextoMenu}" Margin="0,7,0,0"/>
                         <TextBlock x:Name="lblDashBalance" Style="{StaticResource CifraKpi}" Foreground="White" Margin="0,16,0,2"/>
-                        <TextBlock Text="Ingresos menos gastos" Style="{StaticResource TextoSecundario}" Foreground="{StaticResource TextoMenu}"/>
+                        <TextBlock x:Name="lblDashBalanceDetalle" Text="Recibido menos pagado" Style="{StaticResource TextoSecundario}" Foreground="{StaticResource TextoMenu}"
+                                   TextWrapping="Wrap"/>
+                        <!-- Solo informa: lo pendiente no se descuenta del disponible hasta pagarlo -->
+                        <TextBlock x:Name="lblDashTrasPagar" Style="{StaticResource TextoSecundario}" FontWeight="SemiBold" Margin="0,4,0,0"
+                                   TextWrapping="Wrap" Visibility="Collapsed"/>
                     </StackPanel>
                 </Grid>
             </Border>
@@ -235,8 +240,8 @@
                 </DockPanel>
             </Border>
 
-            <!-- Comparado con el mes anterior: en qué se gasta más o menos -->
-            <Border Style="{StaticResource Card}">
+            <!-- Comparado con el mes anterior: disponible desde el segundo mes de uso -->
+            <Border x:Name="tarjetaComparacion" Style="{StaticResource Card}">
                 <DockPanel>
                     <TextBlock DockPanel.Dock="Top" x:Name="lblTituloComparacion" Text="Comparado con el mes anterior" Style="{StaticResource TituloTarjeta}" Margin="0,0,0,12"/>
                     <!-- Resumen del cambio total -->

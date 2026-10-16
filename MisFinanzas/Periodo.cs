@@ -22,6 +22,21 @@ namespace MisFinanzas
 
         public static bool EsMesActual(DateTime mes) => Clave(mes) == MesActual;
 
+        /// <summary>Ventana de navegación: anterior con historial, actual y siguiente.</summary>
+        public static DateTime PrimerMesVisible(DateTime inicio, DateTime hoy)
+        {
+            var actual = InicioMes(hoy);
+            return InicioMes(inicio) < actual ? actual.AddMonths(-1) : actual;
+        }
+
+        public static DateTime LimitarMes(DateTime mes, DateTime inicio, DateTime hoy)
+        {
+            var minimo = PrimerMesVisible(inicio, hoy);
+            var maximo = InicioMes(hoy).AddMonths(1);
+            mes = InicioMes(mes);
+            return mes < minimo ? minimo : mes > maximo ? maximo : mes;
+        }
+
         /// <summary>Nombre legible del mes, p. ej. "Octubre 2026".</summary>
         public static string Nombre(DateTime mes)
         {

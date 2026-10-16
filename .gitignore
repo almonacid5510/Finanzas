@@ -7,3 +7,10 @@ obj/
 # Salidas de publicacion e instalador (binarios generados)
 publish/
 Instalador/Salida/
+
+# Paquetes públicos generados por Velopack
+Celular/app/public/actualizaciones/
+
+# Caché local de Firebase y modelos de OCR descargados al probar
+Celular/.firebase/
+*.traineddata

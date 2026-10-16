@@ -1,0 +1,31 @@
+const ts=require('typescript'), fs=require('node:fs'), assert=require('node:assert/strict');
+const signal=v=>{const f=()=>v;f.set=x=>v=x;return f;};
+let dependencias;
+const core={Injectable:()=>c=>c,DestroyRef:class{},inject:token=>dependencias[token.nombre]||dependencias.destroy,signal};
+const tokens={sw:{nombre:'sw'},borradores:{nombre:'borradores'},sesion:{nombre:'sesion'}};
+function cargar(archivo){const codigo=ts.transpileModule(fs.readFileSync('src/app/nucleo/'+archivo+'.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,experimentalDecorators:true}}).outputText;
+ const m={exports:{}};new Function('require','module','exports',codigo)(n=>n==='@angular/core'?core:n==='@angular/service-worker'?{SwUpdate:tokens.sw}:n.endsWith('/borradores.service')?{BorradoresService:tokens.borradores}:n.endsWith('/sesion.service')?{SesionService:tokens.sesion}:{VERSION_APP:'1.9.0'},m,m.exports);return m.exports;}
+global.document=Object.assign(new EventTarget(),{visibilityState:'visible'});global.window=new EventTarget();
+Object.defineProperty(global,'navigator',{value:{onLine:true},configurable:true});let recargas=0;global.location={reload:()=>recargas++};
+const almacen=new Map();global.sessionStorage={getItem:k=>almacen.get(k)??null,setItem:(k,v)=>almacen.set(k,v),removeItem:k=>almacen.delete(k)};
+(async()=>{
+ let enviar, guardar=0;const fin=[];let online=true;
+ const sw={isEnabled:true,versionUpdates:{subscribe:fn=>{enviar=fn;return {unsubscribe(){}};}},checkForUpdate:async()=>false};
+ dependencias={sw,borradores:{guardar:()=>guardar++},destroy:{onDestroy:fn=>fin.push(fn)}};
+ const {ActualizacionesService}=cargar('actualizaciones.service');const servicio=new ActualizacionesService();await new Promise(r=>setImmediate(r));
+ enviar({type:'VERSION_READY',latestVersion:{hash:'nueva',appData:{version:'2.0.0',novedades:'Prueba'}}});
+ assert.ok(servicio.mostrarAviso());assert.equal(recargas,0,'No recarga sin autorización');
+ servicio.masTarde();assert.ok(!servicio.mostrarAviso());await servicio.buscar();assert.ok(servicio.mostrarAviso(),'Buscar manualmente ofrece la versión pospuesta');
+ servicio.actualizar();assert.equal(guardar,1);assert.equal(recargas,1,'Guarda el borrador antes de recargar');
+ let errorGuardado=true;dependencias.borradores.guardar=()=>{throw new Error('Termina el dictado antes de actualizar.');};
+ servicio.aplicando.set(false);servicio.actualizar();assert.equal(recargas,1);assert.ok(servicio.mensaje().includes('dictado'),'Si no puede proteger el formulario no recarga');
+ servicio.disponible.set(null);navigator.onLine=false;await servicio.buscar();assert.ok(servicio.mensaje().includes('Sin internet'));navigator.onLine=true;
+ sw.checkForUpdate=async()=>{throw new Error('Red');};await servicio.buscar();assert.ok(servicio.mensaje().includes('No se pudo'));fin.forEach(f=>f());
+ let uid='juan';dependencias={sesion:{usuario:()=>({uid})}};
+ const {BorradoresService}=cargar('borradores.service');let borradores=new BorradoresService();
+ borradores.registrar('registrar',()=>({monto:25000,tarjeta:3,cuotas:6}),()=>{});borradores.guardar();
+ uid='otra-persona';let ajeno=false;new BorradoresService().registrar('registrar',()=>({}),()=>ajeno=true);assert.equal(ajeno,false,'No restaura datos de otra cuenta');
+ uid='juan';let restaurado;new BorradoresService().registrar('registrar',()=>({}),v=>restaurado=v);assert.deepEqual(restaurado,{monto:25000,tarjeta:3,cuotas:6});
+ let repetido=false;new BorradoresService().registrar('registrar',()=>({}),()=>repetido=true);assert.equal(repetido,false,'El borrador se consume una sola vez');
+ console.log('OK Actualizaciones celular: aceptación, posponer, búsqueda, errores, protección y recuperación de formulario por cuenta.');
+})().catch(e=>{console.error(e);process.exitCode=1});

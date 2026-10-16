@@ -27,10 +27,10 @@
         <DockPanel Grid.ColumnSpan="3" Margin="0,0,0,14">
             <Border DockPanel.Dock="Right" Style="{StaticResource CapsulaMes}">
                 <StackPanel Orientation="Horizontal">
-                    <Button Style="{StaticResource BotonFlecha}" c:Ui.Icono="{StaticResource IcoIzquierda}" Click="BtnMesAnterior_Click"
+                    <Button x:Name="btnMesAnterior" Style="{StaticResource BotonFlecha}" c:Ui.Icono="{StaticResource IcoIzquierda}" Click="BtnMesAnterior_Click"
                             AutomationProperties.Name="Mes anterior" ToolTip="Mes anterior"/>
                     <TextBlock x:Name="lblPeriodo" Width="150" TextAlignment="Center" FontSize="15" FontWeight="Bold" VerticalAlignment="Center"/>
-                    <Button Style="{StaticResource BotonFlecha}" c:Ui.Icono="{StaticResource IcoDerecha}" Click="BtnMesSiguiente_Click"
+                    <Button x:Name="btnMesSiguiente" Style="{StaticResource BotonFlecha}" c:Ui.Icono="{StaticResource IcoDerecha}" Click="BtnMesSiguiente_Click"
                             AutomationProperties.Name="Mes siguiente" ToolTip="Mes siguiente"/>
                 </StackPanel>
             </Border>
@@ -51,20 +51,11 @@
                         <DockPanel>
                             <Button DockPanel.Dock="Right" Click="BtnActivarEdicion_Click" Style="{StaticResource BotonIcono}"
                                     c:Ui.Icono="{StaticResource IcoEditar}" Background="Transparent" BorderBrush="#3A4A61"
-                                    Foreground="{StaticResource TextoMenu}" AutomationProperties.Name="Editar salario" ToolTip="Editar salario"/>
+                                    Foreground="{StaticResource TextoMenu}" AutomationProperties.Name="Editar en Tu nómina" ToolTip="Editar en Tu nómina (Cuenta)"/>
                             <TextBlock Text="SALARIO MENSUAL" Style="{StaticResource EtiquetaSeccion}" Foreground="{StaticResource TextoMenu}" VerticalAlignment="Center"/>
                         </DockPanel>
                         <TextBlock x:Name="lblIngresoTotal" FontSize="30" FontWeight="ExtraBold" Foreground="White" Margin="0,6,0,2"/>
                         <TextBlock Text="Base de tu presupuesto mensual" Style="{StaticResource TextoSecundario}" Foreground="{StaticResource TextoMenu}"/>
-                    </StackPanel>
-                    <StackPanel x:Name="pnlEdicionSalario" Visibility="Collapsed">
-                        <Label Content="Nuevo salario mensual" Target="{Binding ElementName=txtEditarSalario}" Style="{StaticResource Etiqueta}" Foreground="{StaticResource TextoMenu}"/>
-                        <TextBox x:Name="txtEditarSalario" Style="{StaticResource ModernInputNumeric}" local:NumeroHelper.EsMoneda="True" c:Ui.Pista="$ 0"/>
-                        <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
-                            <Button Content="Guardar" Click="BtnConfirmarSalario_Click" Style="{StaticResource BotonVerde}" Height="34" c:Ui.Icono="{StaticResource IcoCheck}"/>
-                            <Button Content="Cancelar" Click="BtnCancelarEdicion_Click" Style="{StaticResource BotonSecundario}" Height="34" Margin="8,0,0,0"
-                                    Background="Transparent" Foreground="White" BorderBrush="#3A4A61"/>
-                        </StackPanel>
                     </StackPanel>
                 </Grid>
             </Border>
@@ -85,6 +76,7 @@
                 </StackPanel>
             </Border>
         </c:GrillaAdaptable>
+
 
         <!-- ===== OTROS INGRESOS ===== -->
         <Border Grid.Row="2" Style="{StaticResource Card}" Margin="0,0,0,14">

@@ -1,4 +1,4 @@
-// ============================================================
+﻿// ============================================================
 //  Proyecto: Mis Finanzas
 //  Autoria: Juan Almonacid
 //  Copyright (c) 2026 Juan Almonacid. Todos los derechos reservados.
@@ -22,6 +22,8 @@ namespace MisFinanzas.Modulos
             InitializeComponent();
             cbDiaPagoCredito.ItemsSource = Enumerable.Range(1, 31).ToList();
             cbDiaPagoCredito.SelectedItem = DateTime.Today.Day;
+            cbTipoCredito.ItemsSource = TiposCredito.Todos;
+            cbTipoCredito.SelectedItem = TiposCredito.LibreInversion;
 
             // 1. Vinculamos la lista persistente al control de esta pestaña
             // Asumiendo que tu ItemsControl en Créditos se llama 'icListaCreditos'
@@ -64,6 +66,22 @@ namespace MisFinanzas.Modulos
             if (abrir) txtNombreCredito.Focus();
         }
 
+        private bool EsTarjetaNueva => cbTipoCredito.SelectedItem as string == TiposCredito.Tarjeta;
+
+        // La tarjeta se registra con su cupo y lo que se debe hoy; no tiene cuota fija ni plazo
+        private void CbTipoCredito_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (lblTotalCredito == null) return; // aún cargando la pantalla
+            bool tarjeta = EsTarjetaNueva;
+            lblTotalCredito.Content = tarjeta ? "Cupo total" : "Monto total";
+            lblAbonoCredito.Content = tarjeta ? "Ya debes (opcional)" : "Ya pagado";
+            txtAbonoCredito.ToolTip = tarjeta ? "Solo lo que debes hoy de compras anteriores. Si no debes nada, déjalo vacío." : null;
+            var visible = tarjeta ? Visibility.Hidden : Visibility.Visible;
+            lblCuotaCredito.Visibility = txtCuotaCredito.Visibility = visible;
+            lblPlazo.Visibility = txtPlazo.Visibility = visible;
+            Controles.Ui.SetPista(txtNombreCredito, tarjeta ? "Ej. Visa Bancolombia" : "Ej. Libre inversión");
+        }
+
         private void BtnAgregarCredito_Click(object sender, RoutedEventArgs e)
         {
             if (cbDiaPagoCredito.SelectedItem is not int diaPago)
@@ -71,10 +89,21 @@ namespace MisFinanzas.Modulos
                 MisFinanzas.Controles.Aviso.Mostrar("Elige el día del mes en que pagas la cuota.");
                 return;
             }
+            bool tarjeta = EsTarjetaNueva;
+            decimal cuota = 0;
             if (NumeroHelper.TryParseMoneda(txtTotalCredito.Text, out decimal total) &&
-                NumeroHelper.TryParseMoneda(txtCuotaCredito.Text, out decimal cuota) &&
+                (tarjeta || NumeroHelper.TryParseMoneda(txtCuotaCredito.Text, out cuota)) &&
                 !string.IsNullOrWhiteSpace(txtNombreCredito.Text))
             {
+                // Tarjeta: lo que ya se debe es aparte del cupo (una tarjeta nueva o al día no debe nada)
+                if (tarjeta && NumeroHelper.TryParseMoneda(txtAbonoCredito.Text, out var debe) && total > 0 && debe >= total)
+                {
+                    MisFinanzas.Controles.Aviso.Mostrar(debe == total
+                        ? "Escribiste el cupo también en «Ya debes»: la tarjeta quedaría sin cupo disponible. En «Ya debes» va solo lo que debes hoy de compras anteriores; si no debes nada, déjalo vacío."
+                        : "Lo que ya debes no puede ser mayor que el cupo total de la tarjeta.");
+                    txtAbonoCredito.Focus();
+                    return;
+                }
                 try
                 {
                     using (var db = new AppDbContext())
@@ -82,11 +111,15 @@ namespace MisFinanzas.Modulos
                         var nuevo = new Credito
                         {
                             NombreCustom = txtNombreCredito.Text,
+                            Modalidad = cbTipoCredito.SelectedItem as string ?? TiposCredito.LibreInversion,
                             Total = total,
-                            Disponible = total - (NumeroHelper.TryParseMoneda(txtAbonoCredito.Text, out var a) ? a : 0),
-                            CuotaMensual = cuota,
+                            // Tarjeta: el segundo campo es lo que se debe hoy. Préstamo: lo que ya se pagó.
+                            Disponible = tarjeta
+                                ? (NumeroHelper.TryParseMoneda(txtAbonoCredito.Text, out var deuda) ? deuda : 0)
+                                : total - (NumeroHelper.TryParseMoneda(txtAbonoCredito.Text, out var a) ? a : 0),
+                            CuotaMensual = tarjeta ? 0 : cuota,
                             TasaEA = double.TryParse(txtTasaEA.Text, out var t) ? t : 0,
-                            PlazoMeses = int.TryParse(txtPlazo.Text, out var p) ? p : 0,
+                            PlazoMeses = tarjeta ? 0 : (int.TryParse(txtPlazo.Text, out var p) ? p : 0),
                             DiaPago = diaPago,
                             Pagado = false,
                             Editando = false
@@ -100,7 +133,7 @@ namespace MisFinanzas.Modulos
                     CargarDatosGlobal();
                     Seleccionar(ListaCreditosPersistente.Count > 0 ? ListaCreditosPersistente.Max(c => c.Id) : 0);
                     pnlNuevoCredito.Visibility = Visibility.Collapsed;
-                    toast.Show("Crédito registrado");
+                    toast.Show(tarjeta ? "Tarjeta registrada: elígela en «Pagado con» al registrar un gasto" : "Crédito registrado");
 
                     // Limpiar campos
                     txtNombreCredito.Clear();
@@ -110,6 +143,7 @@ namespace MisFinanzas.Modulos
                     txtTasaEA.Clear();
                     txtPlazo.Clear();
                     cbDiaPagoCredito.SelectedItem = DateTime.Today.Day;
+                    cbTipoCredito.SelectedItem = TiposCredito.LibreInversion;
                 }
                 catch (Exception ex) { MisFinanzas.Controles.Aviso.Mostrar("Error al guardar: " + ex.Message); }
             }
@@ -264,6 +298,22 @@ namespace MisFinanzas.Modulos
                     : $"Cuota pagada: {pago.Interes:C0} a intereses y {pago.Capital:C0} a capital");
         }
 
+        // Tarjeta: pagar la cuota del mes (la parte de capital baja la deuda; los intereses son gasto del mes)
+        private void BtnPagarCuotaTarjeta_Click(object sender, RoutedEventArgs e)
+        {
+            if (((Button)sender).DataContext is not Credito tarjeta || !tarjeta.PuedePagarCuotaTarjeta) return;
+            try
+            {
+                PagoCredito pago;
+                using (var db = new AppDbContext())
+                    pago = Amortizacion.PagarCuotaTarjeta(db, tarjeta.Id, DateTime.Today, tarjeta.InteresMesTarjeta, tarjeta.CapitalMesTarjeta);
+                Recargar(tarjeta);
+                ActualizarEncabezado();
+                toast.Show($"Cuota pagada: {pago.Interes:C0} de intereses y {pago.Capital:C0} a capital");
+            }
+            catch (Exception ex) { MisFinanzas.Controles.Aviso.Mostrar("Error al pagar la cuota: " + ex.Message); }
+        }
+
         private void BtnDeshacerCuota_Click(object sender, RoutedEventArgs e)
         {
             if (((Button)sender).DataContext is not Credito credito) return;
@@ -292,9 +342,11 @@ namespace MisFinanzas.Modulos
                 Recargar(credito);
                 ActualizarEncabezado();
                 txt.Clear();
-                toast.Show(credito.Saldado
-                    ? "¡Crédito saldado!"
-                    : $"Abono de {pago.Capital:C0} a capital. Nuevo saldo {pago.SaldoNuevo:C0}");
+                toast.Show(credito.EsTarjeta
+                    ? $"Pago de {pago.Capital:C0} a la tarjeta. Cupo disponible {credito.CupoDisponible:C0}"
+                    : credito.Saldado
+                        ? "¡Crédito saldado!"
+                        : $"Abono de {pago.Capital:C0} a capital. Nuevo saldo {pago.SaldoNuevo:C0}");
             }
             catch (Exception ex)
             {
@@ -362,6 +414,28 @@ namespace MisFinanzas.Modulos
             credito.MesPagado = bd.MesPagado;
             credito.Historial = HistorialDe(db.PagosCredito.Where(p => p.CreditoId == credito.Id).ToList());
             credito.Pagado = credito.CuotaPagadaEsteMes != null;
+            if (credito.EsTarjeta)
+            {
+                credito.Compras = ComprasDe(db, credito.Id);
+                credito.CalcularCuotaTarjeta(ComprasVigentes(db, credito.Id));
+            }
+        }
+
+        /// <summary>Recarga la deuda y las compras de todos los créditos en pantalla (sin cambiar los objetos).</summary>
+        public static void RecargarDeudas()
+        {
+            foreach (var c in ListaCreditosPersistente.ToList()) Recargar(c);
+        }
+
+        // Compras con la tarjeta, de la más reciente a la más antigua
+        private static List<GastoDiario> ComprasDe(AppDbContext db, int tarjetaId) =>
+            db.GastosDiarios.Where(g => g.TarjetaId == tarjetaId).OrderByDescending(g => g.Fecha).Take(30).ToList();
+
+        // Compras que aún pueden tener cuotas (hasta 36 cuotas atrás)
+        public static List<GastoDiario> ComprasVigentes(AppDbContext db, int tarjetaId)
+        {
+            var desde = Periodo.InicioMes(DateTime.Today).AddMonths(-37);
+            return db.GastosDiarios.Where(g => g.TarjetaId == tarjetaId && g.Fecha >= desde).ToList();
         }
 
         // Del más reciente al más antiguo
@@ -384,6 +458,11 @@ namespace MisFinanzas.Modulos
                     foreach (var c in lista)
                     {
                         c.Historial = HistorialDe(pagos.Where(p => p.CreditoId == c.Id));
+                        if (c.EsTarjeta)
+                        {
+                            c.Compras = ComprasDe(db, c.Id);
+                            c.CalcularCuotaTarjeta(ComprasVigentes(db, c.Id));
+                        }
                         bool pagado = c.CuotaPagadaEsteMes != null;
                         if (c.Pagado != pagado || c.MesPagado != (pagado ? mesActual : string.Empty))
                         {

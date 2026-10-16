@@ -1,4 +1,4 @@
-// ============================================================
+﻿// ============================================================
 //  Proyecto: Mis Finanzas
 //  Autoria: Juan Almonacid
 //  Copyright (c) 2026 Juan Almonacid. Todos los derechos reservados.
@@ -6,6 +6,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -36,6 +37,111 @@ namespace MisFinanzas.Modulos
 
         // Lo que se escribió o dictó tal cual ("gasté 25 mil en almuerzo"), para revisar si algo se entendió mal
         public string TextoOriginal { get; set; } = string.Empty;
+
+        // Gasto directo de un vehículo (SOAT, llantas, repuestos…): también aparece en su historial (VinculoVehiculo)
+        public int? VehiculoId { get; set; }
+
+        // Pagado con una tarjeta de crédito (Credito con Modalidad "Tarjeta de crédito"): sube su deuda (VinculoTarjeta)
+        public int? TarjetaId { get; set; }
+
+        // A cuántas cuotas se difirió la compra con tarjeta (1 = se paga completa el mes siguiente)
+        public int Cuotas { get; set; } = 1;
+
+        [NotMapped] public string CuotasTexto => TarjetaId != null && Cuotas > 1 ? $"{Cuotas} cuotas" : string.Empty;
+    }
+
+    /// <summary>
+    /// Compras con tarjeta de crédito: un gasto pagado con la tarjeta sube su deuda (baja el cupo disponible).
+    /// La compra cuenta como gasto del mes; el pago de la tarjeta solo baja la deuda (no es otro gasto).
+    /// </summary>
+    public static class VinculoTarjeta
+    {
+        /// <summary>
+        /// Ajusta la deuda de las tarjetas cuando un gasto se crea (antes = null), se edita o se borra (después = null).
+        /// Quien llama guarda (SaveChanges). Devuelve true si cambió alguna tarjeta.
+        /// </summary>
+        public static bool Ajustar(AppDbContext db, int? tarjetaAntes, decimal montoAntes, int? tarjetaDespues, decimal montoDespues)
+        {
+            bool cambio = false;
+            if (tarjetaAntes is int a && db.Creditos.Find(a) is Credito anterior)
+            {
+                anterior.Disponible = Math.Max(0, anterior.Disponible - montoAntes);
+                cambio = true;
+            }
+            if (tarjetaDespues is int d && db.Creditos.Find(d) is Credito nueva)
+            {
+                nueva.Disponible += montoDespues;
+                cambio = true;
+            }
+            return cambio;
+        }
+
+        /// <summary>Recarga la lista de créditos (pantalla Créditos, Dashboard y celular ven la deuda nueva).</summary>
+        public static void RecargarCreditos() => CreditosView.RecargarDeudas();
+    }
+
+    /// <summary>
+    /// Enlaza un gasto del día a día con el historial de su vehículo: el vehículo tiene un registro
+    /// (GastoVehiculo con GastoDiarioUid) que sigue al gasto. En el total del mes cuenta una sola vez.
+    /// </summary>
+    public static class VinculoVehiculo
+    {
+        public const string CategoriaVehiculos = "Vehículos";
+
+        /// <summary>Crea, actualiza o quita el registro del vehículo según el gasto. Quien llama guarda (SaveChanges).</summary>
+        public static void Sincronizar(AppDbContext db, GastoDiario g)
+        {
+            var enlazado = db.GastosVehiculo.FirstOrDefault(x => x.GastoDiarioUid == g.Uid);
+            if (g.VehiculoId is int id && db.Vehiculos.Any(v => v.Id == id))
+            {
+                if (enlazado == null)
+                {
+                    enlazado = new GastoVehiculo { GastoDiarioUid = g.Uid };
+                    db.GastosVehiculo.Add(enlazado);
+                }
+                enlazado.VehiculoId = id;
+                enlazado.Concepto = g.Descripcion;
+                enlazado.Valor = g.Monto;
+                enlazado.Fecha = g.Fecha;
+            }
+            else if (enlazado != null)
+                db.GastosVehiculo.Remove(enlazado);
+        }
+
+        public static void Quitar(AppDbContext db, string uidGasto) =>
+            db.GastosVehiculo.RemoveRange(db.GastosVehiculo.Where(x => x.GastoDiarioUid == uidGasto));
+
+        /// <summary>Recarga el historial de los vehículos en memoria (pantalla Vehículos y tarjeta del Dashboard).</summary>
+        public static void RecargarVehiculos()
+        {
+            using var db = new AppDbContext();
+            foreach (var v in VehiculosView.listaVehiculos)
+            {
+                var gastos = db.GastosVehiculo.Where(x => x.VehiculoId == v.Id).ToList();
+                v.Gastos.Clear();
+                foreach (var x in gastos) v.Gastos.Add(x);
+                v.NotificarCambioTotal();
+            }
+        }
+    }
+
+    /// <summary>
+    /// Gasto registrado, editado o borrado en el PC, pendiente de enviar a la nube para que se vea en el celular
+    /// (si no hay internet se envía en la siguiente sincronización). Ver SincronizacionCelular.
+    /// </summary>
+    public class CambioNube
+    {
+        public const string Borrar = "Borrar";
+        public const string Subir = "Actualizar";   // crea o actualiza el gasto en la nube (el valor se conserva por compatibilidad)
+
+        [Key]
+        public int Id { get; set; }
+        public string Uid { get; set; } = string.Empty;   // del gasto (= id del documento en la nube)
+        public string Accion { get; set; } = Subir;
+        public DateTime Fecha { get; set; }
+        public decimal Monto { get; set; }
+        public string Descripcion { get; set; } = string.Empty;
+        public string Categoria { get; set; } = string.Empty;
     }
 
     /// <summary>Lo que se entendió de una frase: cualquier parte puede faltar.</summary>
@@ -120,6 +226,51 @@ namespace MisFinanzas.Modulos
             var claves = palabras.Select(p => SinTildes(p.ToLowerInvariant())).ToHashSet();
             r.Categoria = Categorias.FirstOrDefault(c => c.Palabras.Any(claves.Contains)).Categoria ?? string.Empty;
             return r;
+        }
+
+        // ---------- Gasto directo de un vehículo ----------
+        // Siempre son del vehículo (aunque no se diga cuál)
+        private static readonly string[] DelVehiculo =
+        {
+            "soat", "tecnomecanica", "tecno", "llanta", "llantas", "rin", "rines", "repuesto", "repuestos", "aceite", "filtro", "filtros",
+            "bateria", "freno", "frenos", "pastillas", "taller", "mecanico", "latoneria", "alineacion", "balanceo", "embrague",
+            "clutch", "bujia", "bujias", "amortiguador", "amortiguadores", "suspension", "cadena", "kit", "correa", "radiador",
+        };
+        // Solo si se nombra el vehículo ("impuesto del carro", "seguro de la moto")
+        private static readonly string[] DelVehiculoSiSeNombra =
+            { "impuesto", "impuestos", "seguro", "multa", "comparendo", "mantenimiento", "revision", "pintura", "arreglo" };
+        // Nunca van al vehículo (son gasto de transporte del día a día)
+        private static readonly string[] NoDelVehiculo = { "gasolina", "tanqueo", "tanqueada", "tanquear", "peaje", "parqueadero", "parqueo", "lavada", "lavado" };
+
+        /// <summary>
+        /// Si la frase es un gasto directo de un vehículo, cuál. Se reconoce por el nombre, la placa o
+        /// "carro"/"moto"; si no se nombra y solo hay un vehículo, ese. Devuelve (es gasto de vehículo, id o null si no se sabe cuál).
+        /// </summary>
+        public static (bool EsDeVehiculo, int? VehiculoId) DetectarVehiculo(string? frase, IEnumerable<Vehiculo> vehiculos)
+        {
+            var lista = vehiculos.ToList();
+            var texto = SinTildes((frase ?? string.Empty).ToLowerInvariant());
+            if (lista.Count == 0 || texto.Trim().Length == 0) return (false, null);
+            var palabras = Regex.Split(texto, @"[^\p{L}\p{N}]+").Where(p => p.Length > 0).ToHashSet();
+            if (NoDelVehiculo.Any(palabras.Contains)) return (false, null);
+
+            // ¿Cuál vehículo nombra? (nombre, placa o tipo)
+            var compacto = Regex.Replace(texto, @"\s", "");
+            var nombrados = lista.Where(v =>
+                (v.Nombre.Trim().Length > 0 && palabras.Contains(SinTildes(v.Nombre.Trim().ToLowerInvariant()))) ||
+                (v.Placa.Trim().Length >= 5 && compacto.Contains(SinTildes(v.Placa.Trim().ToLowerInvariant())))).ToList();
+            if (nombrados.Count == 0)
+            {
+                string? tipo = palabras.Contains("moto") ? "moto" : palabras.Overlaps(new[] { "carro", "auto", "camioneta", "vehiculo" }) ? "carro" : null;
+                if (tipo != null) nombrados = lista.Where(v => SinTildes(v.Tipo.ToLowerInvariant()) == tipo || tipo == "carro" && palabras.Contains("vehiculo")).ToList();
+            }
+            bool seNombra = nombrados.Count > 0 || palabras.Overlaps(new[] { "carro", "moto", "auto", "camioneta", "vehiculo" });
+
+            bool esDeVehiculo = DelVehiculo.Any(palabras.Contains) || (seNombra && DelVehiculoSiSeNombra.Any(palabras.Contains));
+            if (!esDeVehiculo) return (false, null);
+            if (nombrados.Count == 1) return (true, nombrados[0].Id);
+            if (nombrados.Count == 0 && lista.Count == 1) return (true, lista[0].Id);
+            return (true, null); // es de un vehículo, pero hay que elegir cuál
         }
 
         // "1,5" o "1.5" → 1.5

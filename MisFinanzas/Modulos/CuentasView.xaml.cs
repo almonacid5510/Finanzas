@@ -24,8 +24,26 @@ namespace MisFinanzas.Modulos
         // Cuentas del mes seleccionado, con su vencimiento y estado de pago de ese mes
         private readonly ObservableCollection<CuentaMes> _cuentasDelMes = new ObservableCollection<CuentaMes>();
 
+        // Filtro de la lista ("Todas", "Vencidas", "Pendientes", "Pagadas") y las vistas filtradas
+        private string _filtro = "Todas";
+        private System.Windows.Data.ListCollectionView? _vistaCuentas;
+        private System.Windows.Data.ListCollectionView? _vistaCompromisos;
+        private bool PasaFiltro(string estadoTexto) => _filtro == "Todas" || EstadoPago.Grupo(estadoTexto) == _filtro;
+
         // Gasto que se está editando en el formulario (null = registrando uno nuevo)
         private Movimiento? _editando;
+        private DateTime _fechaColores = DateTime.Today;
+        private readonly System.Windows.Threading.DispatcherTimer _relojColores = new() { Interval=TimeSpan.FromMinutes(1) };
+
+        private void RevisarFechaColores()
+        {
+            var hoy=DateTime.Today;
+            if (hoy == _fechaColores) return;
+            if (_mesSeleccionado == Periodo.InicioMes(_fechaColores)) _mesSeleccionado=Periodo.InicioMes(hoy);
+            _fechaColores=hoy;
+            CreditosView.CargarDatosGlobal();
+            MostrarMes();
+        }
 
         public CuentasView()
         {
@@ -44,13 +62,24 @@ namespace MisFinanzas.Modulos
             CargarCategorias();
 
             // 2. Vinculamos las listas
-            icCuentas.ItemsSource = _cuentasDelMes;
-            icCreditosCompromisos.ItemsSource = CreditosView.ListaCreditosPersistente;
+            _vistaCuentas = new System.Windows.Data.ListCollectionView(_cuentasDelMes) { Filter = c => PasaFiltro(((CuentaMes)c).EstadoTexto) };
+            icCuentas.ItemsSource = _vistaCuentas;
+            // Las tarjetas no tienen cuota fija: no van en los compromisos del mes
+            _vistaCompromisos = new System.Windows.Data.ListCollectionView(CreditosView.ListaCreditosPersistente)
+                { Filter = c => c is Credito cr && !cr.EsTarjeta && PasaFiltro(cr.EstadoTexto) };
+            icCreditosCompromisos.ItemsSource = _vistaCompromisos;
 
             // 3. Escuchamos los cambios en los créditos solo mientras la pantalla está visible,
             // para no acumular suscripciones sobre la lista estática cada vez que se navega aquí
-            Loaded += (s, e) => CreditosView.ListaCreditosPersistente.CollectionChanged += Lista_CollectionChanged;
-            Unloaded += (s, e) => CreditosView.ListaCreditosPersistente.CollectionChanged -= Lista_CollectionChanged;
+            _relojColores.Tick += (_,_) => RevisarFechaColores();
+            Loaded += (s,e) => {
+                CreditosView.ListaCreditosPersistente.CollectionChanged += Lista_CollectionChanged;
+                RevisarFechaColores(); _relojColores.Start();
+            };
+            Unloaded += (s,e) => {
+                CreditosView.ListaCreditosPersistente.CollectionChanged -= Lista_CollectionChanged;
+                _relojColores.Stop();
+            };
 
             MostrarMes();
         }
@@ -117,8 +146,35 @@ namespace MisFinanzas.Modulos
             {
                 MisFinanzas.Controles.Aviso.Mostrar("Error al cargar las cuentas del mes: " + ex.Message);
             }
-            lblSinGastos.Visibility = _cuentasDelMes.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
             ActualizarTotal();
+        }
+
+        private void Filtro_Checked(object sender, RoutedEventArgs e)
+        {
+            _filtro = (sender as FrameworkElement)?.Tag as string ?? "Todas";
+            ActualizarFiltros();
+        }
+
+        // Cuenta cuántos gastos (y cuotas del mes en curso) hay en cada estado y aplica el filtro elegido
+        private void ActualizarFiltros()
+        {
+            if (_vistaCuentas == null || _vistaCompromisos == null) return; // aún inicializando
+            bool esActual = Periodo.EsMesActual(_mesSeleccionado);
+            var estados = _cuentasDelMes.Select(c => c.EstadoTexto)
+                .Concat(esActual ? CreditosView.ListaCreditosPersistente.Where(c => !c.EsTarjeta).Select(c => c.EstadoTexto) : Enumerable.Empty<string>())
+                .Select(EstadoPago.Grupo).ToList();            lblConteoTodas.Text = estados.Count.ToString();
+            lblConteoVencidas.Text = estados.Count(g => g == "Vencidas").ToString();
+            lblConteoPendientes.Text = estados.Count(g => g == "Pendientes").ToString();
+            lblConteoPagadas.Text = estados.Count(g => g == "Pagadas").ToString();
+
+            _vistaCuentas.Refresh();
+            _vistaCompromisos.Refresh();
+            pnlCreditos.Visibility = esActual && _vistaCompromisos.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+            bool vacio = _vistaCuentas.Count == 0 && pnlCreditos.Visibility != Visibility.Visible;
+            lblSinGastos.Text = _cuentasDelMes.Count == 0 && _filtro == "Todas"
+                ? "No hay gastos para este mes. Registra el primero con el formulario de arriba."
+                : "No hay gastos con este filtro.";
+            lblSinGastos.Visibility = vacio ? Visibility.Visible : Visibility.Collapsed;
         }
 
         private void Lista_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs? e)
@@ -133,20 +189,26 @@ namespace MisFinanzas.Modulos
 
         private void CambiarMes(DateTime mes)
         {
-            _mesSeleccionado = Periodo.InicioMes(mes);
+            using var db = new AppDbContext();
+            var inicio = InicioRegistro.Obtener(db);
+            _mesSeleccionado = Periodo.LimitarMes(mes, inicio, DateTime.Today);
             MostrarMes();
         }
 
         private void MostrarMes()
         {
+            using var dbInicio = new AppDbContext();
+            var inicio = InicioRegistro.Obtener(dbInicio);
+            _mesSeleccionado = Periodo.LimitarMes(_mesSeleccionado, inicio, DateTime.Today);
+            btnMesAnterior.IsEnabled = _mesSeleccionado > Periodo.PrimerMesVisible(inicio, DateTime.Today);
+            btnMesSiguiente.IsEnabled = _mesSeleccionado < Periodo.InicioMes(DateTime.Today).AddMonths(1);
             bool esActual = Periodo.EsMesActual(_mesSeleccionado);
             lblMes.Text = Periodo.Nombre(_mesSeleccionado);
             lblTituloGastos.Text = esActual ? "GASTOS DEL MES" : $"GASTOS DE {Periodo.Nombre(_mesSeleccionado).ToUpper()}";
             lblTituloGastos.Visibility = esActual ? Visibility.Collapsed : Visibility.Visible;
             btnMesActual.Visibility = esActual ? Visibility.Collapsed : Visibility.Visible;
 
-            // El estado de pago de los créditos solo existe para el mes en curso
-            pnlCreditos.Visibility = esActual ? Visibility.Visible : Visibility.Collapsed;
+            // El estado de pago de los créditos solo existe para el mes en curso (ActualizarFiltros oculta su sección)
             CargarCuentasDelMes();
         }
 
@@ -190,8 +252,28 @@ namespace MisFinanzas.Modulos
             {
                 using var db = new AppDbContext();
                 var datos = Analisis.Cargar(db);
-                icPredicciones.ItemsSource = Analisis.Predicciones(datos, DateTime.Today);
-                icProyeccion.ItemsSource = Analisis.Proyeccion(datos, DateTime.Today);
+                icPredicciones.ItemsSource = Analisis.TablaProyeccion(datos, DateTime.Today);
+                var proyeccion = Analisis.Proyeccion(datos, DateTime.Today, 13);
+                icProyeccion.ItemsSource = proyeccion.Take(12).ToList();
+
+                // Mes siguiente frente al actual
+                var (actual, siguiente) = (proyeccion[0], proyeccion[1]);
+                var diferencia = siguiente.TotalGastos - actual.TotalGastos;
+                lblKpiMesTitulo.Text = $"PREVISTO {siguiente.Mes:MMMM}".ToUpper();
+                lblKpiMes.Text = siguiente.TotalGastos.ToString("C0");
+                lblKpiMesNota.Text = diferencia == 0 ? $"Igual que {actual.Mes:MMMM}"
+                                   : $"{Math.Abs(diferencia):C0} {(diferencia < 0 ? "menos" : "más")} que {actual.Mes:MMMM}";
+                lblKpiMesNota.Foreground = (System.Windows.Media.Brush)FindResource(diferencia > 0 ? "Rojo" : diferencia < 0 ? "VerdeTexto" : "Texto2");
+
+                // Próximos 12 meses y cuánto de eso son cuotas de créditos
+                var anio = proyeccion.Take(12).ToList();
+                decimal totalAnio = anio.Sum(m => m.TotalGastos), creditosAnio = anio.Sum(m => m.Creditos);
+                lblKpiAnio.Text = totalAnio.ToString("C0");
+                lblKpiAnioNota.Text = creditosAnio > 0 && totalAnio > 0
+                    ? $"{creditosAnio / totalAnio:P0} es de cuotas de créditos"
+                    : "Sin cuotas de créditos";
+
+                icBarrasProyeccion.ItemsSource = Analisis.Barras(proyeccion.Skip(1).Take(6), 80);
             }
             catch (Exception ex)
             {
@@ -247,6 +329,7 @@ namespace MisFinanzas.Modulos
             lblTituloFormulario.Text = "Registrar gasto";
             btnGuardarCuenta.Content = "Agregar";
             btnCancelarEdicion.Visibility = Visibility.Collapsed;
+            pnlAtajos.Visibility = Visibility.Visible;
         }
 
         private void BtnCancelarEdicion_Click(object sender, RoutedEventArgs e) => LimpiarFormulario();
@@ -261,13 +344,14 @@ namespace MisFinanzas.Modulos
             txtDescCuenta.Text = c.Descripcion;
             cbCategoria.Text = c.Categoria;
             txtValorCuenta.Text = NumeroHelper.FormatearMoneda(c.Venta);
-            cbFrecuencia.SelectedItem = cuentaMes.Frecuencia;
+            cbFrecuencia.SelectedItem = Frecuencias.Mostrar(c); // "Quincenal", no "Quincenal · 1.ª"
             cbMesAnual.SelectedIndex = c.Fecha.Month - 1;
             cbDiaPago.SelectedItem = CuentasMensuales.DiaDePago(c);
 
             lblTituloFormulario.Text = $"Editar \"{c.Descripcion}\" (aplica a todos sus meses)";
             btnGuardarCuenta.Content = "Guardar";
             btnCancelarEdicion.Visibility = Visibility.Visible;
+            pnlAtajos.Visibility = Visibility.Collapsed;
             txtDescCuenta.Focus();
         }
 
@@ -353,6 +437,8 @@ namespace MisFinanzas.Modulos
 
         public void ActualizarTotal()
         {
+            ActualizarFiltros();
+
             // 1. Sumar las cuentas del mes seleccionado que no se han pagado
             decimal totalMovimientos = _cuentasDelMes.Where(c => !c.Pagada).Sum(c => c.Venta);
 
@@ -432,40 +518,30 @@ namespace MisFinanzas.Modulos
             }
         }
 
-        // Método para actualizar el total apenas marcas el CheckBox
-        private void CheckBox_Click(object sender, RoutedEventArgs e)
+        // El estado se modifica en pantalla solo después de guardar el pago.
+        private void EstadoPago_Click(object sender, RoutedEventArgs e)
         {
-            // 1. Obtenemos el CheckBox que disparó el evento
-            var cb = sender as CheckBox;
-            if (cb == null) return;
-
+            if (sender is not Button boton) return;
             try
             {
-                // 2. Usamos 'pattern matching' para saber qué tipo de dato es
-                // CASO A: Es un gasto del mes: el pago se registra solo para ese mes, por su valor
-                // (luego se puede ajustar el monto real en la columna "Pagado real")
-                if (cb.DataContext is CuentaMes cuentaMes)
+                if (boton.DataContext is CuentaMes cuenta)
                 {
-                    using var db = new AppDbContext();
-                    if (cuentaMes.Pagada) cuentaMes.MontoPagado = cuentaMes.Venta;
-                    CuentasMensuales.MarcarPagada(db, cuentaMes.Cuenta.Id, cuentaMes.Mes, cuentaMes.Pagada, cuentaMes.MontoPagado);
+                    var pagar=!cuenta.Pagada;
+                    using var db=new AppDbContext();
+                    CuentasMensuales.MarcarPagada(db,cuenta.Cuenta.Id,cuenta.Mes,pagar,pagar ? cuenta.Venta : cuenta.MontoPagado,cuenta.Quincena);
+                    if(pagar) cuenta.MontoPagado=cuenta.Venta;
+                    cuenta.Pagada=pagar;
+                    toast.Show(pagar ? "Pago registrado" : "Pago deshecho");
                 }
-                // CASO B: Es la cuota de un crédito: se reparte entre intereses y capital y baja el saldo
-                else if (cb.DataContext is Credito credito)
+                else if (boton.DataContext is Credito credito && credito.PuedeMarcar)
                 {
-                    var pago = CreditosView.RegistrarCuota(credito, credito.Pagado);
-                    if (pago != null)
-                        toast.Show($"\"{credito.NombreCustom}\": {pago.Capital:C0} a capital. Ahora debes {credito.Disponible:C0}");
-                    else if (!credito.Pagado)
-                        toast.Show($"Pago deshecho. \"{credito.NombreCustom}\" vuelve a {credito.Disponible:C0}");
+                    var pagar=!credito.Pagado;
+                    var pago=CreditosView.RegistrarCuota(credito,pagar);
+                    if(pago!=null) toast.Show($"{pago.Capital:C0} a capital. Ahora debes {credito.Disponible:C0}");
+                    else if(!pagar && !credito.Pagado) toast.Show($"Pago deshecho. Saldo {credito.Disponible:C0}");
                 }
             }
-            catch (Exception ex)
-            {
-                MisFinanzas.Controles.Aviso.Mostrar("Error al guardar el pago: " + ex.Message);
-            }
-
-            // 3. Recalculamos el total de la pantalla automáticamente
+            catch(Exception ex) { MisFinanzas.Controles.Aviso.Mostrar("Error al guardar el pago: " + ex.Message); }
             ActualizarTotal();
             MainWindow.Actual?.VerificarVencimientosCuentas();
         }

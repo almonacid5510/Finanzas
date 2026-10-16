@@ -19,12 +19,16 @@ namespace MisFinanzas.Modulos
         public int MovimientoId { get; set; }
         public string Mes { get; set; } = string.Empty; // "yyyy-MM"
         public decimal Monto { get; set; }              // valor real pagado ese mes
+        /// <summary>Gastos quincenales: 2 = segunda quincena del mes; 0 o 1 = primera (o el pago único del mes).</summary>
+        public int Quincena { get; set; }
     }
 
     /// <summary>Cada cuánto se repite un gasto o ingreso.</summary>
     public static class Frecuencias
     {
         public const string Mensual = "Mensual";
+        /// <summary>Dos veces al mes: el día elegido y 15 días después (o antes, si el día es mayor que 15).</summary>
+        public const string Quincenal = "Quincenal";
         public const string Unica = "Única";
         public const string Anual = "Anual";
 
@@ -34,9 +38,9 @@ namespace MisFinanzas.Modulos
         public const int IntervaloMaximo = 6;
         public static string CadaMeses(int meses) => meses <= 1 ? Mensual : $"{meses} meses";
 
-        /// <summary>Opciones del formulario de gastos: Mensual, Cada 2…6 meses, Anual y Única.</summary>
+        /// <summary>Opciones del formulario de gastos: Mensual, Quincenal, Cada 2…6 meses, Anual y Única.</summary>
         public static readonly string[] Opciones =
-            new[] { Mensual }
+            new[] { Mensual, Quincenal }
             .Concat(Enumerable.Range(2, IntervaloMaximo - 1).Select(CadaMeses))
             .Concat(new[] { Anual, Unica })
             .ToArray();
@@ -60,30 +64,34 @@ namespace MisFinanzas.Modulos
     /// <summary>Una cuenta vista en un mes: su vencimiento, si se pagó y cuánto se pagó realmente.</summary>
     public class CuentaMes : INotifyPropertyChanged
     {
-        public CuentaMes(Movimiento cuenta, DateTime mes, PagoCuenta? pago)
+        public CuentaMes(Movimiento cuenta, DateTime mes, PagoCuenta? pago, int quincena = 0)
         {
             Cuenta = cuenta;
             Mes = Periodo.InicioMes(mes);
-            Vence = CuentasMensuales.Vencimiento(cuenta, mes);
+            Quincena = quincena;
+            Vence = CuentasMensuales.Vencimiento(cuenta, mes, quincena);
             _pagada = pago != null;
             _montoPagado = pago?.Monto ?? cuenta.Venta;
         }
 
         public Movimiento Cuenta { get; }
         public DateTime Mes { get; }
+        /// <summary>Gastos quincenales: 1 o 2. Los demás: 0.</summary>
+        public int Quincena { get; }
         public DateTime Vence { get; }
         public string Descripcion => Cuenta.Descripcion;
         public decimal Venta => Cuenta.Venta;
-        public string Frecuencia => Frecuencias.Mostrar(Cuenta);
+        public string Frecuencia => Quincena > 0 ? $"Quincenal · {Quincena}.ª" : Frecuencias.Mostrar(Cuenta);
         public string Categoria => Etiquetas.Mostrar(Cuenta.Categoria);
         public string ColorCategoria => Etiquetas.ColorTexto(Cuenta.Categoria);
         public string FondoCategoria => Etiquetas.ColorFondo(Cuenta.Categoria);
+        public string BordeCategoria => Etiquetas.ColorBorde(Cuenta.Categoria);
 
         private bool _pagada;
         public bool Pagada
         {
             get => _pagada;
-            set { _pagada = value; Avisar(nameof(Pagada), nameof(Vencida), nameof(Real), nameof(EstadoTexto), nameof(EstadoFondo), nameof(EstadoColor), nameof(FondoFila)); }
+            set { _pagada = value; Avisar(nameof(Pagada), nameof(AccionPago), nameof(Vencida), nameof(Real), nameof(EstadoTexto), nameof(EstadoFondo), nameof(EstadoColor), nameof(FondoFila), nameof(Acento), nameof(ColorFecha)); }
         }
 
         // Lo que realmente se pagó (por defecto, el valor registrado)
@@ -101,11 +109,14 @@ namespace MisFinanzas.Modulos
         /// <summary>Ya pasó la fecha de vencimiento y no se ha pagado.</summary>
         public bool Vencida => !Pagada && Vence < DateTime.Today;
 
-        // Presentación del estado del mes: Pagado (verde), Vencida (rojo) o Pendiente (naranja)
-        public string EstadoTexto => Pagada ? "Pagado" : Vencida ? "Vencida" : "Pendiente";
-        public string EstadoFondo => Pagada ? "#E7F5EF" : Vencida ? "#FEE4E2" : "#FEF6E7";
-        public string EstadoColor => Pagada ? "#075E46" : Vencida ? "#B42318" : "#93370D";
-        public string FondoFila => Vencida ? "#FFF8F7" : "Transparent";
+        private EstadoPago Estado => EstadoPago.Evaluar(Pagada, Vence, DateTime.Today);
+        public string AccionPago => Pagada ? $"Deshacer pago de {Descripcion}" : $"Marcar {Descripcion} como pagado";
+        public string EstadoTexto => Estado.Texto;
+        public string EstadoFondo => Estado.Fondo;
+        public string EstadoColor => Estado.Color;
+        public string FondoFila => Estado.FondoFila;
+        public string Acento => Estado.Acento;
+        public string ColorFecha => Vencida ? "#B42318" : "#0F1B2D";
 
         /// <summary>Mes del vencimiento en corto y mayúsculas ("OCT").</summary>
         public string MesCortoVence => Vence.ToString("MMM").TrimEnd('.').ToUpperInvariant();
@@ -150,11 +161,20 @@ namespace MisFinanzas.Modulos
         public static int DiaDePago(Movimiento cuenta) => cuenta.DiaPago > 0 ? cuenta.DiaPago : cuenta.Fecha.Day;
 
         /// <summary>Fecha de vencimiento en el mes dado (si el mes es más corto, el último día).</summary>
-        public static DateTime Vencimiento(Movimiento cuenta, DateTime mes)
+        public static DateTime Vencimiento(Movimiento cuenta, DateTime mes, int quincena = 0)
         {
             var inicio = Periodo.InicioMes(mes);
-            int dia = Math.Min(DiaDePago(cuenta), DateTime.DaysInMonth(inicio.Year, inicio.Month));
+            int dia = Math.Min(quincena > 0 ? DiasQuincenales(cuenta)[quincena - 1] : DiaDePago(cuenta), DateTime.DaysInMonth(inicio.Year, inicio.Month));
             return inicio.AddDays(dia - 1);
+        }
+
+        public static bool EsQuincenal(Movimiento cuenta) => cuenta.Frecuencia == Frecuencias.Quincenal;
+
+        /// <summary>Días de los dos pagos quincenales: el elegido y 15 días después (o antes): 15 → 15 y 30; 5 → 5 y 20; 31 → 16 y 31.</summary>
+        public static int[] DiasQuincenales(Movimiento cuenta)
+        {
+            int dia = DiaDePago(cuenta);
+            return dia <= 15 ? new[] { dia, dia + 15 } : new[] { dia - 15, dia };
         }
 
         /// <summary>Si el valor aplica en el mes, según su frecuencia, su mes de inicio y su MesFin.</summary>
@@ -191,11 +211,13 @@ namespace MisFinanzas.Modulos
         {
             var clave = Periodo.Clave(mes);
             var pagosDelMes = pagos.Where(p => p.Mes == clave)
-                                   .GroupBy(p => p.MovimientoId)
+                                   .GroupBy(p => (p.MovimientoId, Quincena: p.Quincena == 2 ? 2 : 1))
                                    .ToDictionary(g => g.Key, g => g.First());
 
             return cuentas.Where(c => AplicaEn(c, mes))
-                          .Select(c => new CuentaMes(c, mes, pagosDelMes.GetValueOrDefault(c.Id)))
+                          .SelectMany(c => EsQuincenal(c)
+                              ? new[] { 1, 2 }.Select(q => new CuentaMes(c, mes, pagosDelMes.GetValueOrDefault((c.Id, q)), q))
+                              : new[] { new CuentaMes(c, mes, pagosDelMes.GetValueOrDefault((c.Id, 1))) })
                           .OrderBy(c => c.Vence)
                           .ThenBy(c => c.Descripcion)
                           .ToList();
@@ -209,13 +231,16 @@ namespace MisFinanzas.Modulos
                           .OrderBy(m => m.Descripcion)
                           .ToList();
 
-        public static void MarcarPagada(AppDbContext db, int cuentaId, DateTime mes, bool pagada, decimal monto)
+        public static void MarcarPagada(AppDbContext db, int cuentaId, DateTime mes, bool pagada, decimal monto, int quincena = 0)
         {
             var clave = Periodo.Clave(mes);
-            var pagos = db.PagosCuenta.Where(p => p.MovimientoId == cuentaId && p.Mes == clave).ToList();
+            // La primera quincena (o el pago único del mes) se guarda con 0 o 1; la segunda con 2
+            bool segunda = quincena == 2;
+            var pagos = db.PagosCuenta.Where(p => p.MovimientoId == cuentaId && p.Mes == clave).AsEnumerable()
+                          .Where(p => (p.Quincena == 2) == segunda).ToList();
 
             if (pagada && pagos.Count == 0)
-                db.PagosCuenta.Add(new PagoCuenta { MovimientoId = cuentaId, Mes = clave, Monto = monto });
+                db.PagosCuenta.Add(new PagoCuenta { MovimientoId = cuentaId, Mes = clave, Monto = monto, Quincena = segunda ? 2 : 0 });
             else if (pagada)
                 pagos[0].Monto = monto;
             else

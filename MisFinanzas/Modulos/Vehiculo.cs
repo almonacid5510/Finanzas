@@ -78,6 +78,11 @@ namespace MisFinanzas.Modulos
         private DateTime _fecha = DateTime.Now;
         public DateTime Fecha { get => _fecha; set { _fecha = value; OnPropertyChanged(); } }
 
+        // Si viene de un gasto del día a día (Día a día o celular): su Uid. Vacío = registrado aquí en Vehículos.
+        public string GastoDiarioUid { get; set; } = string.Empty;
+
+        [NotMapped] public bool DesdeDiaADia => GastoDiarioUid.Length > 0;
+
         // Estado solo de UI: NO se persiste. Siempre inicia en modo solo lectura.
         private bool _editando;
         [NotMapped]

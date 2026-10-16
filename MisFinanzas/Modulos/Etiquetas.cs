@@ -38,7 +38,7 @@ namespace MisFinanzas.Modulos
         public const string SinCategoria = "Sin categoría";
 
         private static readonly string[] PorDefectoGasto =
-            { "Hogar", "Servicios", "Alimentación", "Transporte", "Médicos", "Impuestos", "Educación", "Entretenimiento", "Otros" };
+            { "Hogar", "Servicios", "Alimentación", "Transporte", "Vehículos", "Médicos", "Impuestos", "Educación", "Entretenimiento", "Otros" };
         private static readonly string[] PorDefectoIngreso =
             { "Freelance", "Bonos", "Ventas", "Otros" };
 
@@ -128,5 +128,7 @@ namespace MisFinanzas.Modulos
         public static string ColorTexto(string? nombre) => Color(nombre).Texto;
         public static string ColorFondo(string? nombre) => Color(nombre).Fondo;
         public static string ColorBarra(string? nombre) => Color(nombre).Barra;
+        /// <summary>Borde suave de la insignia (el color de la barra al 35 %) para que se vea sobre filas de color.</summary>
+        public static string ColorBorde(string? nombre) => "#59" + Color(nombre).Barra.TrimStart('#');
     }
 }

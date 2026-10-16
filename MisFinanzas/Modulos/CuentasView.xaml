@@ -34,19 +34,122 @@
         </Setter>
     </Style>
 
-    <!-- Insignia de categoría con su color -->
+    <!-- Insignia de categoría con su color; el borde la separa del fondo de color de la fila -->
     <DataTemplate x:Key="InsigniaCategoria">
-        <Border Style="{StaticResource Chip}" Background="{Binding FondoCategoria}" Margin="0,0,8,0">
+        <Border Style="{StaticResource Chip}" Background="{Binding FondoCategoria}" BorderBrush="{Binding BordeCategoria}" BorderThickness="1" Margin="0,0,8,0">
             <TextBlock Text="{Binding Categoria}" Style="{StaticResource TextoChip}" Foreground="{Binding ColorCategoria}"/>
         </Border>
     </DataTemplate>
 
-    <!-- Insignia de estado (Vencida / Pendiente / Pagado) -->
-    <DataTemplate x:Key="InsigniaEstado">
-        <Border Style="{StaticResource Chip}" Background="{Binding EstadoFondo}" CornerRadius="10" Padding="10,3">
-            <TextBlock Text="{Binding EstadoTexto}" Style="{StaticResource TextoChip}" Foreground="{Binding EstadoColor}"/>
-        </Border>
-    </DataTemplate>
+    <!-- Botón de estado: círculo para pagar; check verde para pago registrado. -->
+    <Style x:Key="BotonEstadoPago" TargetType="Button">
+        <Setter Property="Height" Value="28"/>
+        <Setter Property="Padding" Value="10,3"/>
+        <Setter Property="HorizontalAlignment" Value="Left"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Foreground" Value="{StaticResource Texto}"/>
+        <Setter Property="Background" Value="White"/>
+        <Setter Property="BorderBrush" Value="#98A2B3"/>
+        <Setter Property="Tag" Value="False"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="borde" CornerRadius="14" BorderThickness="1" BorderBrush="{TemplateBinding BorderBrush}" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
+                            <Ellipse x:Name="circulo" Width="11" Height="11" Stroke="{TemplateBinding Foreground}" StrokeThickness="1.3" Margin="0,0,5,0"/>
+                            <c:Icono x:Name="checkPago" Geometria="{StaticResource IcoCheck}" Tamano="12" Foreground="{TemplateBinding Foreground}" Margin="0,0,5,0" Visibility="Collapsed"/>
+                            <TextBlock x:Name="textoPago" Text="Marcar pagado" FontSize="11.5" FontWeight="SemiBold" Foreground="{TemplateBinding Foreground}" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <DataTrigger Binding="{Binding EstadoTexto}" Value="Vencida">
+                            <Setter TargetName="borde" Property="BorderBrush" Value="#F04438"/>
+                            <Setter Property="Foreground" Value="{StaticResource Rojo}"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="True">
+                            <Setter TargetName="borde" Property="Background" Value="White"/>
+                            <Setter TargetName="borde" Property="BorderBrush" Value="#75E0A7"/>
+                            <Setter TargetName="circulo" Property="Visibility" Value="Collapsed"/>
+                            <Setter TargetName="checkPago" Property="Visibility" Value="Visible"/>
+                            <Setter TargetName="textoPago" Property="Text" Value="Pagado"/>
+                            <Setter Property="Foreground" Value="#075E46"/>
+                        </DataTrigger>
+                        <Trigger Property="IsKeyboardFocused" Value="True"><Setter TargetName="borde" Property="BorderBrush" Value="{StaticResource Azul}"/></Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="textoPago" Property="Text" Value="{Binding EstadoTexto}"/>
+                            <Setter TargetName="circulo" Property="Visibility" Value="Collapsed"/>
+                            <Setter TargetName="borde" Property="Background" Value="{Binding EstadoFondo}"/>
+                            <Setter TargetName="borde" Property="BorderBrush" Value="Transparent"/>
+                            <Setter Property="Foreground" Value="{Binding EstadoColor}"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True"><Setter TargetName="borde" Property="Opacity" Value="0.75"/></Trigger>
+                        <MultiDataTrigger><MultiDataTrigger.Conditions><Condition Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="True"/><Condition Binding="{Binding IsMouseOver, RelativeSource={RelativeSource Self}}" Value="True"/></MultiDataTrigger.Conditions>
+                            <Setter TargetName="textoPago" Property="Text" Value="Deshacer"/>
+                            <Setter TargetName="checkPago" Property="Visibility" Value="Collapsed"/>
+                            <Setter TargetName="borde" Property="Background" Value="{StaticResource RojoSuave}"/>
+                            <Setter TargetName="borde" Property="BorderBrush" Value="{StaticResource RojoBorde}"/>
+                            <Setter Property="Foreground" Value="{StaticResource Rojo}"/>
+                        </MultiDataTrigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Filtro de la lista: Todas / Vencidas / Pendientes / Pagadas -->
+    <Style x:Key="ChipFiltro" TargetType="RadioButton">
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Margin" Value="0,0,8,0"/>
+        <Setter Property="GroupName" Value="FiltroCuentas"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="RadioButton">
+                    <Border x:Name="bd" Background="White" BorderBrush="{StaticResource Borde}" BorderThickness="1" CornerRadius="14" Padding="11,4">
+                        <ContentPresenter TextElement.FontSize="12.5"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="bd" Property="Background" Value="{StaticResource GrisSuave}"/></Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="bd" Property="Background" Value="{StaticResource GrisSuave}"/>
+                            <Setter TargetName="bd" Property="BorderBrush" Value="#475467"/>
+                            <Setter TargetName="bd" Property="BorderThickness" Value="1.5"/>
+                        </Trigger>
+                        <Trigger Property="IsKeyboardFocused" Value="True"><Setter TargetName="bd" Property="BorderBrush" Value="{StaticResource Azul}"/></Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <Style x:Key="ConteoFiltro" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{StaticResource Texto2}"/>
+        <Setter Property="Margin" Value="5,0,0,0"/>
+    </Style>
+
+    <!-- Fila de la lista: tarjeta con el color del estado y una barra a la izquierda -->
+    <Style x:Key="FilaCuenta" TargetType="Border">
+        <Setter Property="CornerRadius" Value="10"/>
+        <Setter Property="BorderThickness" Value="3,0,0,0"/>
+        <Setter Property="Padding" Value="12,9"/>
+        <Setter Property="Margin" Value="0,0,0,8"/>
+    </Style>
+
+    <!-- Tarjetas de la pestaña de proyección -->
+    <Style x:Key="KpiProyeccion" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource GrisSuave}"/>
+        <Setter Property="CornerRadius" Value="10"/>
+        <Setter Property="Padding" Value="12,10"/>
+    </Style>
+    <Style x:Key="TituloKpi" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Foreground" Value="{StaticResource Texto2}"/>
+    </Style>
+    <Style x:Key="ValorKpi" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="21"/>
+        <Setter Property="FontWeight" Value="ExtraBold"/>
+        <Setter Property="Margin" Value="0,2,0,2"/>
+    </Style>
 
     <!-- Columnas de la tabla del mes (encabezado y filas iguales) -->
     <Style x:Key="FilaTabla" TargetType="Grid"/>
@@ -80,10 +183,10 @@
         <StackPanel Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Top">
             <Border Style="{StaticResource CapsulaMes}">
                 <StackPanel Orientation="Horizontal">
-                    <Button Style="{StaticResource BotonFlecha}" c:Ui.Icono="{StaticResource IcoIzquierda}" Click="BtnMesAnterior_Click"
+                    <Button x:Name="btnMesAnterior" Style="{StaticResource BotonFlecha}" c:Ui.Icono="{StaticResource IcoIzquierda}" Click="BtnMesAnterior_Click"
                             AutomationProperties.Name="Mes anterior" ToolTip="Mes anterior"/>
                     <TextBlock x:Name="lblMes" Width="150" TextAlignment="Center" FontSize="15" FontWeight="Bold" VerticalAlignment="Center"/>
-                    <Button Style="{StaticResource BotonFlecha}" c:Ui.Icono="{StaticResource IcoDerecha}" Click="BtnMesSiguiente_Click"
+                    <Button x:Name="btnMesSiguiente" Style="{StaticResource BotonFlecha}" c:Ui.Icono="{StaticResource IcoDerecha}" Click="BtnMesSiguiente_Click"
                             AutomationProperties.Name="Mes siguiente" ToolTip="Mes siguiente"/>
                 </StackPanel>
             </Border>
@@ -93,7 +196,9 @@
         <Border Grid.Row="1" Style="{StaticResource Card}" Padding="18,14" Margin="0,0,0,14">
             <StackPanel>
                 <DockPanel Margin="0,0,0,10">
-                    <WrapPanel DockPanel.Dock="Right" VerticalAlignment="Center">
+                    <Button x:Name="btnCancelarEdicion" DockPanel.Dock="Right" Content="Cancelar" Click="BtnCancelarEdicion_Click" Style="{StaticResource BotonSecundario}"
+                            VerticalAlignment="Center" Visibility="Collapsed"/>
+                    <WrapPanel x:Name="pnlAtajos" DockPanel.Dock="Right" VerticalAlignment="Center">
                         <TextBlock Text="Atajos" Style="{StaticResource TextoSecundario}" VerticalAlignment="Center" Margin="0,0,2,0"/>
                         <Button Content="Declaración de renta" Tag="Declaración de renta|Impuestos|Anual" Click="BtnAtajo_Click" Style="{StaticResource ChipAtajo}"/>
                         <Button Content="Impuesto predial" Tag="Impuesto predial|Impuestos|Anual" Click="BtnAtajo_Click" Style="{StaticResource ChipAtajo}"/>
@@ -101,7 +206,7 @@
                         <Button Content="Gasto médico" Tag="Consulta médica|Médicos|Única" Click="BtnAtajo_Click" Style="{StaticResource ChipAtajo}"/>
                     </WrapPanel>
                     <TextBlock x:Name="lblTituloFormulario" Text="Registrar gasto" Style="{StaticResource TituloTarjeta}" VerticalAlignment="Center"
-                               TextTrimming="CharacterEllipsis"/>
+                               TextTrimming="CharacterEllipsis" Margin="0,0,16,0"/>
                 </DockPanel>
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -146,12 +251,8 @@
                     <Label Grid.Column="9" Content="Día" Target="{Binding ElementName=cbDiaPago}" Style="{StaticResource Etiqueta}"/>
                     <ComboBox Grid.Row="1" Grid.Column="9" x:Name="cbDiaPago" Style="{StaticResource ModernCombo}" MaxDropDownHeight="300"/>
 
-                    <StackPanel Grid.Row="1" Grid.Column="11" Orientation="Horizontal">
-                        <Button x:Name="btnCancelarEdicion" Content="Cancelar" Click="BtnCancelarEdicion_Click" Style="{StaticResource BotonSecundario}"
-                                Margin="0,0,8,0" Visibility="Collapsed"/>
-                        <Button x:Name="btnGuardarCuenta" Content="Agregar" Click="BtnAgregarCuenta_Click" Style="{StaticResource BotonAzul}"
-                                c:Ui.Icono="{StaticResource IcoPlus}"/>
-                    </StackPanel>
+                    <Button Grid.Row="1" Grid.Column="11" x:Name="btnGuardarCuenta" Content="Agregar" Click="BtnAgregarCuenta_Click" Style="{StaticResource BotonAzul}"
+                            c:Ui.Icono="{StaticResource IcoPlus}"/>
                 </Grid>
             </StackPanel>
         </Border>
@@ -173,65 +274,82 @@
                     <StackPanel MinWidth="680" Width="{Binding ViewportWidth, RelativeSource={RelativeSource AncestorType=ScrollViewer}}">
                         <TextBlock x:Name="lblTituloGastos" Style="{StaticResource EtiquetaSeccion}" Margin="4,8,0,0" Visibility="Collapsed"/>
 
+                        <!-- Filtros -->
+                        <DockPanel Margin="0,12,0,0">
+                            <TextBlock DockPanel.Dock="Right" Text="Ordenado por fecha de vencimiento" Style="{StaticResource TextoSecundario}" VerticalAlignment="Center"/>
+                            <StackPanel Orientation="Horizontal">
+                                <RadioButton IsChecked="True" Tag="Todas" Checked="Filtro_Checked" Style="{StaticResource ChipFiltro}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Ellipse Width="7" Height="7" Fill="#98A2B3" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                        <TextBlock Text="Todas" FontWeight="SemiBold"/><TextBlock x:Name="lblConteoTodas" Style="{StaticResource ConteoFiltro}"/>
+                                    </StackPanel>
+                                </RadioButton>
+                                <RadioButton Tag="Vencidas" Checked="Filtro_Checked" Style="{StaticResource ChipFiltro}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Ellipse Width="7" Height="7" Fill="#D92D20" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                        <TextBlock Text="Vencidas" FontWeight="SemiBold"/><TextBlock x:Name="lblConteoVencidas" Style="{StaticResource ConteoFiltro}"/>
+                                    </StackPanel>
+                                </RadioButton>
+                                <RadioButton Tag="Pendientes" Checked="Filtro_Checked" Style="{StaticResource ChipFiltro}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Ellipse Width="7" Height="7" Fill="#F79009" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                        <TextBlock Text="Pendientes" FontWeight="SemiBold"/><TextBlock x:Name="lblConteoPendientes" Style="{StaticResource ConteoFiltro}"/>
+                                    </StackPanel>
+                                </RadioButton>
+                                <RadioButton Tag="Pagadas" Checked="Filtro_Checked" Style="{StaticResource ChipFiltro}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Ellipse Width="7" Height="7" Fill="#12B76A" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                        <TextBlock Text="Pagadas" FontWeight="SemiBold"/><TextBlock x:Name="lblConteoPagadas" Style="{StaticResource ConteoFiltro}"/>
+                                    </StackPanel>
+                                </RadioButton>
+                            </StackPanel>
+                        </DockPanel>
+
                         <!-- Encabezado -->
-                        <Grid Style="{StaticResource FilaTabla}" Margin="0,8,0,0">
+                        <Grid Style="{StaticResource FilaTabla}" Margin="15,14,12,6">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="52"/>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="104"/>
-                                <ColumnDefinition Width="96"/>
+                                <ColumnDefinition Width="140"/>
                                 <ColumnDefinition Width="104"/>
                                 <ColumnDefinition Width="84"/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="1" Text="Concepto" Style="{StaticResource EncabezadoTabla}"/>
-                            <TextBlock Grid.Column="2" Text="Vence" Style="{StaticResource EncabezadoTabla}"/>
-                            <TextBlock Grid.Column="3" Text="Estado" Style="{StaticResource EncabezadoTabla}"/>
-                            <TextBlock Grid.Column="4" Text="Valor" Style="{StaticResource EncabezadoTabla}" HorizontalAlignment="Right"/>
+                            <TextBlock Grid.Column="0" Text="Concepto" Style="{StaticResource EncabezadoTabla}"/>
+                            <TextBlock Grid.Column="1" Text="Vence" Style="{StaticResource EncabezadoTabla}"/>
+                            <TextBlock Grid.Column="2" Text="Estado" Style="{StaticResource EncabezadoTabla}"/>
+                            <TextBlock Grid.Column="3" Text="Valor" Style="{StaticResource EncabezadoTabla}" HorizontalAlignment="Right"/>
                         </Grid>
-                        <Border Style="{StaticResource LineaTabla}" Margin="0,8,0,0"/>
-
                         <TextBlock x:Name="lblSinGastos" Text="No hay gastos para este mes. Registra el primero con el formulario de arriba."
                                    Style="{StaticResource TextoSecundario}" Margin="6,14" Visibility="Collapsed"/>
 
                         <ItemsControl x:Name="icCuentas">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                    <Border Background="{Binding FondoFila}" Style="{StaticResource LineaTabla}" Padding="0,10">
+                                    <Border Background="{Binding FondoFila}" BorderBrush="{Binding Acento}" Style="{StaticResource FilaCuenta}">
                                         <Grid Style="{StaticResource FilaTabla}">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="52"/>
                                                 <ColumnDefinition Width="*"/>
                                                 <ColumnDefinition Width="104"/>
-                                                <ColumnDefinition Width="96"/>
+                                                <ColumnDefinition Width="140"/>
                                                 <ColumnDefinition Width="104"/>
                                                 <ColumnDefinition Width="84"/>
                                             </Grid.ColumnDefinitions>
-                                            <CheckBox IsChecked="{Binding Pagada, UpdateSourceTrigger=PropertyChanged}" Click="CheckBox_Click"
-                                                      Style="{StaticResource ModernCheckBox}" HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                      AutomationProperties.Name="{Binding Descripcion, StringFormat='Marcar {0} como pagado'}"/>
-                                            <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,10,0">
-                                                <TextBlock Text="{Binding Descripcion}" FontSize="14" FontWeight="SemiBold" TextTrimming="CharacterEllipsis">
-                                                    <TextBlock.Style>
-                                                        <Style TargetType="TextBlock">
-                                                            <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding Pagada}" Value="True">
-                                                                    <Setter Property="Foreground" Value="{StaticResource Texto2}"/>
-                                                                    <Setter Property="TextDecorations" Value="Strikethrough"/>
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </TextBlock.Style>
-                                                </TextBlock>
+                                            <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,10,0">
+                                                <TextBlock Text="{Binding Descripcion}" FontSize="14" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
                                                 <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
                                                     <ContentPresenter Content="{Binding}" ContentTemplate="{StaticResource InsigniaCategoria}"/>
                                                     <TextBlock Text="{Binding Frecuencia}" FontSize="12.5" Foreground="{StaticResource Texto2}" VerticalAlignment="Center"/>
                                                 </StackPanel>
                                             </StackPanel>
-                                            <TextBlock Grid.Column="2" Text="{Binding Vence, StringFormat='{}{0:dd/MM/yyyy}'}" FontSize="13.5" VerticalAlignment="Center"/>
-                                            <ContentPresenter Grid.Column="3" Content="{Binding}" ContentTemplate="{StaticResource InsigniaEstado}" VerticalAlignment="Center"/>
-                                            <TextBlock Grid.Column="4" Text="{Binding Venta, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" FontSize="14" FontWeight="Bold"
+                                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding Vence, StringFormat='{}{0:dd/MM/yyyy}'}" FontSize="13.5" Foreground="{Binding ColorFecha}"/>
+                                                <TextBlock Text="{Binding EstadoTexto}" FontSize="11.5" FontWeight="SemiBold" Foreground="{Binding EstadoColor}" Margin="0,1,0,0"/>
+                                            </StackPanel>
+                                            <Button Grid.Column="2" Style="{StaticResource BotonEstadoPago}" Tag="{Binding Pagada}" Click="EstadoPago_Click"
+                                                    ToolTip="{Binding AccionPago}" AutomationProperties.Name="{Binding AccionPago}"/>
+                                            <TextBlock Grid.Column="3" Text="{Binding Venta, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" FontSize="14" FontWeight="Bold" Foreground="#1E3A5F"
                                                        HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                                            <StackPanel Grid.Column="5" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                            <StackPanel Grid.Column="4" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
                                                 <Button Click="BtnEditar_Click" Style="{StaticResource BotonIcono}" c:Ui.Icono="{StaticResource IcoEditar}"
                                                         AutomationProperties.Name="Editar gasto" ToolTip="Editar gasto"/>
                                                 <Button Click="BtnEliminar_Click" Style="{StaticResource BotonIconoPeligro}" c:Ui.Icono="{StaticResource IcoEliminar}"
@@ -245,25 +363,20 @@
 
                         <!-- Cuotas de créditos (solo el mes en curso) -->
                         <StackPanel x:Name="pnlCreditos">
-                            <TextBlock Text="COMPROMISOS DE CRÉDITOS" Style="{StaticResource EtiquetaSeccion}" Foreground="{StaticResource MoradoTexto}" Margin="8,16,0,8"/>
-                            <Border Style="{StaticResource LineaTabla}"/>
+                            <TextBlock Text="COMPROMISOS DE CRÉDITOS" Style="{StaticResource EtiquetaSeccion}" Foreground="{StaticResource MoradoTexto}" Margin="4,10,0,8"/>
                             <ItemsControl x:Name="icCreditosCompromisos">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <Border Style="{StaticResource LineaTabla}" Padding="0,10">
+                                        <Border Background="{Binding FondoFila}" BorderBrush="{Binding Acento}" Style="{StaticResource FilaCuenta}">
                                             <Grid Style="{StaticResource FilaTabla}">
                                                 <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="52"/>
                                                     <ColumnDefinition Width="*"/>
                                                     <ColumnDefinition Width="104"/>
-                                                    <ColumnDefinition Width="96"/>
+                                                    <ColumnDefinition Width="140"/>
                                                     <ColumnDefinition Width="104"/>
                                                     <ColumnDefinition Width="84"/>
                                                 </Grid.ColumnDefinitions>
-                                                <CheckBox IsChecked="{Binding Pagado, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding PuedeMarcar}"
-                                                          Click="CheckBox_Click" Style="{StaticResource ModernCheckBox}" HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                          AutomationProperties.Name="{Binding NombreCustom, StringFormat='Pagar cuota de {0}'}"/>
-                                                <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,10,0">
+                                                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,10,0">
                                                     <TextBlock FontSize="14" FontWeight="SemiBold" TextTrimming="CharacterEllipsis">
                                                         <Run Text="Cuota ·"/> <Run Text="{Binding NombreCustom, Mode=OneWay}"/>
                                                     </TextBlock>
@@ -276,13 +389,16 @@
                                                         </TextBlock>
                                                     </StackPanel>
                                                 </StackPanel>
-                                                <TextBlock Grid.Column="2" Text="{Binding NombreMesActual}" FontSize="13.5" Foreground="{StaticResource Texto2}"
-                                                           VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
-                                                <ContentPresenter Grid.Column="3" Content="{Binding}" ContentTemplate="{StaticResource InsigniaEstado}" VerticalAlignment="Center"/>
-                                                <TextBlock Grid.Column="4" Text="{Binding CuotaEsteMes, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" FontSize="14" FontWeight="Bold"
+                                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding NombreMesActual}" FontSize="13.5" Foreground="{StaticResource Texto2}" TextTrimming="CharacterEllipsis"/>
+                                                    <TextBlock Text="{Binding EstadoTexto}" FontSize="11.5" FontWeight="SemiBold" Foreground="{Binding EstadoColor}" Margin="0,1,0,0"/>
+                                                </StackPanel>
+                                                <Button Grid.Column="2" Style="{StaticResource BotonEstadoPago}" Tag="{Binding Pagado}" IsEnabled="{Binding PuedeMarcar}" Click="EstadoPago_Click"
+                                                        ToolTip="{Binding AccionPago}" AutomationProperties.Name="{Binding AccionPago}"/>
+                                                <TextBlock Grid.Column="3" Text="{Binding CuotaEsteMes, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" FontSize="14" FontWeight="Bold" Foreground="#1E3A5F"
                                                            HorizontalAlignment="Right" VerticalAlignment="Center"/>
                                                 <!-- Abre el crédito en su pantalla (mismo alto que los botones de editar/eliminar) -->
-                                                <Button Grid.Column="5" Content="Ver" Click="BtnVerCredito_Click" Style="{StaticResource BotonSecundario}"
+                                                <Button Grid.Column="4" Content="Ver" Click="BtnVerCredito_Click" Style="{StaticResource BotonSecundario}"
                                                         c:Ui.Icono="{StaticResource IcoCreditos}" Height="32" Padding="11,0" FontSize="12.5"
                                                         Background="{StaticResource MoradoSuave}" Foreground="{StaticResource MoradoTexto}"
                                                         BorderBrush="{StaticResource MoradoBorde}" HorizontalAlignment="Right" VerticalAlignment="Center"
@@ -387,28 +503,104 @@
                 </StackPanel>
 
                 <!-- ================= PROYECCIÓN Y PREDICCIÓN ================= -->
-                <StackPanel x:Name="pnlProyeccion" Visibility="Collapsed" Margin="0,10,0,0">
-                    <TextBlock Text="Predicción por gasto" Style="{StaticResource SubTitulo}"/>
-                    <TextBlock Text="La predicción es el promedio de lo que pagaste realmente en los últimos 6 pagos; si aún no hay pagos, se usa el valor registrado."
-                               Style="{StaticResource TextoSecundario}" TextWrapping="Wrap" Margin="0,2,0,10"/>
+                <StackPanel x:Name="pnlProyeccion" Visibility="Collapsed" Margin="0,12,0,0">
+                    <!-- Resumen: tarjetas, aviso y gráfico de los próximos 6 meses -->
+                    <Grid Margin="0,0,0,14">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="12"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <UniformGrid Columns="2">
+                                <Border Style="{StaticResource KpiProyeccion}" Margin="0,0,6,0">
+                                    <StackPanel>
+                                        <TextBlock x:Name="lblKpiMesTitulo" Style="{StaticResource TituloKpi}"/>
+                                        <TextBlock x:Name="lblKpiMes" Style="{StaticResource ValorKpi}"/>
+                                        <TextBlock x:Name="lblKpiMesNota" FontSize="11.5" FontWeight="SemiBold" TextWrapping="Wrap"/>
+                                    </StackPanel>
+                                </Border>
+                                <Border Style="{StaticResource KpiProyeccion}" Margin="6,0,0,0">
+                                    <StackPanel>
+                                        <TextBlock Text="PRÓXIMOS 12 MESES" Style="{StaticResource TituloKpi}"/>
+                                        <TextBlock x:Name="lblKpiAnio" Style="{StaticResource ValorKpi}"/>
+                                        <TextBlock x:Name="lblKpiAnioNota" FontSize="11.5" Foreground="{StaticResource Texto2}" TextWrapping="Wrap"/>
+                                    </StackPanel>
+                                </Border>
+                            </UniformGrid>
+
+                            <Border Background="#FFFAEB" BorderBrush="#FEDF89" BorderThickness="1" CornerRadius="10" Padding="12,10" Margin="0,10,0,0">
+                                <DockPanel>
+                                    <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" VerticalAlignment="Top" Margin="0,3,10,0">
+                                        <Border Width="4" Height="11" CornerRadius="1.5" Background="#F79009" Margin="0,0,2,0"/>
+                                        <Border Width="4" Height="11" CornerRadius="1.5" Background="#F79009" Opacity="0.6" Margin="0,0,2,0"/>
+                                        <Border Width="4" Height="11" CornerRadius="1.5" Background="#F79009" Opacity="0.3"/>
+                                    </StackPanel>
+                                    <StackPanel>
+                                        <TextBlock Text="Estos valores son aproximados" FontSize="12.5" FontWeight="SemiBold" Foreground="{StaticResource NaranjaTexto}"/>
+                                        <TextBlock Text="Salen de lo que escribiste en cada gasto. Se vuelven más exactos a medida que registras tus pagos reales."
+                                                   FontSize="11.5" Foreground="{StaticResource Texto2}" TextWrapping="Wrap" Margin="0,3,0,6"/>
+                                        <WrapPanel>
+                                            <TextBlock FontSize="11" Margin="0,0,12,0"><Run Text="0–2 pagos:" FontWeight="Bold" Foreground="#B54708"/> <Run Text="aproximado" Foreground="{StaticResource Texto2}"/></TextBlock>
+                                            <TextBlock FontSize="11" Margin="0,0,12,0"><Run Text="3–5 pagos:" FontWeight="Bold" Foreground="#175CD3"/> <Run Text="bastante exacto" Foreground="{StaticResource Texto2}"/></TextBlock>
+                                            <TextBlock FontSize="11"><Run Text="6 pagos:" FontWeight="Bold" Foreground="#067647"/> <Run Text="muy exacto" Foreground="{StaticResource Texto2}"/></TextBlock>
+                                        </WrapPanel>
+                                    </StackPanel>
+                                </DockPanel>
+                            </Border>
+                        </StackPanel>
+
+                        <Border Grid.Column="2" BorderBrush="{StaticResource Borde}" BorderThickness="1" CornerRadius="10" Padding="12,10">
+                            <DockPanel>
+                                <DockPanel DockPanel.Dock="Top" Margin="0,0,0,8">
+                                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                                        <Border Width="8" Height="8" CornerRadius="2" Background="{StaticResource Morado}" Margin="0,0,4,0"/>
+                                        <TextBlock Text="Crédito" FontSize="11" Foreground="{StaticResource Texto2}" Margin="0,0,10,0"/>
+                                        <Border Width="8" Height="8" CornerRadius="2" Background="{StaticResource Verde}" Margin="0,0,4,0"/>
+                                        <TextBlock Text="Gastos" FontSize="11" Foreground="{StaticResource Texto2}"/>
+                                    </StackPanel>
+                                    <TextBlock Text="Próximos 6 meses" FontSize="13" FontWeight="SemiBold"/>
+                                </DockPanel>
+                                <ItemsControl x:Name="icBarrasProyeccion" VerticalAlignment="Bottom">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate><UniformGrid Rows="1"/></ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Margin="4,0" VerticalAlignment="Bottom">
+                                                <TextBlock Text="{Binding Total}" FontSize="10.5" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,0,0,3"/>
+                                                <Border Height="{Binding AltoGastos}" Background="{StaticResource Verde}" CornerRadius="4,4,0,0"/>
+                                                <Border Height="{Binding AltoCreditos}" Background="{StaticResource Morado}"/>
+                                                <Border Height="1" Background="{StaticResource Borde}"/>
+                                                <TextBlock Text="{Binding Mes}" FontSize="11" Foreground="{StaticResource Texto2}" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </DockPanel>
+                        </Border>
+                    </Grid>
+
+                    <!-- Predicción por gasto -->
                     <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
-                        <StackPanel Grid.IsSharedSizeScope="True" MinWidth="{Binding ViewportWidth, RelativeSource={RelativeSource AncestorType=ScrollViewer}}">
-                            <Grid Margin="10,0,10,6">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto" SharedSizeGroup="P0" MinWidth="104"/>
-                                    <ColumnDefinition Width="Auto" SharedSizeGroup="P1" MinWidth="108"/>
-                                    <ColumnDefinition Width="Auto" SharedSizeGroup="P2" MinWidth="108"/>
-                                    <ColumnDefinition Width="Auto" SharedSizeGroup="P3" MinWidth="124"/>
-                                    <ColumnDefinition Width="Auto" SharedSizeGroup="P4" MinWidth="150"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Text="Gasto" Style="{StaticResource EncabezadoTabla}"/>
-                                <TextBlock Grid.Column="1" Margin="14,0,0,0" Text="Próximo pago" Style="{StaticResource EncabezadoTabla}"/>
-                                <TextBlock Grid.Column="2" Margin="14,0,0,0" Text="Registrado" Style="{StaticResource EncabezadoTabla}" HorizontalAlignment="Right"/>
-                                <TextBlock Grid.Column="3" Margin="14,0,0,0" Text="Predicción" Style="{StaticResource EncabezadoTabla}" HorizontalAlignment="Right"/>
-                                <TextBlock Grid.Column="4" Margin="14,0,0,0" Text="12 meses" Style="{StaticResource EncabezadoTabla}" HorizontalAlignment="Right"/>
-                                <TextBlock Grid.Column="5" Margin="14,0,0,0" Text="Tendencia" Style="{StaticResource EncabezadoTabla}" HorizontalAlignment="Right"/>
-                            </Grid>
+                        <StackPanel MinWidth="680" Width="{Binding ViewportWidth, RelativeSource={RelativeSource AncestorType=ScrollViewer}}">
+                            <Border Style="{StaticResource LineaTabla}" Padding="10,0,10,8">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="70"/>
+                                        <ColumnDefinition Width="110"/>
+                                        <ColumnDefinition Width="110"/>
+                                        <ColumnDefinition Width="120"/>
+                                        <ColumnDefinition Width="190"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="Gasto" Style="{StaticResource EncabezadoTabla}"/>
+                                    <TextBlock Grid.Column="2" Text="Próximo pago" Style="{StaticResource EncabezadoTabla}"/>
+                                    <TextBlock Grid.Column="3" Text="Previsto / mes" Style="{StaticResource EncabezadoTabla}" HorizontalAlignment="Right"/>
+                                    <TextBlock Grid.Column="4" Text="12 meses" Style="{StaticResource EncabezadoTabla}" HorizontalAlignment="Right"/>
+                                    <TextBlock Grid.Column="5" Text="Calculado con" Style="{StaticResource EncabezadoTabla}" Margin="16,0,0,0"/>
+                                </Grid>
+                            </Border>
                             <ItemsControl x:Name="icPredicciones">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
@@ -416,25 +608,51 @@
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*"/>
-                                                    <ColumnDefinition Width="Auto" SharedSizeGroup="P0" MinWidth="104"/>
-                                                    <ColumnDefinition Width="Auto" SharedSizeGroup="P1" MinWidth="108"/>
-                                                    <ColumnDefinition Width="Auto" SharedSizeGroup="P2" MinWidth="108"/>
-                                                    <ColumnDefinition Width="Auto" SharedSizeGroup="P3" MinWidth="124"/>
-                                                    <ColumnDefinition Width="Auto" SharedSizeGroup="P4" MinWidth="150"/>
+                                                    <ColumnDefinition Width="70"/>
+                                                    <ColumnDefinition Width="110"/>
+                                                    <ColumnDefinition Width="110"/>
+                                                    <ColumnDefinition Width="120"/>
+                                                    <ColumnDefinition Width="190"/>
                                                 </Grid.ColumnDefinitions>
-                                                <StackPanel VerticalAlignment="Center">
-                                                    <TextBlock Text="{Binding Descripcion}" FontSize="13.5" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
-                                                    <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
-                                                        <ContentPresenter Content="{Binding}" ContentTemplate="{StaticResource InsigniaCategoria}"/>
-                                                        <TextBlock Text="{Binding Frecuencia}" FontSize="12.5" Foreground="{StaticResource Texto2}" VerticalAlignment="Center"/>
+                                                <DockPanel Margin="0,0,10,0">
+                                                    <Border DockPanel.Dock="Left" Width="4" CornerRadius="2" Background="{Binding ColorBarra}" Margin="0,1,10,1"/>
+                                                    <StackPanel VerticalAlignment="Center">
+                                                        <TextBlock Text="{Binding Nombre}" FontSize="13.5" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                                                        <TextBlock Text="{Binding Detalle}" FontSize="11.5" Foreground="{StaticResource Texto2}" TextTrimming="CharacterEllipsis"/>
                                                     </StackPanel>
+                                                </DockPanel>
+                                                <ProgressBar Grid.Column="1" Style="{StaticResource Barra}" Maximum="1" Value="{Binding Proporcion, Mode=OneWay}" Height="4"
+                                                             Foreground="{Binding ColorBarra}" Margin="0,0,14,0" VerticalAlignment="Center"/>
+                                                <TextBlock Grid.Column="2" Text="{Binding ProximoTexto}" FontSize="13" VerticalAlignment="Center"/>
+                                                <TextBlock Grid.Column="3" Text="{Binding Prediccion, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" FontSize="13.5" FontWeight="Bold"
+                                                           HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                                <TextBlock Grid.Column="4" Text="{Binding Proyeccion12, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" FontSize="13" Foreground="{StaticResource Texto2}"
+                                                           HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                                <!-- Créditos: monto fijo. Gastos: un segmento por pago real registrado -->
+                                                <Border Grid.Column="5" Style="{StaticResource Chip}" Background="{StaticResource MoradoSuave}" HorizontalAlignment="Left" Margin="16,0,0,0">
+                                                    <Border.Visibility>
+                                                        <Binding Path="EsCredito"><Binding.Converter><BooleanToVisibilityConverter/></Binding.Converter></Binding>
+                                                    </Border.Visibility>
+                                                    <TextBlock Text="Cuota fija · exacto" Style="{StaticResource TextoChip}" FontSize="11.5" Foreground="{StaticResource MoradoTexto}"/>
+                                                </Border>
+                                                <StackPanel Grid.Column="5" Orientation="Horizontal" VerticalAlignment="Center" Margin="16,0,0,0">
+                                                    <StackPanel.Style>
+                                                        <Style TargetType="StackPanel">
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding EsCredito}" Value="True"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </StackPanel.Style>
+                                                    <ItemsControl ItemsSource="{Binding Segmentos}" VerticalAlignment="Center">
+                                                        <ItemsControl.ItemsPanel>
+                                                            <ItemsPanelTemplate><StackPanel Orientation="Horizontal"/></ItemsPanelTemplate>
+                                                        </ItemsControl.ItemsPanel>
+                                                        <ItemsControl.ItemTemplate>
+                                                            <DataTemplate><Border Width="4" Height="12" CornerRadius="1.5" Background="{Binding}" Margin="0,0,2,0"/></DataTemplate>
+                                                        </ItemsControl.ItemTemplate>
+                                                    </ItemsControl>
+                                                    <TextBlock Text="{Binding CalculadoCon}" FontSize="11.5" Foreground="{Binding ColorCalculadoCon}" Margin="6,0,0,0" VerticalAlignment="Center"/>
                                                 </StackPanel>
-                                                <TextBlock Grid.Column="1" Margin="14,0,0,0" Text="{Binding ProximoVence, StringFormat='{}{0:dd/MM/yyyy}', TargetNullValue='—'}" Foreground="{StaticResource Texto2}" VerticalAlignment="Center"/>
-                                                <TextBlock Grid.Column="2" Margin="14,0,0,0" Text="{Binding Valor, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" Foreground="{StaticResource Texto2}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                                                <TextBlock Grid.Column="3" Margin="14,0,0,0" Text="{Binding Prediccion, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" FontWeight="Bold" Foreground="{StaticResource Azul}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                                                <TextBlock Grid.Column="4" Margin="14,0,0,0" Text="{Binding Proyeccion12, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                                                <TextBlock Grid.Column="5" Margin="14,0,0,0" Text="{Binding Tendencia}" FontSize="12.5" FontWeight="SemiBold" Foreground="{Binding ColorTendencia}"
-                                                           HorizontalAlignment="Right" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
                                             </Grid>
                                         </Border>
                                     </DataTemplate>
@@ -443,7 +661,7 @@
                         </StackPanel>
                     </ScrollViewer>
 
-                    <TextBlock Text="Próximos 12 meses" Style="{StaticResource SubTitulo}" Margin="0,20,0,0"/>
+                    <TextBlock Text="Mes a mes" Style="{StaticResource SubTitulo}" Margin="0,20,0,0"/>
                     <TextBlock Text="Ingresos (salario + otros ingresos) frente a gastos previstos y cuotas de créditos."
                                Style="{StaticResource TextoSecundario}" TextWrapping="Wrap" Margin="0,2,0,10"/>
                     <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
@@ -498,8 +716,8 @@
                     <TextBlock x:Name="lblTotalPendiente" FontSize="30" FontWeight="ExtraBold" Foreground="#A9C5FF" Margin="0,6,0,10"/>
                     <ProgressBar x:Name="barPagado" Style="{StaticResource Barra}" Background="#2A3A52" Foreground="#6CE9A6" Height="7"/>
                     <DockPanel Margin="0,8,0,0">
-                        <TextBlock x:Name="lblTotalMes" DockPanel.Dock="Right" FontSize="12.5" Foreground="{StaticResource TextoMenu}"/>
-                        <TextBlock x:Name="lblPagadoMes" FontSize="12.5" Foreground="{StaticResource TextoMenu}"/>
+                        <TextBlock x:Name="lblTotalMes" DockPanel.Dock="Right" FontSize="11.5" Foreground="{StaticResource TextoMenu}" Margin="8,0,0,0"/>
+                        <TextBlock x:Name="lblPagadoMes" FontSize="11.5" Foreground="{StaticResource TextoMenu}" TextTrimming="CharacterEllipsis"/>
                     </DockPanel>
                 </StackPanel>
             </Border>

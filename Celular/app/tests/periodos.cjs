@@ -1,0 +1,16 @@
+const ts = require('typescript');
+const fs = require('node:fs');
+const assert = require('node:assert/strict');
+const codigo = ts.transpileModule(fs.readFileSync('src/app/nucleo/periodos.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS}}).outputText;
+const modulo={exports:{}};new Function('exports','module',codigo)(modulo.exports,modulo);
+const {mesesVisibles} = modulo.exports;
+const oct = new Date(2026,9,15);
+const publicados = ['2026-08','2026-09','2026-10','2026-11','2026-12'];
+assert.deepEqual(mesesVisibles(publicados,'2026-10',oct),['2026-10','2026-11'],'Inicio en octubre: septiembre publicado por error queda oculto');
+assert.deepEqual(mesesVisibles(publicados,'2026-08',oct),['2026-09','2026-10','2026-11'],'Con historial solo ofrece un mes a cada lado');
+assert.deepEqual(mesesVisibles(publicados,null,oct),['2026-10','2026-11'],'Sin inicio sincronizado no inventa historial');
+assert.deepEqual(mesesVisibles(['2026-10','2026-11'],'2026-08',oct),['2026-10','2026-11'],'No ofrece el anterior si falta su resumen');
+assert.deepEqual(mesesVisibles(publicados,'2026-10',new Date(2026,10,1)),['2026-10','2026-11','2026-12'],'Al cambiar de mes se habilita el historial de octubre');
+assert.deepEqual(mesesVisibles(['2026-11','2026-12','2027-01','2027-02','2027-03'],'2026-10',new Date(2027,0,1)),['2026-12','2027-01','2027-02'],'Cruce de año');
+assert.deepEqual(mesesVisibles(['2026-10','2026-10','2026-11'],'2026-10',oct),['2026-10','2026-11'],'No duplica meses');
+console.log('7 casos correctos de navegación mensual: inicio, historial, resúmenes obsoletos y cambios de mes/año.');

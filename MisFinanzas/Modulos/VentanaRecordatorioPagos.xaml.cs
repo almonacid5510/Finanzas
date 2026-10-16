@@ -44,7 +44,7 @@ namespace MisFinanzas.Modulos
                     // El pago se registra solo para el mes de este vencimiento
                     using (var db = new AppDbContext())
                     {
-                        CuentasMensuales.MarcarPagada(db, cuenta.Cuenta.Id, cuenta.Mes, true, cuenta.Venta);
+                        CuentasMensuales.MarcarPagada(db, cuenta.Cuenta.Id, cuenta.Mes, true, cuenta.Venta, cuenta.Quincena);
                     }
 
                     // Remover visualmente de la lista de pendientes

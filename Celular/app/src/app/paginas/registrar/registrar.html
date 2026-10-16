@@ -1,0 +1,191 @@
+<!-- Encabezado: cuánto llevas hoy -->
+<header class="cabecera">
+  <div class="fila">
+    <div class="marca">
+      <span class="logo"><app-icono nombre="logo" [tamano]="20" /></span>
+      <strong>Mis Finanzas</strong>
+    </div>
+    <div class="acciones">
+      @if (gastos.sinEnviar(); as n) {
+        <span class="pastilla" title="Se enviarán cuando haya señal"><i></i>{{ n }} sin enviar</span>
+      }
+      <button class="menu" (click)="menuAbierto.set(true)" aria-label="Menú"><app-icono nombre="menu" [tamano]="22" /></button>
+    </div>
+  </div>
+  <div class="hoy">
+    <div>
+      <span class="rotulo">Hoy llevas</span>
+      <strong class="total">{{ pesos(gastos.totalHoy()) }}</strong>
+    </div>
+    <button class="ver" (click)="verGastos()">
+      {{ gastos.deHoy().length }} {{ gastos.deHoy().length === 1 ? 'gasto' : 'gastos' }} ›
+    </button>
+  </div>
+</header>
+
+<main class="pagina contenido">
+  <h2 class="titulo">¿En qué gastaste?</h2>
+  <div class="frase">
+    <input #campoFrase class="campo" [value]="frase()" (input)="alEscribirFrase(campoFrase.value)"
+           (keydown.enter)="guardar()" placeholder="Ej. gasté 25 mil en almuerzo" enterkeyhint="send"
+           autocomplete="off" aria-label="Frase del gasto" />
+    <!-- Toque: empieza a escuchar y queda en pausa/terminar. Mantener pulsado: escucha hasta soltar. -->
+    <button type="button" class="mic" sinSeleccionTactil [class.escuchando]="escuchando()"
+            [attr.aria-label]="escuchando() ? 'Terminar de dictar' : 'Dictar el gasto: toca o mantén pulsado'" [attr.aria-pressed]="escuchando()"
+            (pointerdown)="sostenerVoz($event)" (pointerup)="soltarVoz($event)"
+            (touchend)="soltarTacto($event)" (touchcancel)="soltarTacto($event)"
+            (pointercancel)="soltarVoz($event)" (lostpointercapture)="soltarVoz($event)"
+            (keydown)="sostenerTecla($event)" (keyup)="soltarTecla($event)"
+            (blur)="terminarPulsacion()" (contextmenu)="$event.preventDefault()">
+      <app-icono [nombre]="escuchando() ? 'pausa' : 'microfono'" [tamano]="22" />
+    </button>
+  </div>
+  <p class="ayuda" [class.escuchando]="escuchando()" aria-live="polite">
+    {{ sosteniendo() ? 'Te escucho… suelta para terminar.' : escuchando() ? 'Te escucho… toca la pausa cuando termines.' : 'Escríbelo o díctalo: toca el micrófono o mantenlo pulsado y llenamos valor, descripción y categoría.' }}
+  </p>
+
+  <!-- Foto del recibo: se lee el total en el celular -->
+  <input #campoFoto type="file" accept="image/*" hidden (change)="alElegirFoto(campoFoto)" />
+  @if (foto()) {
+    <div class="recibo" [class.leyendo]="leyendo()">
+      <img [src]="foto()" alt="Foto del recibo" />
+      <div class="recibo-info">
+        @if (leyendo()) {
+          <strong>Leyendo el recibo…</strong>
+          <div class="avance"><span [style.width.%]="avance() * 100"></span></div>
+          <small>{{ (avance() * 100).toFixed(0) }} %</small>
+        } @else if (lecturaFoto()?.total) {
+          <span class="ok">Total detectado</span>
+          <strong class="total-recibo">{{ pesos(lecturaFoto()!.total!) }}</strong>
+          @if (lecturaFoto()!.comercio) { <small>{{ lecturaFoto()!.comercio }}</small> }
+        } @else {
+          <strong>No encontré el total</strong>
+          <small>Escríbelo en Valor o intenta con otra foto más nítida.</small>
+        }
+      </div>
+      @if (!leyendo()) {
+        <button class="quitar" (click)="quitarFoto()" aria-label="Quitar la foto"><app-icono nombre="cerrar" [tamano]="18" /></button>
+      }
+    </div>
+  } @else {
+    <button class="boton-foto" (click)="campoFoto.click()">
+      <app-icono nombre="camara" [tamano]="20" /> Foto del recibo
+      <small>detectamos el total</small>
+    </button>
+  }
+
+  <div class="separador"><span>o llénalo a mano</span></div>
+
+  <section class="tarjeta formulario">
+    <!-- Primero: cómo pagaste (también se dice en la frase: "con la visa", "en efectivo") -->
+    @if (tarjetasConCupo().length) {
+      <span class="etiqueta" id="lblPago">¿Cómo pagaste?</span>
+      <div class="chips-pago" role="radiogroup" aria-labelledby="lblPago">
+        <button type="button" class="chip-pago" role="radio" [attr.aria-checked]="tarjeta() === null" (click)="elegirTarjeta(null)">
+          <span class="icono-efectivo"><app-icono nombre="efectivo" [tamano]="18" /></span>
+          <span><strong>Efectivo</strong><small>o tarjeta débito</small></span>
+        </button>
+        @for (t of tarjetasConCupo(); track t.id) {
+          <button type="button" class="chip-pago" role="radio" [attr.aria-checked]="tarjeta() === t.id" (click)="elegirTarjeta(t.id)">
+            <app-marca-tarjeta [nombre]="t.nombre" [pequena]="true" />
+            <span><strong>{{ tituloTarjeta(t.nombre) }}</strong><small>Disponible {{ pesos(t.disponible) }}</small></span>
+          </button>
+        }
+      </div>
+      @if (superaCupo()) { <p class="falta-vehiculo">Este valor supera el cupo disponible de la tarjeta.</p> }
+      @if (tarjeta() !== null) {
+        <!-- Cuotas de la compra (por defecto 1; también se dicen: "a 6 cuotas") -->
+        <span class="etiqueta" id="lblCuotas">Cuotas</span>
+        <div class="chips-cuotas" role="radiogroup" aria-labelledby="lblCuotas">
+          @for (n of opcionesCuotas(); track n) {
+            <button type="button" class="chip-cuota" role="radio" [attr.aria-checked]="cuotas() === n" (click)="elegirCuotas(n)">{{ n }}</button>
+          }
+        </div>
+        <p class="detalle-cuotas">{{ detalleCuotas() }}</p>
+      }
+    }
+
+    <label class="etiqueta" for="monto">Valor</label>
+    <div class="valor" [class.vacio-valor]="!monto()">
+      <span>$</span>
+      <input #campoMonto id="monto" inputmode="numeric" placeholder="0" autocomplete="off"
+             [value]="montoTexto()" (input)="alEscribirMonto(campoMonto.value)" />
+    </div>
+    <div class="rapidos">
+      @for (n of montosRapidos; track n) {
+        <button type="button" (click)="sumar(n)">+{{ n / 1000 }} mil</button>
+      }
+    </div>
+
+    <label class="etiqueta" for="descripcion">Descripción</label>
+    <input #campoDesc id="descripcion" class="campo" placeholder="Ej. Almuerzo" autocomplete="off"
+           [value]="descripcion()" (input)="descripcion.set(campoDesc.value)" />
+
+    <span class="etiqueta" id="lblCategoria">Categoría</span>
+    <div #filaCategorias class="chips" role="radiogroup" aria-labelledby="lblCategoria">
+      @for (c of categorias; track c.nombre) {
+        <button type="button" class="chip" role="radio" [attr.aria-checked]="categoria() === c.nombre"
+                [style.--c]="c.color.texto" [style.--f]="c.color.fondo" (click)="elegirCategoria(c.nombre)">
+          <app-icono [nombre]="c.icono" [tamano]="18" /> {{ c.nombre }}
+        </button>
+      }
+      <button type="button" class="chip nueva" role="radio" [attr.aria-checked]="categoria() === NUEVA"
+              (click)="elegirCategoria(NUEVA)">
+        <app-icono nombre="lapiz" [tamano]="16" /> Nueva
+      </button>
+    </div>
+    @if (categoria() === NUEVA) {
+      <input #campoNueva class="campo nueva-categoria" placeholder="Nombre de la categoría nueva" autocomplete="off"
+             [value]="categoriaNueva()" (input)="categoriaNueva.set(campoNueva.value)" />
+    }
+
+    @if (resumen.vehiculos().length) {
+      <span class="etiqueta" id="lblVehiculo">Vehículo <small>· solo gastos directos: SOAT, impuesto, llantas, repuestos…</small></span>
+      <div class="chips-vehiculo" role="radiogroup" aria-labelledby="lblVehiculo">
+        @for (v of resumen.vehiculos(); track v.id) {
+          <button type="button" class="chip-vehiculo" role="radio" [attr.aria-checked]="vehiculo() === v.id" (click)="elegirVehiculo(v.id)">
+            <app-icono [nombre]="v.tipo.toLowerCase() === 'moto' ? 'moto' : 'carro'" [tamano]="18" />
+            <span>{{ v.nombre }}</span>
+            @if (v.placa) { <small>{{ v.placa }}</small> }
+          </button>
+        }
+      </div>
+      @if (faltaVehiculo()) { <p class="falta-vehiculo">¿De cuál vehículo es? Elígelo aquí.</p> }
+    }
+
+    <span class="etiqueta" id="lblFecha">Fecha</span>
+    <div class="segmentos" role="radiogroup" aria-labelledby="lblFecha">
+      <button type="button" class="segmento" [class.activo]="diasAtras() === 0" (click)="elegirFecha(0)">Hoy</button>
+      <button type="button" class="segmento" [class.activo]="diasAtras() === 1" (click)="elegirFecha(1)">Ayer</button>
+      <button type="button" class="segmento" [class.activo]="diasAtras() === null" (click)="elegirFecha(null)">Otra fecha</button>
+    </div>
+    @if (diasAtras() === null) {
+      <input #campoFecha type="date" class="campo otra-fecha" [value]="fechaOtra()" (input)="fechaOtra.set(campoFecha.value)"
+             aria-label="Fecha del gasto" />
+    }
+  </section>
+</main>
+
+<!-- Guardar: siempre a la mano, encima de la barra inferior -->
+<div class="guardar">
+  <button class="boton" (click)="guardar()"><app-icono nombre="check" [tamano]="22" [grosor]="2.6" /> Guardar gasto</button>
+</div>
+
+<!-- Menú -->
+@if (menuAbierto()) {
+  <div class="velo" (click)="menuAbierto.set(false)">
+    <div class="hoja" (click)="$event.stopPropagation()" role="dialog" aria-label="Menú">
+      <div class="cuenta">
+        <span class="avatar"><app-icono nombre="persona" [tamano]="20" /></span>
+        <div>
+          <strong>Tu cuenta</strong>
+          <span>{{ sesion.usuario()?.email }}</span>
+        </div>
+      </div>
+      <p class="nota">Tus gastos se sincronizan con Mis Finanzas del PC conectado a esta cuenta.</p>
+      <p class="version">Versión {{ version }}</p>
+      <button class="opcion" (click)="salir()"><app-icono nombre="salir" [tamano]="20" /> Cerrar sesión</button>
+      <button class="opcion" (click)="menuAbierto.set(false)"><app-icono nombre="cerrar" [tamano]="20" /> Cerrar menú</button>
+    </div>
+  </div>
+}

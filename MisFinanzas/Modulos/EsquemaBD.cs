@@ -1,4 +1,4 @@
-// ============================================================
+﻿// ============================================================
 //  Proyecto: Mis Finanzas
 //  Autoria: Juan Almonacid
 //  Copyright (c) 2026 Juan Almonacid. Todos los derechos reservados.
@@ -33,6 +33,12 @@ namespace MisFinanzas.Modulos
         };
 
         public static void Actualizar(AppDbContext db)
+        {
+            ActualizarEsquema(db);
+            InicioRegistro.Obtener(db);
+        }
+
+        private static void ActualizarEsquema(AppDbContext db)
         {
             db.Database.EnsureCreated();
 

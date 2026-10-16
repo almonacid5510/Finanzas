@@ -1,0 +1,20 @@
+dialog { border: 1px solid var(--borde); border-radius: 20px; padding: 22px; width: min(420px, calc(100vw - 28px)); max-height: calc(100dvh - 36px); overflow-y: auto; color: var(--texto); background: var(--tarjeta); box-shadow: 0 20px 70px #0003; }
+dialog::backdrop { background: #0f1b2d99; }
+form { display: grid; gap: 14px; }
+.campos, .acciones { display: grid; gap: 12px; }
+.acciones { gap: 10px; margin-top: 2px; }
+.etiqueta { color: var(--verde); font-size: 12px; font-weight: 800; }
+h2 { font-size: 21px; margin: 0; }
+p { margin: 0; font-size: 14px; line-height: 1.5; color: var(--texto2); }
+label { display: grid; gap: 6px; font-size: 13px; font-weight: 700; }
+/* Mismo ancho, alto y alineación para el valor y la fecha (en iPhone el campo de fecha se centra y se ensancha solo) */
+input { box-sizing: border-box; display: block; font: inherit; font-size: 16px; font-weight: 600; color: inherit; background: var(--tarjeta);
+  border: 1px solid var(--borde-input); border-radius: 10px; padding: 0 12px; width: 100%; max-width: 100%; min-width: 0; height: 48px; text-align: left; }
+input[type="date"] { -webkit-appearance: none; appearance: none; line-height: 48px; }
+input[type="date"]::-webkit-date-and-time-value { text-align: left; margin: 0; }
+input:focus { outline: 2px solid var(--verde); outline-offset: 1px; border-color: var(--verde); }
+button { box-sizing: border-box; width: 100%; min-height: 48px; padding: 12px; border-radius: 12px; font: inherit; font-size: 15px; font-weight: 700; }
+.aceptar { background: var(--verde); color: white; border: 1px solid var(--verde); }
+.posponer { background: var(--gris-suave); border: 1px solid var(--borde); }
+small { color: var(--texto2); font-size: 12px; line-height: 1.5; }
+.error { color: var(--rojo); }

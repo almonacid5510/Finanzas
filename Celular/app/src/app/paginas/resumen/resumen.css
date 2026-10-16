@@ -1,0 +1,125 @@
+.selector-mes {
+  display: flex; align-items: center; gap: 4px; background: var(--tarjeta); border: 1px solid var(--borde);
+  border-radius: 16px; padding: 6px; flex: none;
+}
+.selector-mes span { font-weight: 800; font-size: 15px; min-width: 76px; text-align: center; }
+.selector-mes button { background: none; border: 0; width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; color: var(--texto); }
+.selector-mes button:disabled { color: var(--borde-input); }
+
+.sin-datos { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 34px 20px; }
+.sin-datos strong { color: var(--texto); font-size: 16px; }
+
+/* Disponible */
+.disponible { padding: 22px 18px 18px; }
+.fila { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.rotulo { color: var(--texto-menu); font-size: 15px; }
+.salud { background: #12382D; color: var(--verde-claro); font-size: 13px; font-weight: 800; padding: 6px 12px; border-radius: 999px; white-space: nowrap; }
+.salud.mal { background: #3B1714; color: #FDA29B; }
+.cifra { display: block; font-size: 38px; font-weight: 800; letter-spacing: -1px; margin: 12px 0 2px; }
+.cifra.negativa { color: #F97066; }
+.estado { margin: 0 0 14px; font-size: 13.5px; color: var(--verde-claro); }
+.estado.negativa { color: #F97066; }
+.cajitas { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.cajitas div { background: #1B2A40; border: 1px solid #26374F; border-radius: 12px; padding: 10px 12px; min-width: 0; }
+.cajitas span { display: block; color: var(--texto-menu); font-size: 12.5px; }
+.cajitas strong { display: block; font-size: 17px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.verde-claro { color: var(--verde-claro); }
+.naranja-claro { color: #FEC84B; }
+.rojo-claro { color: #FDA29B; }
+.tras-pagar { margin: 12px 0 0; font-size: 13.5px; color: var(--texto-menu); }
+.tras-pagar b { color: var(--verde-claro); }
+.tras-pagar.negativa b { color: #F97066; }
+.aviso-inicial { margin: 12px 0 0; padding: 10px 12px; border-radius: 10px; background: #2A2217; color: #FEC84B; font-size: 12.5px; line-height: 1.45; }
+.aviso-inicial b { color: #fff; }
+.cajitas small { display: block; color: var(--texto-menu); font-size: 11.5px; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sincronizado { display: flex; align-items: center; gap: 6px; }
+.punto { width: 7px; height: 7px; border-radius: 50%; background: #12B76A; flex: none; }
+.como { background: none; border: 0; padding: 0; color: #84ADFF; font: inherit; font-size: 13.5px; font-weight: 700; cursor: pointer; }
+.calculo { margin: 10px 0 0; }
+.barra { height: 10px; border-radius: 5px; background: #24324A; overflow: hidden; }
+.barra span { display: block; height: 100%; border-radius: 5px; background: #F0A04B; }
+.barra span.excedida { background: #F97066; }
+.pie { margin-top: 14px; padding-top: 12px; border-top: 1px solid #26374F; color: var(--texto-menu); font-size: 13.5px; }
+.pie b { color: #fff; }
+
+/* Vencidas */
+.vencida {
+  display: flex; align-items: center; gap: 14px; background: var(--tarjeta); border: 1px solid var(--rojo-borde);
+  border-radius: 16px; padding: 14px;
+}
+.alerta { width: 50px; height: 50px; border-radius: 12px; background: var(--rojo-suave); color: var(--rojo); display: grid; place-items: center; flex: none; }
+.vencida .info { flex: 1; min-width: 0; }
+.vencida strong { display: block; font-size: 16px; }
+.vencida .info span { color: var(--rojo); font-size: 14px; }
+.vencida button { border: 0; background: var(--verde); color: #fff; font-weight: 800; border-radius: 11px; padding: 11px 16px; flex: none; }
+.enviada { color: var(--verde); font-weight: 700; font-size: 13px; text-align: right; flex: none; }
+
+/* Por pagar */
+.por-pagar h2 { font-size: 17px; font-weight: 800; margin: 0; }
+.titulo-bloque { margin-bottom: 6px; }
+.total-rojo { color: var(--rojo); font-size: 15px; font-weight: 800; }
+.pago { display: flex; align-items: center; gap: 14px; padding: 12px 0; border-bottom: 1px solid var(--borde); }
+.pago:last-child { border-bottom: 0; padding-bottom: 2px; }
+.fecha { width: 46px; height: 50px; box-sizing: border-box; text-align: center; flex: none; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  background: var(--gris-suave); border: 1px solid var(--borde); border-radius: 10px; }
+.fecha.urgente { background: var(--rojo-suave); border-color: var(--rojo-borde); }
+.fecha.urgente b, .fecha.urgente span { color: var(--rojo); }
+.fecha b { font-size: 19px; font-weight: 800; line-height: 1.1; }
+.fecha span { font-size: 11px; font-weight: 800; color: var(--texto2); text-transform: uppercase; }
+.raya { width: 18px; height: 3px; border-radius: 2px; background: var(--morado); margin: 8px 0 6px; }
+.pago .info { flex: 1; min-width: 0; }
+.pago .info strong { display: block; font-size: 15.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pago .info span { font-size: 13.5px; color: var(--naranja-texto); }
+.pago .monto { font-size: 15.5px; font-weight: 800; white-space: nowrap; }
+.pago.proxima .info span, .pago.proxima .monto { color: var(--texto2); }
+.roja { color: var(--rojo) !important; }
+
+/* Tarjetas de crédito: una por cada una, con el logo de su marca */
+.tarjeta-credito { padding: 16px; }
+.tc-cabeza { display: flex; align-items: center; gap: 12px; }
+.tc-nombre { flex: 1; min-width: 0; }
+.tc-nombre strong { display: block; font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tc-nombre small, .tc-disponible small { color: var(--texto2); font-size: 13px; }
+.tc-disponible { text-align: right; flex: none; }
+.tc-disponible small { display: block; }
+.tc-disponible strong { color: var(--verde-texto); font-size: 17px; font-weight: 800; white-space: nowrap; }
+.tc-barra { height: 8px; border-radius: 4px; background: var(--gris-segmento); overflow: hidden; margin: 12px 0 8px; }
+.tc-barra i { display: block; height: 100%; background: var(--morado); border-radius: 4px; min-width: 8px; }
+.tc-barra i.alto { background: var(--rojo); }
+.tc-cupo { color: var(--texto2); font-size: 13px; }
+
+/* Cuadrícula de tarjetas */
+.cuadricula { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.mini { padding: 16px 14px; margin: 0 !important; }
+.mini span { color: var(--texto2); font-size: 14px; }
+.mini strong { display: block; font-size: 20px; font-weight: 800; margin: 4px 0 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mini small { color: var(--texto2); font-size: 13px; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.verde { color: var(--verde-texto); }
+.azul { color: var(--azul); }
+.progreso { height: 6px; border-radius: 3px; background: var(--gris-segmento); margin-top: 10px; overflow: hidden; }
+.progreso i { display: block; height: 100%; background: var(--morado); border-radius: 3px; min-width: 6px; }
+
+.explicacion, .disponible small { color: var(--texto-menu); font-size: 12px; line-height: 1.5; }
+.cobros p, .cobros small { color: var(--texto2, #667085); font-size: 13px; line-height: 1.5; }
+.cobros .fila { flex-wrap: wrap; }
+.cobros h2 { margin: 0; }
+.agregar-cobro { background: var(--verde, #087f5b); color: white; border: 0; border-radius: 9px; padding: 10px 12px; font-weight: 700; cursor: pointer; }
+.cobros form { display: grid; gap: 12px; margin: 16px 0; }
+.cobros label { display: grid; gap: 5px; font-size: 13px; font-weight: 600; }
+/* Mismo ancho, alto, fondo y alineación en todos los campos (en iPhone la fecha se centra, se ensancha y sale gris) */
+.cobros input:not([type=checkbox]) { display: block; width: 100%; max-width: 100%; min-width: 0; box-sizing: border-box; height: 48px;
+  border: 1px solid var(--borde-input, #ccd0d5); border-radius: 10px; padding: 0 12px; font: inherit; font-size: 16px;
+  background: var(--tarjeta, #fff); color: inherit; text-align: left; }
+.cobros input[type=date] { -webkit-appearance: none; appearance: none; line-height: 48px; }
+.cobros input[type=date]::-webkit-date-and-time-value { text-align: left; margin: 0; }
+.cobros input:focus { outline: 2px solid var(--verde); outline-offset: 1px; border-color: var(--verde); }
+.cobros .opcion-saldo { display: flex; align-items: center; }
+.cobro { border-top: 1px solid var(--borde); padding: 12px 0; }
+.cobro div { flex: 1; min-width: 120px; }
+.cobro small { display: block; }
+.cobro button { border: 0; background: transparent; font-size: 24px; padding: 8px; color: #b42318; }
+.cobros [role=alert] { color: #b42318; }
+
+.cobros select { box-sizing: border-box; width: 100%; padding: 12px; border-radius: 9px; border: 1px solid var(--borde-input, #ccd0d5); font: inherit; background: white; }
+.cobros label[hidden] { display: none; }
+.cobro button.agregar-cobro { background: var(--verde, #087f5b); color: white; font-size: 13px; }

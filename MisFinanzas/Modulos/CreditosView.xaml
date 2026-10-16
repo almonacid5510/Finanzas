@@ -1,4 +1,4 @@
-<!--
+﻿<!--
     Proyecto: Mis Finanzas
     Autoria: Juan Almonacid
     Copyright (c) 2026 Juan Almonacid. Todos los derechos reservados.
@@ -30,6 +30,31 @@
             <Style.Triggers>
                 <DataTrigger Binding="{Binding Saldado}" Value="True">
                     <Setter Property="Visibility" Value="Collapsed"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Tarjeta de crédito o préstamo (libre inversión, hipotecario) -->
+        <Style x:Key="SiTarjeta" TargetType="FrameworkElement">
+            <Setter Property="Visibility" Value="Collapsed"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding EsTarjeta}" Value="True">
+                    <Setter Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="SiNoTarjeta" TargetType="FrameworkElement">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding EsTarjeta}" Value="True">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        <!-- Barra de uso del cupo: roja desde el 80 % -->
+        <Style x:Key="BarraCupo" TargetType="ProgressBar" BasedOn="{StaticResource Barra}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding CupoAlto}" Value="True">
+                    <Setter Property="Foreground" Value="{StaticResource Rojo}"/>
                 </DataTrigger>
             </Style.Triggers>
         </Style>
@@ -104,10 +129,21 @@
                         <TextBlock Text="{Binding NombreCustom}" FontSize="22" FontWeight="ExtraBold" VerticalAlignment="Center" Style="{StaticResource ViewStyle}"/>
                         <TextBox Text="{Binding NombreCustom, UpdateSourceTrigger=PropertyChanged}" Width="200" Style="{StaticResource EditInputInline}"
                                  AutomationProperties.Name="Nombre del crédito"/>
-                        <TextBlock Text="Monto original" Style="{StaticResource TextoSecundario}" FontSize="13" VerticalAlignment="Center" Margin="12,4,6,0"/>
-                        <TextBlock Text="{Binding Total, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" Style="{StaticResource TextoSecundario}" FontSize="13" VerticalAlignment="Center" Margin="0,4,0,0"
-                                   Foreground="{StaticResource Texto}"/>
-                        <TextBox Text="{Binding Total, StringFormat='{}{0:N0}', UpdateSourceTrigger=LostFocus}" Width="130" Style="{StaticResource EditInputInline}"
+                        <TextBlock Text="{Binding EtiquetaTotal}" Style="{StaticResource TextoSecundario}" FontSize="13" VerticalAlignment="Center" Margin="12,4,6,0"/>
+                        <!-- Al editar solo se ve el campo (no el valor repetido en texto) -->
+                        <TextBlock Text="{Binding Total, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" FontSize="13" VerticalAlignment="Center" Margin="0,4,0,0"
+                                   Foreground="{StaticResource Texto}">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock" BasedOn="{StaticResource TextoSecundario}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Editando}" Value="True">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                        <TextBox Text="{Binding Total, StringFormat='{}{0:N0}', UpdateSourceTrigger=LostFocus}" Width="130" Style="{StaticResource EditInputInline}" local:NumeroHelper.EsMoneda="True"
                                  AutomationProperties.Name="Monto original"/>
                         <TextBlock Text="· Pago" Style="{StaticResource TextoSecundario}" FontSize="13" VerticalAlignment="Center" Margin="8,4,6,0"/>
                         <TextBlock Text="{Binding DiaPagoTexto}" FontSize="13" VerticalAlignment="Center" Margin="0,4,0,0" Foreground="{StaticResource Texto}">
@@ -127,6 +163,8 @@
                     </WrapPanel>
                 </DockPanel>
 
+                <!-- ===== PRÉSTAMO (libre inversión, hipotecario): cuotas, plan de pagos ===== -->
+                <StackPanel Style="{StaticResource SiNoTarjeta}">
                 <!-- Indicadores -->
                 <c:GrillaAdaptable Columnas="4" AnchoMinimo="150" Espacio="10" Margin="0,0,0,16">
                     <Border Style="{StaticResource Recuadro}">
@@ -134,7 +172,7 @@
                             <TextBlock Text="SALDO QUE DEBES" Style="{StaticResource EtiquetaSeccion}" FontSize="11.5"/>
                             <TextBlock Text="{Binding Disponible, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" FontSize="20" FontWeight="ExtraBold" Foreground="{StaticResource Rojo}"
                                        Margin="0,2,0,0" Style="{StaticResource ViewStyle}"/>
-                            <TextBox Text="{Binding Disponible, StringFormat='{}{0:N0}', UpdateSourceTrigger=LostFocus}" Style="{StaticResource EditInputInline}"
+                            <TextBox Text="{Binding Disponible, StringFormat='{}{0:N0}', UpdateSourceTrigger=LostFocus}" Style="{StaticResource EditInputInline}" local:NumeroHelper.EsMoneda="True"
                                      AutomationProperties.Name="Saldo que debes"/>
                         </StackPanel>
                     </Border>
@@ -143,7 +181,7 @@
                             <TextBlock Text="CUOTA MENSUAL" Style="{StaticResource EtiquetaSeccion}" FontSize="11.5"/>
                             <TextBlock Text="{Binding CuotaMensual, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" FontSize="20" FontWeight="ExtraBold" Foreground="{StaticResource Azul}"
                                        Margin="0,2,0,0" Style="{StaticResource ViewStyle}"/>
-                            <TextBox Text="{Binding CuotaMensual, StringFormat='{}{0:N0}', UpdateSourceTrigger=LostFocus}" Style="{StaticResource EditInputInline}"
+                            <TextBox Text="{Binding CuotaMensual, StringFormat='{}{0:N0}', UpdateSourceTrigger=LostFocus}" Style="{StaticResource EditInputInline}" local:NumeroHelper.EsMoneda="True"
                                      AutomationProperties.Name="Cuota mensual"/>
                         </StackPanel>
                     </Border>
@@ -363,6 +401,147 @@
                         </StackPanel>
                     </Border>
                 </c:GrillaAdaptable>
+                </StackPanel>
+
+                <!-- ===== TARJETA DE CRÉDITO: cupo, compras y pagos ===== -->
+                <StackPanel Style="{StaticResource SiTarjeta}">
+                    <c:GrillaAdaptable Columnas="4" AnchoMinimo="150" Espacio="10" Margin="0,0,0,16">
+                        <Border Style="{StaticResource Recuadro}" Background="{StaticResource VerdeSuave}">
+                            <StackPanel>
+                                <TextBlock Text="CUPO DISPONIBLE" Style="{StaticResource EtiquetaSeccion}" FontSize="11.5" Foreground="{StaticResource VerdeTexto}"/>
+                                <TextBlock Text="{Binding CupoDisponible, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" FontSize="20" FontWeight="ExtraBold" Foreground="{StaticResource VerdeTexto}" Margin="0,2,0,0"/>
+                            </StackPanel>
+                        </Border>
+                        <Border Style="{StaticResource Recuadro}">
+                            <StackPanel>
+                                <TextBlock Text="DEUDA ACTUAL" Style="{StaticResource EtiquetaSeccion}" FontSize="11.5"/>
+                                <!-- No se edita: la deuda solo cambia con las compras y los pagos a la tarjeta -->
+                                <TextBlock Text="{Binding Disponible, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" FontSize="20" FontWeight="ExtraBold" Foreground="{StaticResource Rojo}"
+                                           Margin="0,2,0,0" ToolTip="Cambia con las compras y los pagos a la tarjeta"/>
+                            </StackPanel>
+                        </Border>
+                        <Border Style="{StaticResource Recuadro}">
+                            <StackPanel>
+                                <TextBlock Text="CUPO TOTAL" Style="{StaticResource EtiquetaSeccion}" FontSize="11.5"/>
+                                <TextBlock Text="{Binding Total, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" FontSize="20" FontWeight="ExtraBold" Margin="0,2,0,0"/>
+                            </StackPanel>
+                        </Border>
+                        <Border Style="{StaticResource Recuadro}">
+                            <StackPanel>
+                                <TextBlock Text="TASA E.A." Style="{StaticResource EtiquetaSeccion}" FontSize="11.5"/>
+                                <TextBlock Margin="0,2,0,0" Style="{StaticResource ViewStyle}" TextWrapping="Wrap">
+                                    <Run Text="{Binding TasaEA, StringFormat='{}{0} %', Mode=OneWay}" FontSize="20" FontWeight="ExtraBold"/>
+                                    <Run Text="{Binding TasaMensualTexto, Mode=OneWay}" FontSize="12" Foreground="{StaticResource Texto2}"/>
+                                </TextBlock>
+                                <TextBox Text="{Binding TasaEA, UpdateSourceTrigger=LostFocus}" Style="{StaticResource EditInputInline}" AutomationProperties.Name="Tasa efectiva anual"/>
+                            </StackPanel>
+                        </Border>
+                    </c:GrillaAdaptable>
+
+                    <DockPanel>
+                        <TextBlock DockPanel.Dock="Right" Text="{Binding UsoCupoTexto}" Style="{StaticResource TextoSecundario}"/>
+                        <TextBlock Text="Uso del cupo" FontSize="13.5" FontWeight="Bold"/>
+                    </DockPanel>
+                    <ProgressBar Style="{StaticResource BarraCupo}" Value="{Binding UsoCupo, Mode=OneWay}" Margin="0,7,0,16"/>
+
+                    <!-- Cuota de este mes: suma de las cuotas de las compras (a 1 cuota se paga completa, sin intereses) -->
+                    <Border Background="{StaticResource GrisSuave}" CornerRadius="12" Padding="14,12" Margin="0,0,0,12">
+                        <DockPanel>
+                            <StackPanel DockPanel.Dock="Right" VerticalAlignment="Center">
+                                <Button Click="BtnPagarCuotaTarjeta_Click" Style="{StaticResource BotonMorado}" c:Ui.Icono="{StaticResource IcoCheck}"
+                                        Visibility="{Binding PuedePagarCuotaTarjeta, Converter={StaticResource BoolAVisible}}">
+                                    <TextBlock><Run Text="Pagar cuota ·"/> <Run Text="{Binding NombreMesActual, Mode=OneWay}"/></TextBlock>
+                                </Button>
+                                <StackPanel Orientation="Horizontal" Visibility="{Binding CuotaTarjetaPagada, Converter={StaticResource BoolAVisible}}">
+                                    <c:Icono Geometria="{StaticResource IcoCheck}" Tamano="14" Grosor="2.5" Foreground="{StaticResource Verde}" Margin="0,0,7,0"/>
+                                    <TextBlock Text="Pagada" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource VerdeTexto}" VerticalAlignment="Center"/>
+                                    <Button Content="Deshacer" Click="BtnDeshacerCuota_Click" Style="{StaticResource BotonEnlace}" Foreground="{StaticResource Rojo}"
+                                            Margin="10,0,0,0" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </StackPanel>
+                            <StackPanel>
+                                <TextBlock FontSize="13.5" FontWeight="Bold"><Run Text="Cuota de"/> <Run Text="{Binding NombreMesActual, Mode=OneWay}"/></TextBlock>
+                                <TextBlock Text="{Binding CuotaMesTarjeta, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" FontSize="22" FontWeight="ExtraBold" Margin="0,2,0,2"/>
+                                <TextBlock Style="{StaticResource TextoSecundario}" TextWrapping="Wrap">
+                                    <Run Text="{Binding InteresMesTarjeta, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}', Mode=OneWay}" FontWeight="Bold" Foreground="{StaticResource NaranjaTexto}"/>
+                                    <Run Text="de intereses ·"/>
+                                    <Run Text="{Binding CapitalMesTarjeta, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}', Mode=OneWay}" FontWeight="Bold" Foreground="{StaticResource VerdeTexto}"/>
+                                    <Run Text="a capital"/>
+                                </TextBlock>
+                                <TextBlock Text="Sin cuotas este mes: las compras empiezan a cobrarse el mes siguiente a hacerlas."
+                                           Style="{StaticResource TextoSecundario}" FontSize="12.5" TextWrapping="Wrap" Margin="0,4,0,0"
+                                           Visibility="{Binding SinCuotaTarjeta, Converter={StaticResource BoolAVisible}}"/>
+                            </StackPanel>
+                        </DockPanel>
+                    </Border>
+
+                    <!-- Pagar la tarjeta: baja la deuda y libera cupo (no es otro gasto: las compras ya contaron) -->
+                    <Border Background="{StaticResource MoradoSuave}" CornerRadius="12" Padding="12" Margin="0,0,0,16">
+                        <StackPanel>
+                            <WrapPanel>
+                                <Label Content="Pago extra" Target="{Binding ElementName=txtPagoTarjeta}" Foreground="{StaticResource Texto2}" FontSize="13"
+                                       VerticalAlignment="Center" Padding="0" Margin="0,0,10,0"/>
+                                <TextBox x:Name="txtPagoTarjeta" Width="160" Style="{StaticResource ModernInputNumeric}" local:NumeroHelper.EsMoneda="True"
+                                         c:Ui.Pista="$ 0" ToolTip="Lo que pagaste de la tarjeta"/>
+                                <Button Content="Registrar pago" Click="BtnAbonar_Click" Tag="{Binding ElementName=txtPagoTarjeta}" Margin="10,0,0,0"
+                                        Style="{StaticResource BotonMorado}" c:Ui.Icono="{StaticResource IcoCheck}"/>
+                            </WrapPanel>
+                            <TextBlock Text="Un pago extra va completo a capital y libera cupo. Ni la cuota ni los pagos son otro gasto: cada compra ya contó cuando la hiciste; solo los intereses suman."
+                                       Style="{StaticResource TextoSecundario}" FontSize="12.5" TextWrapping="Wrap" Margin="0,8,0,0"/>
+                        </StackPanel>
+                    </Border>
+
+                    <c:GrillaAdaptable Columnas="2" AnchoMinimo="330" Espacio="14">
+                        <Border BorderBrush="{StaticResource Borde}" BorderThickness="1" CornerRadius="12" Padding="14,12">
+                            <StackPanel>
+                                <TextBlock Text="Compras con la tarjeta" FontSize="14" FontWeight="Bold" Margin="0,0,0,8"/>
+                                <TextBlock Text="Aún no hay compras. Al registrar un gasto, elige esta tarjeta en «Pagado con»."
+                                           Style="{StaticResource TextoSecundario}" TextWrapping="Wrap"
+                                           Visibility="{Binding SinCompras, Converter={StaticResource BoolAVisible}}"/>
+                                <ScrollViewer MaxHeight="220" VerticalScrollBarVisibility="Auto">
+                                    <ItemsControl ItemsSource="{Binding Compras}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border Style="{StaticResource LineaTabla}" Padding="2,7">
+                                                    <DockPanel>
+                                                        <TextBlock DockPanel.Dock="Right" Text="{Binding Monto, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" FontSize="13" FontWeight="Bold"/>
+                                                        <TextBlock DockPanel.Dock="Right" Text="{Binding CuotasTexto}" Style="{StaticResource TextoSecundario}" FontSize="12" Margin="0,0,10,0"/>
+                                                        <TextBlock DockPanel.Dock="Left" Text="{Binding Fecha, StringFormat='{}{0:dd/MM}'}" Width="52" Style="{StaticResource TextoSecundario}"/>
+                                                        <TextBlock Text="{Binding Descripcion}" FontSize="13" TextTrimming="CharacterEllipsis" Margin="0,0,10,0"/>
+                                                    </DockPanel>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </ScrollViewer>
+                            </StackPanel>
+                        </Border>
+                        <Border BorderBrush="{StaticResource Borde}" BorderThickness="1" CornerRadius="12" Padding="14,12">
+                            <StackPanel>
+                                <TextBlock Text="Pagos a la tarjeta" FontSize="14" FontWeight="Bold" Margin="0,0,0,8"/>
+                                <ScrollViewer MaxHeight="220" VerticalScrollBarVisibility="Auto">
+                                    <ItemsControl ItemsSource="{Binding Historial}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border Style="{StaticResource LineaTabla}" Padding="2,7">
+                                                    <DockPanel>
+                                                        <Button DockPanel.Dock="Right" Click="BtnDeshacerPago_Click" Style="{StaticResource BotonFlecha}" Width="26" Height="26"
+                                                                Foreground="{StaticResource Rojo}" c:Ui.Icono="{StaticResource IcoX}" Margin="8,0,0,0"
+                                                                Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                                AutomationProperties.Name="Deshacer este pago" ToolTip="Deshacer este pago"/>
+                                                        <TextBlock DockPanel.Dock="Right" Text="{Binding Monto, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" FontSize="13" FontWeight="Bold"
+                                                                   Foreground="{StaticResource VerdeTexto}" VerticalAlignment="Center"/>
+                                                        <TextBlock Text="{Binding Fecha, StringFormat='{}{0:dd/MM/yyyy}'}" Style="{StaticResource TextoSecundario}" VerticalAlignment="Center"/>
+                                                    </DockPanel>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </ScrollViewer>
+                            </StackPanel>
+                        </Border>
+                    </c:GrillaAdaptable>
+                </StackPanel>
             </StackPanel>
         </DataTemplate>
     </UserControl.Resources>
@@ -395,7 +574,13 @@
         <Border x:Name="pnlNuevoCredito" Grid.Row="1" Grid.ColumnSpan="3" Style="{StaticResource Card}" Padding="18,14" Margin="0,0,0,14"
                 Visibility="Collapsed">
             <StackPanel>
-                <TextBlock Text="Registrar nuevo crédito" Style="{StaticResource TituloTarjeta}" Margin="0,0,0,10"/>
+                <DockPanel Margin="0,0,0,10">
+                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                        <Label Content="Tipo" Target="{Binding ElementName=cbTipoCredito}" Style="{StaticResource Etiqueta}" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                        <ComboBox x:Name="cbTipoCredito" Width="200" Style="{StaticResource ModernCombo}" SelectionChanged="CbTipoCredito_SelectionChanged"/>
+                    </StackPanel>
+                    <TextBlock Text="Registrar nuevo crédito" Style="{StaticResource TituloTarjeta}" VerticalAlignment="Center"/>
+                </DockPanel>
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="1.2*"/>
@@ -420,15 +605,15 @@
                     </Grid.RowDefinitions>
                     <Label Content="Nombre" Target="{Binding ElementName=txtNombreCredito}" Style="{StaticResource Etiqueta}"/>
                     <TextBox Grid.Row="1" x:Name="txtNombreCredito" Style="{StaticResource ModernInput}" c:Ui.Pista="Ej. Libre inversión"/>
-                    <Label Grid.Column="2" Content="Cuota" Target="{Binding ElementName=txtCuotaCredito}" Style="{StaticResource Etiqueta}"/>
+                    <Label Grid.Column="2" x:Name="lblCuotaCredito" Content="Cuota" Target="{Binding ElementName=txtCuotaCredito}" Style="{StaticResource Etiqueta}"/>
                     <TextBox Grid.Row="1" Grid.Column="2" x:Name="txtCuotaCredito" Style="{StaticResource ModernInputNumeric}" local:NumeroHelper.EsMoneda="True" c:Ui.Pista="$ 0"/>
-                    <Label Grid.Column="4" Content="Monto total" Target="{Binding ElementName=txtTotalCredito}" Style="{StaticResource Etiqueta}"/>
+                    <Label Grid.Column="4" x:Name="lblTotalCredito" Content="Monto total" Target="{Binding ElementName=txtTotalCredito}" Style="{StaticResource Etiqueta}"/>
                     <TextBox Grid.Row="1" Grid.Column="4" x:Name="txtTotalCredito" Style="{StaticResource ModernInputNumeric}" local:NumeroHelper.EsMoneda="True" c:Ui.Pista="$ 0"/>
-                    <Label Grid.Column="6" Content="Ya pagado" Target="{Binding ElementName=txtAbonoCredito}" Style="{StaticResource Etiqueta}"/>
+                    <Label Grid.Column="6" x:Name="lblAbonoCredito" Content="Ya pagado" Target="{Binding ElementName=txtAbonoCredito}" Style="{StaticResource Etiqueta}"/>
                     <TextBox Grid.Row="1" Grid.Column="6" x:Name="txtAbonoCredito" Style="{StaticResource ModernInputNumeric}" local:NumeroHelper.EsMoneda="True" c:Ui.Pista="$ 0"/>
                     <Label Grid.Column="8" Content="Tasa E.A. %" Target="{Binding ElementName=txtTasaEA}" Style="{StaticResource Etiqueta}"/>
                     <TextBox Grid.Row="1" Grid.Column="8" x:Name="txtTasaEA" Style="{StaticResource ModernInputNumeric}" c:Ui.Pista="0"/>
-                    <Label Grid.Column="10" Content="Meses" Target="{Binding ElementName=txtPlazo}" Style="{StaticResource Etiqueta}"/>
+                    <Label Grid.Column="10" x:Name="lblPlazo" Content="Meses" Target="{Binding ElementName=txtPlazo}" Style="{StaticResource Etiqueta}"/>
                     <TextBox Grid.Row="1" Grid.Column="10" x:Name="txtPlazo" Style="{StaticResource ModernInputNumeric}" c:Ui.Pista="0"/>
                     <Label Grid.Column="12" Content="Día de pago" Target="{Binding ElementName=cbDiaPagoCredito}" Style="{StaticResource Etiqueta}"/>
                     <ComboBox Grid.Row="1" Grid.Column="12" x:Name="cbDiaPagoCredito" Style="{StaticResource ModernCombo}" MaxDropDownHeight="300"
@@ -461,11 +646,23 @@
                                     </Border>
                                     <TextBlock Text="{Binding NombreCustom}" FontSize="15" FontWeight="Bold" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
                                 </DockPanel>
-                                <TextBlock Text="{Binding Disponible, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" FontSize="20" FontWeight="ExtraBold" Foreground="{StaticResource Rojo}" Margin="0,6,0,8"/>
-                                <ProgressBar Style="{StaticResource Barra}" Value="{Binding Progreso, Mode=OneWay}" Height="6"/>
-                                <TextBlock Style="{StaticResource TextoSecundario}" Margin="0,6,0,0">
-                                    <Run Text="{Binding ProgresoTexto, Mode=OneWay}"/><Run Text=" pagado · cuota "/><Run Text="{Binding CuotaMensual, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}', Mode=OneWay}"/>
-                                </TextBlock>
+                                <TextBlock Text="{Binding ModalidadTexto}" Style="{StaticResource TextoSecundario}" FontSize="12" Margin="0,2,0,0"/>
+                                <!-- Préstamo: lo que se debe y cuánto se ha pagado -->
+                                <StackPanel Style="{StaticResource SiNoTarjeta}">
+                                    <TextBlock Text="{Binding Disponible, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" FontSize="20" FontWeight="ExtraBold" Foreground="{StaticResource Rojo}" Margin="0,4,0,8"/>
+                                    <ProgressBar Style="{StaticResource Barra}" Value="{Binding Progreso, Mode=OneWay}" Height="6"/>
+                                    <TextBlock Style="{StaticResource TextoSecundario}" Margin="0,6,0,0">
+                                        <Run Text="{Binding ProgresoTexto, Mode=OneWay}"/><Run Text=" pagado · cuota "/><Run Text="{Binding CuotaMensual, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}', Mode=OneWay}"/>
+                                    </TextBlock>
+                                </StackPanel>
+                                <!-- Tarjeta: cupo disponible y cuánto se ha usado -->
+                                <StackPanel Style="{StaticResource SiTarjeta}">
+                                    <TextBlock Text="{Binding CupoDisponible, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" FontSize="20" FontWeight="ExtraBold" Foreground="{StaticResource VerdeTexto}" Margin="0,4,0,8"/>
+                                    <ProgressBar Style="{StaticResource BarraCupo}" Value="{Binding UsoCupo, Mode=OneWay}" Height="6"/>
+                                    <TextBlock Style="{StaticResource TextoSecundario}" Margin="0,6,0,0">
+                                        <Run Text="disponible · debes "/><Run Text="{Binding Disponible, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}', Mode=OneWay}"/>
+                                    </TextBlock>
+                                </StackPanel>
                             </StackPanel>
                         </Button>
                     </DataTemplate>

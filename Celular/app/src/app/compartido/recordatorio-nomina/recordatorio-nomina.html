@@ -1,0 +1,19 @@
+<dialog #dialogo aria-labelledby="titulo-nomina" aria-describedby="detalle-nomina" (cancel)="cancelar($event)">
+  @if (pendiente(); as pago) {
+    <form (submit)="$event.preventDefault(); confirmar(monto.value, fecha.value)">
+      <span class="etiqueta">Recordatorio de nómina</span>
+      <h2 id="titulo-nomina">¿Ya recibiste tu nómina?</h2>
+      <p id="detalle-nomina">Tenías un pago previsto para el <strong>{{ fechaLarga(pago.fecha) }}</strong> por <strong>{{ pesos(pago.monto) }}</strong>. Confirma el dinero que recibiste para actualizar tu disponible.</p>
+      <div class="campos">
+        <label>Valor recibido<input #monto inputmode="numeric" [value]="miles(pago.monto)" (input)="monto.value = miles(soloDigitos(monto.value))" required autofocus /></label>
+        <label>Fecha en que lo recibiste<input #fecha type="date" [value]="pago.fecha" [max]="hoy()" required /></label>
+      </div>
+      @if (error()) { <p role="alert" class="error">{{ error() }}</p> }
+      <div class="acciones">
+        <button class="aceptar" type="submit">Sí, recibí mi nómina</button>
+        <button class="posponer" type="button" (click)="posponer()">Recordarme mañana</button>
+      </div>
+      <small>Solo se suma al disponible cuando confirmas. Si pospones, te preguntaremos al volver a usar la app desde mañana.</small>
+    </form>
+  }
+</dialog>

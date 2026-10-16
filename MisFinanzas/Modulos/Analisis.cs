@@ -1,4 +1,4 @@
-// ============================================================
+﻿// ============================================================
 //  Proyecto: Mis Finanzas
 //  Autoria: Juan Almonacid
 //  Copyright (c) 2026 Juan Almonacid. Todos los derechos reservados.
@@ -52,6 +52,35 @@ namespace MisFinanzas.Modulos
         public DateTime? ProximoVence { get; set; }
         public string Tendencia { get; set; } = string.Empty;
         public string ColorTendencia { get; set; } = "#718096";
+
+        // --- Tabla de la pestaña de proyección ---
+        /// <summary>Cuota de un crédito: monto fijo según su plan de pagos.</summary>
+        public bool EsCredito { get; set; }
+        public string? Titulo { get; set; }
+        public string Nombre => Titulo ?? Descripcion;
+        public string Detalle => $"{Categoria} · {Frecuencia}";
+        public string ColorBarra => Etiquetas.ColorBarra(Cuenta.Categoria);
+        public string ProximoTexto { get; set; } = "—";
+        /// <summary>12 meses de este gasto frente al gasto más alto de la tabla (0..1).</summary>
+        public double Proporcion { get; set; }
+
+        /// <summary>Qué tan exacta es la predicción: un segmento por pago real (máximo 6).</summary>
+        public IReadOnlyList<string> Segmentos
+        {
+            get
+            {
+                int n = Math.Min(MesesConDatos, 6);
+                var color = n <= 2 ? "#F79009" : n <= 5 ? "#2E90FA" : "#12B76A";
+                return Enumerable.Range(0, 6).Select(i => i < n ? color : "#E4E7EC").ToList();
+            }
+        }
+        public string CalculadoCon => MesesConDatos switch
+        {
+            0 => "Lo que escribiste",
+            1 => "1 pago real",
+            _ => $"{Math.Min(MesesConDatos, 6)} pagos reales"
+        };
+        public string ColorCalculadoCon => MesesConDatos == 0 ? "#98A2B3" : "#344054";
     }
 
     /// <summary>Lo que se espera ingresar y gastar en un mes futuro.</summary>
@@ -65,6 +94,15 @@ namespace MisFinanzas.Modulos
         public decimal TotalGastos => Gastos + Creditos;
         public decimal Balance => Ingresos - TotalGastos;
         public string ColorBalance => Balance < 0 ? "#C53030" : "#2F855A";
+    }
+
+    /// <summary>Barra del gráfico de los próximos meses: gastos y cuotas de créditos apiladas.</summary>
+    public class BarraProyeccion
+    {
+        public string Mes { get; set; } = string.Empty;
+        public string Total { get; set; } = string.Empty;
+        public double AltoGastos { get; set; }
+        public double AltoCreditos { get; set; }
     }
 
     /// <summary>Historial, proyección y predicción de gastos e ingresos.</summary>
@@ -81,11 +119,13 @@ namespace MisFinanzas.Modulos
             public List<Movimiento> IngresosExtra { get; init; } = new();
             public List<Credito> Creditos { get; init; } = new();
             public List<PagoCredito> PagosCredito { get; init; } = new();
+            public DateTime Inicio { get; init; } = Periodo.InicioMes(DateTime.Today);
             public decimal Salario { get; init; }
         }
 
         public static Datos Cargar(AppDbContext db) => new Datos
         {
+            Inicio = InicioRegistro.Obtener(db),
             Cuentas = db.Movimientos.Where(m => m.Tipo == CuentasMensuales.TipoGasto).ToList(),
             Pagos = db.PagosCuenta.ToList(),
             IngresosExtra = db.Movimientos.Where(m => m.Tipo == CuentasMensuales.TipoIngresoExtra).ToList(),
@@ -94,9 +134,60 @@ namespace MisFinanzas.Modulos
             Salario = db.Movimientos.Where(m => m.Tipo == "Ingreso").Select(m => m.Venta).AsEnumerable().FirstOrDefault()
         };
 
+        /// <summary>
+        /// Gastos registrados directamente en Vehículos (repuestos, SOAT…) entre dos fechas, como gastos del día a día
+        /// de la categoría "Vehículos", para sumarlos al gasto del mes. Los que vienen de Día a día no se incluyen
+        /// (ya están como gasto del día a día: así cada gasto cuenta una sola vez).
+        /// </summary>
+        public static List<GastoDiario> GastosDeVehiculos(AppDbContext db, DateTime desde, DateTime hasta)
+        {
+            var nombres = db.Vehiculos.ToDictionary(v => v.Id, v => v.Nombre);
+            return db.GastosVehiculo.Where(g => g.GastoDiarioUid == "" && g.Fecha >= desde && g.Fecha < hasta)
+                     .AsEnumerable()
+                     .Select(g => new GastoDiario
+                     {
+                         Uid = string.Empty,
+                         Fecha = g.Fecha,
+                         Monto = g.Valor,
+                         Categoria = VinculoVehiculo.CategoriaVehiculos,
+                         Descripcion = nombres.TryGetValue(g.VehiculoId, out var n) ? $"{n}: {g.Concepto}" : g.Concepto,
+                         VehiculoId = g.VehiculoId
+                     })
+                     .ToList();
+        }
+
+        /// <summary>
+        /// Intereses de las tarjetas de crédito en el mes, como gastos de la categoría "Créditos" (las compras
+        /// ya contaron cuando se hicieron: solo los intereses son gasto nuevo). Si la cuota del mes ya se pagó,
+        /// lo pagado; si no, lo que se calcula con las cuotas de cada compra.
+        /// </summary>
+        public static List<GastoDiario> InteresesTarjetas(AppDbContext db, DateTime mes)
+        {
+            mes = Periodo.InicioMes(mes);
+            var clave = Periodo.Clave(mes);
+            var lista = new List<GastoDiario>();
+            foreach (var t in db.Creditos.AsEnumerable().Where(c => c.EsTarjeta).ToList())
+            {
+                var pagos = db.PagosCredito.Where(p => p.CreditoId == t.Id && p.Tipo == Amortizacion.TipoCuota && p.Mes == clave).ToList();
+                decimal interes = pagos.Count > 0
+                    ? pagos.Sum(p => p.Interes)
+                    : Amortizacion.CuotaTarjeta(t, db.GastosDiarios.Where(g => g.TarjetaId == t.Id && g.Fecha >= mes.AddMonths(-37) && g.Fecha < mes).ToList(), mes).Interes;
+                if (interes > 0)
+                    lista.Add(new GastoDiario
+                    {
+                        Uid = string.Empty, Fecha = mes, Monto = interes, Categoria = CategoriaCreditos,
+                        Descripcion = $"Intereses tarjeta · {t.NombreCustom}", TarjetaId = null
+                    });
+            }
+            return lista;
+        }
+
+        public const string CategoriaCreditos = "Créditos";
+
         /// <summary>Salario mensual más los ingresos extra que aplican en el mes.</summary>
         public static decimal IngresosDelMes(Datos d, DateTime mes) =>
-            d.Salario + d.IngresosExtra.Where(i => CuentasMensuales.AplicaEn(i, mes)).Sum(i => i.Venta);
+            Periodo.InicioMes(mes) < Periodo.InicioMes(d.Inicio) ? 0
+                : d.Salario + d.IngresosExtra.Where(i => CuentasMensuales.AplicaEn(i, mes)).Sum(i => i.Venta);
 
         /// <summary>
         /// Resumen de los últimos meses (hasta 'meses'), del más reciente al más antiguo.
@@ -105,10 +196,8 @@ namespace MisFinanzas.Modulos
         public static List<ResumenMes> Historial(Datos d, DateTime hasta, int meses = 12)
         {
             var fin = Periodo.InicioMes(hasta);
-            var fechas = d.Cuentas.Concat(d.IngresosExtra).Select(m => Periodo.InicioMes(m.Fecha)).ToList();
-            var desde = fechas.Count > 0 ? fechas.Min() : fin;
+            var desde = Periodo.InicioMes(d.Inicio);
             if (desde < fin.AddMonths(-(meses - 1))) desde = fin.AddMonths(-(meses - 1));
-            if (desde > fin) desde = fin;
 
             var lista = new List<ResumenMes>();
             for (var mes = fin; mes >= desde; mes = mes.AddMonths(-1))
@@ -139,7 +228,13 @@ namespace MisFinanzas.Modulos
                              .GroupBy(i => i.Categoria)
                              .Select(g => new TotalCategoria { Nombre = g.Key, Total = g.Sum(i => i.Monto) })
                              .ToList();
-            if (creditos > 0) lista.Add(new TotalCategoria { Nombre = "Créditos", Total = creditos });
+            if (creditos > 0)
+            {
+                // Con los intereses de tarjetas (que vienen en los diarios) quedan en una sola fila
+                var fila = lista.FirstOrDefault(c => c.Nombre == CategoriaCreditos);
+                if (fila != null) fila.Total += creditos;
+                else lista.Add(new TotalCategoria { Nombre = CategoriaCreditos, Total = creditos });
+            }
 
             lista = lista.Where(c => c.Total > 0).OrderByDescending(c => c.Total).ToList();
             var maximo = lista.Count > 0 ? lista.Max(c => c.Total) : 0;
@@ -169,7 +264,10 @@ namespace MisFinanzas.Modulos
                 decimal promedio = pagos.Count > 0 ? Math.Round(pagos.Average(p => p.Monto)) : 0;
                 decimal prediccion = pagos.Count > 0 ? promedio : cuenta.Venta;
 
-                var mesesPagados = d.Pagos.Where(p => p.MovimientoId == cuenta.Id).Select(p => p.Mes).ToHashSet();
+                // Un mes queda pagado cuando tiene todos sus pagos (dos si el gasto es quincenal)
+                int pagosPorMes = CuentasMensuales.EsQuincenal(cuenta) ? 2 : 1;
+                var mesesPagados = d.Pagos.Where(p => p.MovimientoId == cuenta.Id).GroupBy(p => p.Mes)
+                                          .Where(g => g.Count() >= pagosPorMes).Select(g => g.Key).ToHashSet();
                 var proximo = mesesQueAplica.FirstOrDefault(m => !mesesPagados.Contains(Periodo.Clave(m)));
 
                 var pred = new PrediccionGasto
@@ -178,8 +276,8 @@ namespace MisFinanzas.Modulos
                     MesesConDatos = pagos.Count,
                     Promedio = promedio,
                     Prediccion = prediccion,
-                    Proyeccion12 = prediccion * mesesQueAplica.Count,
-                    ProximoVence = proximo == default ? null : CuentasMensuales.Vencimiento(cuenta, proximo),
+                    Proyeccion12 = prediccion * mesesQueAplica.Count * pagosPorMes,
+                    ProximoVence = proximo == default ? null : CuentasMensuales.Vencimiento(cuenta, proximo, QuincenaPendiente(d.Pagos, cuenta, proximo)),
                 };
 
                 if (pagos.Count >= 2 && cuenta.Venta > 0)
@@ -196,7 +294,72 @@ namespace MisFinanzas.Modulos
                 lista.Add(pred);
             }
 
+            foreach (var p in lista) p.ProximoTexto = p.ProximoVence?.ToString("dd/MM/yyyy") ?? "—";
             return lista.OrderBy(p => p.ProximoVence ?? DateTime.MaxValue).ThenBy(p => p.Descripcion).ToList();
+        }
+
+        /// <summary>Quincenal: 2 si la primera quincena del mes ya está pagada, si no 1. Los demás gastos: 0.</summary>
+        private static int QuincenaPendiente(IEnumerable<PagoCuenta> pagos, Movimiento cuenta, DateTime mes)
+        {
+            if (!CuentasMensuales.EsQuincenal(cuenta)) return 0;
+            var clave = Periodo.Clave(mes);
+            return pagos.Any(p => p.MovimientoId == cuenta.Id && p.Mes == clave && p.Quincena != 2) ? 2 : 1;
+        }
+
+        /// <summary>
+        /// Tabla de la proyección: primero las cuotas de los créditos (montos fijos de su plan)
+        /// y luego cada gasto con su predicción, con la proporción de sus 12 meses para la barra.
+        /// </summary>
+        public static List<PrediccionGasto> TablaProyeccion(Datos d, DateTime desde)
+        {
+            var inicio = Periodo.InicioMes(desde);
+            var lista = new List<PrediccionGasto>();
+
+            foreach (var c in d.Creditos.Where(c => !c.EsTarjeta))
+            {
+                var meses = Enumerable.Range(0, 12).Select(i => inicio.AddMonths(i))
+                    .Select(m => (Mes: m, Cuota: Amortizacion.CuotasEnMes(new[] { c }, d.PagosCredito, m),
+                                  Pagado: d.PagosCredito.Any(p => p.CreditoId == c.Id && p.Tipo == Amortizacion.TipoCuota && p.Mes == Periodo.Clave(m))))
+                    .ToList();
+                decimal total = meses.Sum(m => m.Cuota);
+                if (total <= 0) continue; // crédito saldado
+
+                var proximo = meses.FirstOrDefault(m => !m.Pagado && m.Cuota > 0);
+                var nombreMes = proximo.Mes == default ? "—" : proximo.Mes.ToString("MMMM");
+                lista.Add(new PrediccionGasto
+                {
+                    Cuenta = new Movimiento { Descripcion = c.NombreCustom, Categoria = CategoriaCreditos, Frecuencia = Frecuencias.Mensual },
+                    Titulo = $"Cuota · {c.NombreCustom}",
+                    EsCredito = true,
+                    Prediccion = proximo.Mes == default ? 0 : proximo.Cuota,
+                    Proyeccion12 = total,
+                    ProximoTexto = nombreMes.Length > 0 ? char.ToUpper(nombreMes[0]) + nombreMes[1..] : nombreMes,
+                });
+            }
+
+            lista.AddRange(Predicciones(d, inicio));
+            var maximo = lista.Count > 0 ? lista.Max(p => p.Proyeccion12) : 0;
+            foreach (var p in lista) p.Proporcion = maximo > 0 ? (double)(p.Proyeccion12 / maximo) : 0;
+            return lista;
+        }
+
+        /// <summary>Barras del gráfico: gastos y cuotas de cada mes, a escala del mes más alto.</summary>
+        public static List<BarraProyeccion> Barras(IEnumerable<ProyeccionMes> meses, double altoMaximo)
+        {
+            var lista = meses.ToList();
+            var maximo = lista.Count > 0 ? lista.Max(m => m.TotalGastos) : 0;
+            double Alto(decimal v) => maximo > 0 ? (double)(v / maximo) * altoMaximo : 0;
+            return lista.Select(m =>
+            {
+                var corto = m.Mes.ToString("MMM").TrimEnd('.');
+                return new BarraProyeccion
+                {
+                    Mes = corto.Length > 0 ? char.ToUpper(corto[0]) + corto[1..] : corto,
+                    Total = $"{m.TotalGastos / 1_000_000m:0.00} M",
+                    AltoGastos = Alto(m.Gastos),
+                    AltoCreditos = Alto(m.Creditos),
+                };
+            }).ToList();
         }
 
         /// <summary>

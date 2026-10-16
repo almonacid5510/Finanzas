@@ -9,7 +9,6 @@ using System.Globalization;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
 
 namespace MisFinanzas.Modulos
 {
@@ -20,16 +19,36 @@ namespace MisFinanzas.Modulos
 
         private DateTime _mesSeleccionado = Periodo.InicioMes(DateTime.Today);
 
-        // Gasto que se está modificando en el formulario (null = se agrega uno nuevo)
-        private GastoDiario? _editando;
+        // Vehículos, para mostrar a cuál pertenece cada gasto directo
+        private List<Vehiculo> _vehiculos = new();
 
         public GastosDiariosView()
         {
             InitializeComponent();
-            Etiquetas.ActivarOpcionNueva(cbCategoria);
-            dpFecha.SelectedDate = DateTime.Today;
-            Loaded += (s, e) => CambiarMes(_mesSeleccionado);
+            Loaded += (s, e) =>
+            {
+                CambiarMes(_mesSeleccionado);
+                SincronizacionCelular.GastosRecibidos -= GastosDelCelular; // evita duplicados al volver a la pantalla
+                SincronizacionCelular.GastosRecibidos += GastosDelCelular;
+                SincronizacionCelular.AccionesAplicadas -= AccionesDelCelular;
+                SincronizacionCelular.AccionesAplicadas += AccionesDelCelular;
+            };
+            Unloaded += (s, e) =>
+            {
+                SincronizacionCelular.GastosRecibidos -= GastosDelCelular;
+                SincronizacionCelular.AccionesAplicadas -= AccionesDelCelular;
+            };
         }
+
+        // Un gasto borrado desde el celular
+        private void AccionesDelCelular(string texto) => Dispatcher.BeginInvoke(() => { Cargar(); toast.Show(texto); });
+
+        // --- Gastos que llegan del celular ---
+        private void GastosDelCelular(int nuevos) => Dispatcher.BeginInvoke(() =>
+        {
+            Cargar();
+            toast.Show(nuevos == 1 ? "Llegó 1 gasto del celular" : $"Llegaron {nuevos} gastos del celular");
+        });
 
         // --- Navegación entre meses ---
         private void BtnMesAnterior_Click(object sender, RoutedEventArgs e) => CambiarMes(_mesSeleccionado.AddMonths(-1));
@@ -38,7 +57,11 @@ namespace MisFinanzas.Modulos
 
         private void CambiarMes(DateTime mes)
         {
-            _mesSeleccionado = Periodo.InicioMes(mes);
+            using var dbInicio = new AppDbContext();
+            var inicio = InicioRegistro.Obtener(dbInicio);
+            _mesSeleccionado = Periodo.LimitarMes(mes, inicio, DateTime.Today);
+            btnMesAnterior.IsEnabled = _mesSeleccionado > Periodo.PrimerMesVisible(inicio, DateTime.Today);
+            btnMesSiguiente.IsEnabled = _mesSeleccionado < Periodo.InicioMes(DateTime.Today).AddMonths(1);
             lblPeriodo.Text = Periodo.Nombre(_mesSeleccionado);
             btnMesActual.Visibility = Periodo.EsMesActual(_mesSeleccionado) ? Visibility.Collapsed : Visibility.Visible;
             Cargar();
@@ -51,13 +74,10 @@ namespace MisFinanzas.Modulos
             try
             {
                 using var db = new AppDbContext();
-                var texto = cbCategoria.Text;
-                cbCategoria.ItemsSource = Etiquetas.ListaConNueva(db, Etiquetas.Gasto);
-                cbCategoria.Text = texto;
-
                 var desde = _mesSeleccionado;
                 var hasta = _mesSeleccionado.AddMonths(1);
                 gastos = db.GastosDiarios.Where(g => g.Fecha >= desde && g.Fecha < hasta).ToList();
+                _vehiculos = db.Vehiculos.ToList();
             }
             catch (Exception ex)
             {
@@ -112,16 +132,16 @@ namespace MisFinanzas.Modulos
                              .OrderByDescending(g => g.Key)
                              .Select(g => new DiaGastos
                              {
-                                 Titulo = (g.Key == hoy ? "HOY · " : g.Key == hoy.AddDays(-1) ? "AYER · " : string.Empty)
-                                          + g.Key.ToString("dddd d 'de' MMMM", CultureInfo.CurrentCulture).ToUpperInvariant(),
+                                 Relativo = g.Key == hoy ? "Hoy · " : g.Key == hoy.AddDays(-1) ? "Ayer · " : string.Empty,
+                                 Fecha = g.Key.ToString("dddd d 'de' MMMM", CultureInfo.CurrentCulture),
                                  Total = g.Sum(x => x.Monto),
-                                 Gastos = g.OrderByDescending(x => x.Fecha).Select(x => new FilaGastoDiario(x)).ToList()
+                                 Gastos = g.OrderByDescending(x => x.Fecha).Select(x => new FilaGastoDiario(x, NombreVehiculo(x.VehiculoId))).ToList()
                              })
                              .ToList();
             icDias.ItemsSource = dias;
-            lblTituloLista.Text = $"Movimientos · {Periodo.Nombre(_mesSeleccionado)}";
             txtSinGastos.Text = Periodo.EsMesActual(_mesSeleccionado)
-                ? "Aún no registras gastos este mes. Escribe el primero arriba."
+                ? (SincronizacionCelular.Conectado ? "Aún no registras gastos este mes. Regístralos desde el celular."
+                                                   : "Aún no hay gastos este mes. Conecta tu celular en Cuenta para registrarlos.")
                 : $"No hay gastos registrados en {Periodo.Nombre(_mesSeleccionado)}.";
             lblSinGastos.Visibility = dias.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
         }
@@ -142,6 +162,24 @@ namespace MisFinanzas.Modulos
                               .ToList();
             icCategorias.ItemsSource = filas;
             lblSinCategorias.Visibility = filas.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+
+            // Una sola barra repartida entre las categorías
+            barraCategorias.Children.Clear();
+            barraCategorias.ColumnDefinitions.Clear();
+            barraCategorias.Visibility = filas.Count == 0 ? Visibility.Collapsed : Visibility.Visible;
+            for (int i = 0; i < filas.Count; i++)
+            {
+                barraCategorias.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(Math.Max(filas[i].Proporcion, 0.01), GridUnitType.Star) });
+                var tramo = new Border
+                {
+                    CornerRadius = new CornerRadius(4),
+                    Background = (System.Windows.Media.Brush)new System.Windows.Media.BrushConverter().ConvertFromString(filas[i].Color)!,
+                    Margin = new Thickness(0, 0, i < filas.Count - 1 ? 2 : 0, 0),
+                    ToolTip = $"{filas[i].Nombre} · {filas[i].Proporcion:P0}"
+                };
+                Grid.SetColumn(tramo, i);
+                barraCategorias.Children.Add(tramo);
+            }
         }
 
         // Lo que más se repite (por descripción): "Almuerzo · 14 veces"
@@ -170,121 +208,7 @@ namespace MisFinanzas.Modulos
             lblSinFrecuentes.Visibility = filas.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
         }
 
-        // --- Registro rápido con una frase ---
-        // Al escribir la frase se llenan los campos; se pueden corregir antes de agregar
-        private void TxtFrase_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            var r = InterpreteGasto.Interpretar(txtFrase.Text);
-            txtDescripcion.Text = r.Descripcion;
-            if (r.Monto is decimal monto) txtMonto.Text = NumeroHelper.FormatearMoneda(monto);
-            else txtMonto.Clear();
-            if (r.Categoria.Length > 0) cbCategoria.Text = r.Categoria;
-            // La fecha solo se cambia si la frase la dice (ayer, antier); si no, la que esté elegida
-            if (r.Fecha != DateTime.Today || dpFecha.SelectedDate == null) dpFecha.SelectedDate = r.Fecha;
-        }
-
-        // Enter en la frase = Agregar
-        private void TxtFrase_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Enter) { BtnGuardar_Click(sender, e); e.Handled = true; }
-        }
-
-        private void BtnGuardar_Click(object sender, RoutedEventArgs e)
-        {
-            if (!NumeroHelper.TryParseMoneda(txtMonto.Text, out var monto) || monto <= 0)
-            {
-                MisFinanzas.Controles.Aviso.Mostrar("Escribe cuánto gastaste (por ejemplo: \"almuerzo 25 mil\").");
-                return;
-            }
-            var descripcion = string.IsNullOrWhiteSpace(txtDescripcion.Text) ? "Gasto" : txtDescripcion.Text.Trim();
-            var dia = dpFecha.SelectedDate ?? DateTime.Today;
-
-            try
-            {
-                using (var db = new AppDbContext())
-                {
-                    var categoria = Etiquetas.Asegurar(db, cbCategoria.Text, Etiquetas.Gasto);
-                    if (_editando == null)
-                    {
-                        // Hoy con la hora actual; otro día, a mediodía (no se sabe la hora)
-                        var fecha = dia.Date == DateTime.Today ? DateTime.Now : dia.Date.AddHours(12);
-                        db.GastosDiarios.Add(new GastoDiario
-                        {
-                            Fecha = fecha,
-                            Monto = monto,
-                            Categoria = categoria,
-                            Descripcion = descripcion,
-                            Origen = GastoDiario.OrigenPC,
-                            TextoOriginal = txtFrase.Text.Trim()
-                        });
-                        toast.Show($"Gasto registrado: {NumeroHelper.Moneda(monto)} · {Etiquetas.Mostrar(categoria)}");
-                    }
-                    else
-                    {
-                        var g = db.GastosDiarios.Find(_editando.Id);
-                        if (g != null)
-                        {
-                            // Si cambia el día se conserva la hora original
-                            g.Fecha = dia.Date + g.Fecha.TimeOfDay;
-                            g.Monto = monto;
-                            g.Categoria = categoria;
-                            g.Descripcion = descripcion;
-                        }
-                        toast.Show("Cambios guardados");
-                    }
-                    db.SaveChanges();
-                }
-            }
-            catch (Exception ex)
-            {
-                MisFinanzas.Controles.Aviso.Mostrar($"Error al guardar el gasto: {ex.Message}");
-                return;
-            }
-
-            // Si el gasto quedó en otro mes, se muestra ese mes
-            LimpiarFormulario();
-            if (Periodo.Clave(dia) != Periodo.Clave(_mesSeleccionado)) CambiarMes(dia);
-            else Cargar();
-            txtFrase.Focus();
-        }
-
-        private void LimpiarFormulario()
-        {
-            _editando = null;
-            txtFrase.TextChanged -= TxtFrase_TextChanged;
-            txtFrase.Clear();
-            txtFrase.TextChanged += TxtFrase_TextChanged;
-            txtDescripcion.Clear();
-            txtMonto.Clear();
-            cbCategoria.Text = string.Empty;
-            dpFecha.SelectedDate = DateTime.Today;
-            lblTituloFormulario.Text = "Registrar gasto";
-            btnGuardar.Content = "Agregar";
-            btnCancelarEdicion.Visibility = Visibility.Collapsed;
-        }
-
-        private void BtnCancelarEdicion_Click(object sender, RoutedEventArgs e) => LimpiarFormulario();
-
-        // Carga el gasto en el formulario para modificarlo
-        private void BtnEditar_Click(object sender, RoutedEventArgs e)
-        {
-            if (((Button)sender).DataContext is not FilaGastoDiario fila) return;
-            var g = fila.Gasto;
-            _editando = g;
-
-            txtFrase.TextChanged -= TxtFrase_TextChanged;
-            txtFrase.Text = g.TextoOriginal;
-            txtFrase.TextChanged += TxtFrase_TextChanged;
-            txtDescripcion.Text = g.Descripcion;
-            txtMonto.Text = NumeroHelper.FormatearMoneda(g.Monto);
-            cbCategoria.Text = g.Categoria;
-            dpFecha.SelectedDate = g.Fecha.Date;
-
-            lblTituloFormulario.Text = $"Editar \"{g.Descripcion}\"";
-            btnGuardar.Content = "Guardar";
-            btnCancelarEdicion.Visibility = Visibility.Visible;
-            txtDescripcion.Focus();
-        }
+        private string? NombreVehiculo(int? id) => id is int x ? _vehiculos.FirstOrDefault(v => v.Id == x)?.Nombre : null;
 
         // --- Eliminación con confirmación ---
         private GastoDiario? _pendienteEliminar;
@@ -316,9 +240,18 @@ namespace MisFinanzas.Modulos
                 using (var db = new AppDbContext())
                 {
                     var g = db.GastosDiarios.Find(gasto.Id);
-                    if (g != null) { db.GastosDiarios.Remove(g); db.SaveChanges(); }
+                    if (g != null)
+                    {
+                        db.GastosDiarios.Remove(g);
+                        VinculoVehiculo.Quitar(db, g.Uid);
+                        VinculoTarjeta.Ajustar(db, g.TarjetaId, g.Monto, null, 0); // se devuelve el cupo
+                        db.SaveChanges();
+                    }
                 }
-                if (_editando?.Id == gasto.Id) LimpiarFormulario();
+                VinculoVehiculo.RecargarVehiculos();
+                VinculoTarjeta.RecargarCreditos();
+                // También se borra en el celular
+                SincronizacionCelular.RegistrarCambio(gasto, borrado: true);
                 Cargar();
                 toast.Show("Gasto eliminado");
             }
@@ -328,11 +261,13 @@ namespace MisFinanzas.Modulos
             }
         }
 
-        private void MostrarOverlayConfirm(bool visible)
+        private void MostrarOverlayConfirm(bool visible) => MostrarOverlay(OverlayConfirm, visible);
+
+        private static void MostrarOverlay(FrameworkElement overlay, bool visible)
         {
-            OverlayConfirm.Visibility = visible ? Visibility.Visible : Visibility.Collapsed;
+            overlay.Visibility = visible ? Visibility.Visible : Visibility.Collapsed;
             if (visible)
-                OverlayConfirm.BeginAnimation(OpacityProperty,
+                overlay.BeginAnimation(OpacityProperty,
                     new System.Windows.Media.Animation.DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(150)));
         }
     }
@@ -341,14 +276,17 @@ namespace MisFinanzas.Modulos
 
     public class DiaGastos
     {
-        public string Titulo { get; set; } = string.Empty;
+        public string Relativo { get; set; } = string.Empty;   // "Hoy · ", "Ayer · " o vacío
+        public string Fecha { get; set; } = string.Empty;      // "jueves 15 de octubre"
         public decimal Total { get; set; }
         public List<FilaGastoDiario> Gastos { get; set; } = new();
     }
 
     public class FilaGastoDiario
     {
-        public FilaGastoDiario(GastoDiario gasto) => Gasto = gasto;
+        public FilaGastoDiario(GastoDiario gasto, string? vehiculo = null) { Gasto = gasto; Vehiculo = vehiculo; }
+        public string? Vehiculo { get; }
+        public bool TieneVehiculo => Vehiculo != null;
         public GastoDiario Gasto { get; }
         public DateTime Fecha => Gasto.Fecha;
         public string Descripcion => Gasto.Descripcion;
@@ -356,6 +294,15 @@ namespace MisFinanzas.Modulos
         public string Categoria => Etiquetas.Mostrar(Gasto.Categoria);
         public string ColorCategoria => Etiquetas.ColorTexto(Gasto.Categoria);
         public string FondoCategoria => Etiquetas.ColorFondo(Gasto.Categoria);
+        public object? Icono => Application.Current.TryFindResource(Etiquetas.Mostrar(Gasto.Categoria) switch
+        {
+            "Alimentación" => "IcoComida",
+            "Vehículos" or "Transporte" => "IcoVehiculos",
+            "Hogar" => "IcoCasa",
+            "Entretenimiento" => "IcoSonrisa",
+            "Médicos" => "IcoPersona",
+            _ => TieneVehiculo ? "IcoVehiculos" : "IcoEtiqueta"
+        });
         public bool DesdeCelular => Gasto.Origen == GastoDiario.OrigenCelular;
         public string? TextoOriginal => string.IsNullOrWhiteSpace(Gasto.TextoOriginal) ? null : $"Escribiste: \"{Gasto.TextoOriginal}\"";
     }
@@ -368,7 +315,7 @@ namespace MisFinanzas.Modulos
         public double Proporcion { get; set; }
         public double Resto => 1 - Proporcion;
         public string Color { get; set; } = "#8A94A3";
-        public string Detalle => $"{Proporcion:P0} de lo gastado · {Veces} {(Veces == 1 ? "vez" : "veces")}";
+        public string Detalle => $"{Proporcion:P0} · {Veces} {(Veces == 1 ? "vez" : "veces")}";
     }
 
     public class FilaFrecuente

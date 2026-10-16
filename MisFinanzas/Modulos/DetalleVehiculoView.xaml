@@ -98,8 +98,15 @@
                                 <ColumnDefinition Width="130"/>
                                 <ColumnDefinition Width="88"/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock Text="{Binding Concepto}" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"
-                                       Style="{StaticResource ViewStyle}"/>
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Style="{StaticResource ViewStyle}">
+                                <TextBlock Text="{Binding Concepto}" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                                <!-- Registrado en Día a día (o en el celular): cuenta en el gasto del mes allí -->
+                                <Border Background="{StaticResource AzulSuave}" CornerRadius="6" Padding="6,1" Margin="8,0,0,0" VerticalAlignment="Center"
+                                        Visibility="{Binding DesdeDiaADia, Converter={StaticResource BoolAVisible}}"
+                                        ToolTip="Registrado en Día a día: al editarlo o borrarlo aquí también cambia allá">
+                                    <TextBlock Text="Día a día" FontSize="11.5" FontWeight="SemiBold" Foreground="{StaticResource Azul}"/>
+                                </Border>
+                            </StackPanel>
                             <TextBox Text="{Binding Concepto, UpdateSourceTrigger=LostFocus}" Style="{StaticResource EditInputInline}" Margin="0,0,10,0"
                                      AutomationProperties.Name="Concepto"/>
                             <TextBlock Grid.Column="1" Text="{Binding Fecha, StringFormat='{}{0:dd/MM/yyyy}'}" Foreground="{StaticResource Texto2}" VerticalAlignment="Center"/>

@@ -1,0 +1,52 @@
+.redondo { border-radius: 14px; width: 46px; height: 46px; }
+.busqueda { margin-bottom: 12px; }
+
+/* Total del periodo */
+.resumen { padding: 20px 18px; }
+.rotulo { color: var(--texto-menu); font-size: 15px; }
+.fila-total { display: flex; align-items: flex-end; justify-content: space-between; gap: 10px; margin-top: 2px; }
+.total { font-size: 34px; font-weight: 800; letter-spacing: -.8px; line-height: 1.2; }
+.cuantos { color: var(--texto-menu); font-size: 14.5px; padding-bottom: 6px; }
+.barra { display: flex; gap: 3px; height: 10px; margin-top: 16px; }
+.barra span { flex-basis: 0; border-radius: 5px; min-width: 6px; }
+.leyenda { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 12px; font-size: 14px; }
+.leyenda span { display: inline-flex; align-items: center; gap: 7px; }
+.leyenda i { width: 10px; height: 10px; border-radius: 3px; }
+.leyenda b { font-weight: 800; }
+
+/* Gastos sin enviar */
+.aviso-envio {
+  display: flex; align-items: center; gap: 12px; background: var(--naranja-suave); color: var(--naranja-texto);
+  border: 1px solid var(--naranja-borde); border-radius: 16px; padding: 12px 12px 12px 16px; font-size: 15px;
+}
+.aviso-envio span { flex: 1; }
+.aviso-envio button {
+  border: 0; border-radius: 11px; background: var(--naranja); color: #fff; font-weight: 800; padding: 11px 14px; white-space: nowrap;
+}
+
+/* Lista */
+.titulo-dia { display: flex; justify-content: space-between; align-items: baseline; margin: 22px 2px 8px; }
+.titulo-dia span:first-child { font-size: 13px; font-weight: 800; letter-spacing: .6px; color: var(--texto2); }
+.pista { font-size: 13px; color: var(--texto2); }
+
+.deslizable { position: relative; margin-bottom: 10px; border-radius: 16px; overflow: hidden; }
+.deslizable.abierta { background: var(--rojo); }
+.borrar {
+  position: absolute; right: 0; top: 0; bottom: 0; width: 96px; border: 0; background: var(--rojo); color: #fff; visibility: hidden;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-weight: 800;
+}
+.gasto {
+  position: relative; display: flex; align-items: center; gap: 14px; background: var(--tarjeta);
+  border: 1px solid var(--borde); border-radius: 16px; padding: 14px; touch-action: pan-y; user-select: none;
+  transition: transform .22s ease;
+}
+.gasto.arrastrando { transition: none; }
+.gasto.con-borrar { border-color: var(--rojo-borde); }
+.icono-cat { width: 46px; height: 46px; border-radius: 12px; display: grid; place-items: center; flex: none; }
+.info { flex: 1; min-width: 0; }
+.info strong, .lado strong { display: block; font-size: 16px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.info span { color: var(--texto2); font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; margin-top: 2px; }
+.lado { text-align: right; flex: none; }
+.lado strong { font-weight: 800; }
+.lado .estado { display: block; margin-top: 2px; }
+.deslizable.abierta .borrar { visibility: visible; }

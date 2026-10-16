@@ -1,0 +1,41 @@
+{
+  "$schema": "./node_modules/@angular/service-worker/config/schema.json",
+  "index": "/index.html",
+  "assetGroups": [
+    {
+      "name": "app",
+      "installMode": "prefetch",
+      "resources": {
+        "files": [
+          "/icons/logo.svg",
+          "/index.csr.html",
+          "/index.html",
+          "/manifest.webmanifest",
+          "/*.css",
+          "/*.js"
+        ]
+      }
+    },
+    {
+      "name": "assets",
+      "installMode": "lazy",
+      "updateMode": "prefetch",
+      "resources": {
+        "files": [
+          "/**/*.(svg|cur|jpg|jpeg|png|apng|webp|avif|gif|otf|ttf|woff|woff2)"
+        ]
+      }
+    }
+  ],
+  "appData": {
+    "version": "1.9.2",
+    "novedades": "# Mis Finanzas 1.9.2\r\n\r\n- PC: se retiran las casillas de selección de Cuentas del mes y los compromisos de crédito.\r\n- La columna Estado muestra un botón Marcar pagado con círculo.\r\n- Al pagar aparece una cápsula verde con check y Pagado; al pasar el cursor muestra Deshacer.\r\n- Deshacer revierte el pago del mes y actualiza los totales y el color según el vencimiento.\r\n- Se conservan los colores blanco, amarillo, rojo y verde y el historial por mes.\r\n"
+  },
+  "navigationUrls": [
+    "/**",
+    "!/**/*.*",
+    "!/**/__*",
+    "!/**/__*/**",
+    "!/actualizaciones/**"
+  ]
+}

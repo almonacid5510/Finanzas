@@ -1,4 +1,4 @@
-// ============================================================
+﻿// ============================================================
 //  Proyecto: Mis Finanzas
 //  Autoria: Juan Almonacid
 //  Copyright (c) 2026 Juan Almonacid. Todos los derechos reservados.
@@ -204,6 +204,66 @@ namespace MisFinanzas.Modulos
             return db.PagosCredito.FirstOrDefault(p => p.CreditoId == creditoId && p.Mes == clave && p.Tipo == TipoCuota);
         }
 
+        // ===== Tarjeta de crédito: cada compra se difiere a sus cuotas =====
+
+        /// <summary>Cuota de una compra con tarjeta en un mes: número (1 = mes siguiente a la compra), total de cuotas y reparto.</summary>
+        public record CuotaCompra(GastoDiario Compra, int Numero, int Total, decimal Cuota, decimal Interes, decimal Capital);
+
+        /// <summary>
+        /// Cuota de la tarjeta en el mes: la suma de la cuota de cada compra vigente.
+        /// A 1 cuota se paga completa el mes siguiente, sin intereses; a más cuotas, cuota fija con la tasa de la tarjeta.
+        /// El capital no pasa de lo que se debe (por si se hicieron pagos extra).
+        /// </summary>
+        public static (decimal Cuota, decimal Interes, decimal Capital, List<CuotaCompra> Detalle) CuotaTarjeta(
+            Credito tarjeta, IEnumerable<GastoDiario> compras, DateTime mes)
+        {
+            double r = (double)TasaMensual(tarjeta.TasaEA);
+            var detalle = new List<CuotaCompra>();
+            foreach (var c in compras.Where(c => c.TarjetaId == tarjeta.Id && c.Monto > 0))
+            {
+                int n = Math.Max(1, c.Cuotas);
+                int k = (mes.Year - c.Fecha.Year) * 12 + mes.Month - c.Fecha.Month; // 1 = el mes siguiente a la compra
+                if (k < 1 || k > n) continue;
+
+                decimal cuota, interes;
+                if (n == 1 || r <= 0)
+                {
+                    cuota = Math.Round(c.Monto / n, 0, MidpointRounding.AwayFromZero);
+                    interes = 0;
+                }
+                else
+                {
+                    double p = (double)c.Monto, fija = p * r / (1 - Math.Pow(1 + r, -n));
+                    double saldo = p * Math.Pow(1 + r, k - 1) - fija * (Math.Pow(1 + r, k - 1) - 1) / r; // antes de esta cuota
+                    cuota = Math.Round((decimal)fija, 0, MidpointRounding.AwayFromZero);
+                    interes = Math.Round((decimal)(saldo * r), 0, MidpointRounding.AwayFromZero);
+                }
+                detalle.Add(new CuotaCompra(c, k, n, cuota, interes, cuota - interes));
+            }
+            decimal capital = Math.Min(detalle.Sum(d => d.Capital), Math.Max(0, tarjeta.Disponible));
+            decimal intereses = detalle.Sum(d => d.Interes);
+            return (capital + intereses, intereses, capital, detalle);
+        }
+
+        /// <summary>Registra el pago de la cuota de la tarjeta del mes: la parte de capital baja la deuda.</summary>
+        public static PagoCredito PagarCuotaTarjeta(AppDbContext db, int tarjetaId, DateTime mes, decimal interes, decimal capital)
+        {
+            var tarjeta = db.Creditos.Find(tarjetaId) ?? throw new InvalidOperationException("La tarjeta ya no existe.");
+            capital = Math.Min(capital, tarjeta.Disponible);
+            var pago = new PagoCredito
+            {
+                CreditoId = tarjetaId, Mes = Periodo.Clave(mes), Fecha = DateTime.Now, Tipo = TipoCuota,
+                Monto = interes + capital, Interes = interes, Capital = capital,
+                SaldoAnterior = tarjeta.Disponible, SaldoNuevo = tarjeta.Disponible - capital
+            };
+            db.PagosCredito.Add(pago);
+            tarjeta.Disponible = pago.SaldoNuevo;
+            tarjeta.Pagado = true;
+            tarjeta.MesPagado = pago.Mes;
+            db.SaveChanges();
+            return pago;
+        }
+
         /// <summary>Cuota de cada mes futuro según el plan de cada crédito (para la proyección).</summary>
         public static decimal CuotasEnMes(IEnumerable<Credito> creditos, IEnumerable<PagoCredito> pagos, DateTime mes)
         {
@@ -212,7 +272,7 @@ namespace MisFinanzas.Modulos
                                      .GroupBy(p => p.CreditoId)
                                      .ToDictionary(g => g.Key, g => g.Sum(p => p.Monto));
             decimal total = 0;
-            foreach (var c in creditos)
+            foreach (var c in creditos.Where(c => !c.EsTarjeta)) // las tarjetas van aparte (solo sus intereses son gasto)
             {
                 if (cuotasPagadas.TryGetValue(c.Id, out var pagado)) { total += pagado; continue; }
 

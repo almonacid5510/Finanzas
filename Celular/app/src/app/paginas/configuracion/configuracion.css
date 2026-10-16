@@ -1,0 +1,18 @@
+.fila { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.cobros p, .cobros small { color: var(--texto2, #667085); font-size: 13px; line-height: 1.5; }
+.cobros .fila { flex-wrap: wrap; }
+.cobros h2 { margin: 0; }
+.agregar-cobro { background: var(--verde, #087f5b); color: white; border: 0; border-radius: 9px; padding: 10px 12px; font-weight: 700; cursor: pointer; }
+.cobros form { display: grid; gap: 12px; margin: 16px 0; }
+.cobros label { display: grid; gap: 5px; font-size: 13px; font-weight: 600; }
+.cobros input:not([type=checkbox]) { width: 100%; box-sizing: border-box; border: 1px solid var(--borde-input, #ccd0d5); border-radius: 9px; padding: 12px; font: inherit; }
+.cobros .opcion-saldo { display: flex; align-items: center; }
+.cobro { border-top: 1px solid var(--borde); padding: 12px 0; }
+.cobro div { flex: 1; min-width: 120px; }
+.cobro small { display: block; }
+.cobro button { border: 0; background: transparent; font-size: 24px; padding: 8px; color: #b42318; }
+.cobros [role=alert] { color: #b42318; }
+
+.cobros select { box-sizing: border-box; width: 100%; padding: 12px; border-radius: 9px; border: 1px solid var(--borde-input, #ccd0d5); font: inherit; background: white; }
+.cobros label[hidden] { display: none; }
+.cobro button.agregar-cobro { background: var(--verde, #087f5b); color: white; font-size: 13px; }
