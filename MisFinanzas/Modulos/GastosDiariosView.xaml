@@ -46,7 +46,7 @@
             <Border Style="{StaticResource TarjetaOscura}" Padding="18,16">
                 <StackPanel>
                     <TextBlock x:Name="lblTituloTotal" Text="GASTADO EN EL MES" Style="{StaticResource EtiquetaSeccion}" Foreground="{StaticResource TextoMenu}"/>
-                    <TextBlock x:Name="lblTotal" Style="{StaticResource CifraKpi}" Foreground="White" Margin="0,8,0,2"/>
+                    <TextBlock x:Name="lblTotal" Style="{StaticResource CifraKpi}" Foreground="{StaticResource T_T_FFFFFF}" Margin="0,8,0,2"/>
                     <TextBlock x:Name="lblTotalDetalle" Style="{StaticResource TextoSecundario}" Foreground="{StaticResource TextoMenu}"/>
                 </StackPanel>
             </Border>
@@ -68,7 +68,7 @@
                     ToolTip="Gastos pequeños (hasta $ 20.000) que, sumados, se notan">
                 <StackPanel>
                     <TextBlock Text="GASTOS HORMIGA" Style="{StaticResource EtiquetaSeccion}"/>
-                    <TextBlock x:Name="lblHormiga" Style="{StaticResource CifraKpi}" Foreground="#C4320A" Margin="0,8,0,2"/>
+                    <TextBlock x:Name="lblHormiga" Style="{StaticResource CifraKpi}" Foreground="{StaticResource T_T_C4320A}" Margin="0,8,0,2"/>
                     <TextBlock x:Name="lblHormigaDetalle" Style="{StaticResource TextoSecundario}"/>
                 </StackPanel>
             </Border>
@@ -206,7 +206,7 @@
 
     <!-- ===== CONFIRMACIÓN DE ELIMINACIÓN ===== -->
     <Grid x:Name="OverlayConfirm" Background="#660F1B2D" Visibility="Collapsed" Panel.ZIndex="100">
-        <Border Background="White" CornerRadius="16" Width="400" Padding="26" HorizontalAlignment="Center" VerticalAlignment="Center">
+        <Border Background="{StaticResource T_F_FFFFFF}" CornerRadius="16" Width="400" Padding="26" HorizontalAlignment="Center" VerticalAlignment="Center">
             <StackPanel>
                 <Border Width="48" Height="48" Background="{StaticResource RojoSuave}" CornerRadius="12" HorizontalAlignment="Left" Margin="0,0,0,14">
                     <c:Icono Geometria="{StaticResource IcoEliminar}" Tamano="20" Foreground="{StaticResource Rojo}" HorizontalAlignment="Center"/>

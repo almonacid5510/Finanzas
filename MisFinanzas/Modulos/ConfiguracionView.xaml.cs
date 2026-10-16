@@ -29,6 +29,9 @@ namespace MisFinanzas.Modulos
             chkRecordarPagos.IsChecked = preferencias.RecordarPagos;
             chkVencidosAlAbrir.IsChecked = preferencias.MostrarVencidosAlAbrir;
             lblDiasAviso.Text = $"{Preferencias.DiasAviso} días antes de cada vencimiento";
+            _cargandoTema = true;
+            (preferencias.Tema switch { MisFinanzas.Tema.Oscuro => temaOscuro, MisFinanzas.Tema.Rosado => temaRosado, _ => temaClaro }).IsChecked = true;
+            _cargandoTema = false;
 
             _relojCelular.Tick += (_, _) => MostrarCelular();
             Loaded += (_, _) =>
@@ -78,6 +81,26 @@ namespace MisFinanzas.Modulos
             preferencias.MostrarVencidosAlAbrir = chkVencidosAlAbrir.IsChecked == true;
             try { preferencias.Guardar(); toast.Show("Preferencia guardada"); }
             catch (Exception ex) { MisFinanzas.Controles.Aviso.Mostrar("No se pudo guardar la preferencia: " + ex.Message); }
+        }
+
+        // --- Tema ---
+        private bool _cargandoTema;
+
+        private void Tema_Checked(object sender, RoutedEventArgs e)
+        {
+            if (_cargandoTema || (sender as FrameworkElement)?.Tag is not string tema) return;
+            Preferencias.Actual.Tema = tema;
+            try { Preferencias.Actual.Guardar(); }
+            catch (Exception ex) { MisFinanzas.Controles.Aviso.Mostrar("No se pudo guardar el tema: " + ex.Message); return; }
+            // Las pantallas toman sus colores al cargar: el tema nuevo se ve al reiniciar
+            pnlReiniciarTema.Visibility = tema == MisFinanzas.Tema.Actual ? Visibility.Collapsed : Visibility.Visible;
+        }
+
+        private void ReiniciarTema_Click(object sender, RoutedEventArgs e)
+        {
+            if (!PuedeActualizar) { MessageBox.Show("Guarda o cancela la edición de tu nómina antes de reiniciar.", "Mis Finanzas"); return; }
+            if (Environment.ProcessPath is string exe) Process.Start(new ProcessStartInfo(exe) { UseShellExecute = true });
+            Application.Current.Shutdown();
         }
 
         // --- Celular ---

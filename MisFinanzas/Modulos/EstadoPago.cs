@@ -4,6 +4,12 @@ namespace MisFinanzas.Modulos
     /// <summary>Colores de una obligación según su pago y fecha límite, sin modificar el historial.</summary>
     public record EstadoPago(string Texto, string Fondo, string Color, string FondoFila, string Acento)
     {
+        // Colores según el tema (Claro, Oscuro o Rosado)
+        public string Fondo { get; init; } = MisFinanzas.Tema.Fondo(Fondo);
+        public string Color { get; init; } = MisFinanzas.Tema.Texto(Color);
+        public string FondoFila { get; init; } = MisFinanzas.Tema.Fondo(FondoFila);
+        public string Acento { get; init; } = MisFinanzas.Tema.Acento(Acento);
+
         public static EstadoPago Evaluar(bool pagado, DateTime? vence, DateTime hoy)
         {
             if (pagado) return new("Pagado", "#D1FADF", "#075E46", "#E7F5EF", "#12B76A");

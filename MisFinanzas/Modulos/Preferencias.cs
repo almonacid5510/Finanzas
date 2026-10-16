@@ -19,6 +19,8 @@ namespace MisFinanzas.Modulos
 
         public bool RecordarPagos { get; set; } = true;
         public bool MostrarVencidosAlAbrir { get; set; } = true;
+        /// <summary>Tema de colores (Tema.Claro, Tema.Oscuro o Tema.Rosado); se aplica al arrancar.</summary>
+        public string Tema { get; set; } = MisFinanzas.Tema.Claro;
 
         private static readonly string Ruta =
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "MisFinanzas", "preferencias.json");

@@ -129,9 +129,9 @@ namespace MisFinanzas.Modulos
             return Paleta[Math.Abs(hash % Paleta.Length)];
         }
 
-        public static string ColorTexto(string? nombre) => Color(nombre).Texto;
-        public static string ColorFondo(string? nombre) => Color(nombre).Fondo;
-        public static string ColorBarra(string? nombre) => Color(nombre).Barra;
+        public static string ColorTexto(string? nombre) => MisFinanzas.Tema.Texto(Color(nombre).Texto);
+        public static string ColorFondo(string? nombre) => MisFinanzas.Tema.Fondo(Color(nombre).Fondo);
+        public static string ColorBarra(string? nombre) => MisFinanzas.Tema.Acento(Color(nombre).Barra);
         /// <summary>Borde suave de la insignia (el color de la barra al 35 %) para que se vea sobre filas de color.</summary>
         public static string ColorBorde(string? nombre) => "#59" + Color(nombre).Barra.TrimStart('#');
     }

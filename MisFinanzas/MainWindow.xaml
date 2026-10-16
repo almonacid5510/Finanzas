@@ -34,7 +34,7 @@
                                     <c:Icono Geometria="{Binding Tag, RelativeSource={RelativeSource TemplatedParent}}"
                                              Tamano="18" Foreground="{TemplateBinding Foreground}"/>
                                     <!-- Punto rojo de pendientes: solo con el menú cerrado (abierto se ve el contador) -->
-                                    <Ellipse x:Name="punto" Width="9" Height="9" Fill="#F04438" Stroke="{StaticResource Oscuro}" StrokeThickness="1.5"
+                                    <Ellipse x:Name="punto" Width="9" Height="9" Fill="{StaticResource T_A_F04438}" Stroke="{StaticResource Oscuro}" StrokeThickness="1.5"
                                              HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-4,-5,0" Visibility="Collapsed"
                                              Opacity="{Binding Opacity, ElementName=refCerrado}"/>
                                 </Grid>
@@ -48,15 +48,15 @@
                                 <Setter TargetName="punto" Property="Visibility" Value="Visible"/>
                             </Trigger>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="bd" Property="Background" Value="#1A2A40"/>
-                                <Setter Property="Foreground" Value="White"/>
+                                <Setter TargetName="bd" Property="Background" Value="{StaticResource T_F_1A2A40}"/>
+                                <Setter Property="Foreground" Value="{StaticResource T_T_FFFFFF}"/>
                             </Trigger>
                             <Trigger Property="IsKeyboardFocused" Value="True">
-                                <Setter TargetName="bd" Property="Background" Value="#1A2A40"/>
+                                <Setter TargetName="bd" Property="Background" Value="{StaticResource T_F_1A2A40}"/>
                             </Trigger>
                             <Trigger Property="local:NavState.IsActive" Value="True">
                                 <Setter TargetName="bd" Property="Background" Value="{StaticResource OscuroActivo}"/>
-                                <Setter Property="Foreground" Value="White"/>
+                                <Setter Property="Foreground" Value="{StaticResource T_T_FFFFFF}"/>
                                 <Setter Property="FontWeight" Value="Bold"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
@@ -88,16 +88,16 @@
                 <!-- Logo -->
                 <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="6,0,0,24">
                     <Border Width="36" Height="36" CornerRadius="9" Background="{StaticResource Verde}">
-                        <c:Icono Geometria="{StaticResource IcoLogo}" Tamano="19" Foreground="White" HorizontalAlignment="Center"/>
+                        <c:Icono Geometria="{StaticResource IcoLogo}" Tamano="19" Foreground="{StaticResource T_T_FFFFFF}" HorizontalAlignment="Center"/>
                     </Border>
                     <StackPanel x:Name="panelNombreApp" Margin="12,0,0,0" VerticalAlignment="Center" Opacity="0">
-                        <TextBlock Text="Mis Finanzas" FontSize="15" FontWeight="Bold" Foreground="White"/>
-                        <TextBlock Text="Gestor personal" FontSize="12" Foreground="#9AA6B6"/>
+                        <TextBlock Text="Mis Finanzas" FontSize="15" FontWeight="Bold" Foreground="{StaticResource T_T_FFFFFF}"/>
+                        <TextBlock Text="Gestor personal" FontSize="12" Foreground="{StaticResource T_T_9AA6B6}"/>
                     </StackPanel>
                 </StackPanel>
 
                 <!-- Autoría al pie del menú (solo con el menú abierto) -->
-                <TextBlock DockPanel.Dock="Bottom" Text="© 2026 Juan Almonacid" FontSize="11.5" Foreground="#9AA6B6"
+                <TextBlock DockPanel.Dock="Bottom" Text="© 2026 Juan Almonacid" FontSize="11.5" Foreground="{StaticResource T_T_9AA6B6}"
                            Margin="10,14,0,0" TextWrapping="NoWrap" Opacity="{Binding Opacity, ElementName=panelNombreApp}"/>
 
                 <!-- Cuenta (nómina, avisos, celular y versión) permanece al pie del menú. -->
@@ -115,9 +115,9 @@
                             Click="NavCuentas_Click" Style="{StaticResource NavButtonStyle}">
                         <DockPanel>
                             <!-- Contador de pagos vencidos -->
-                            <Border x:Name="insigniaVencidas" DockPanel.Dock="Right" Background="#D92D20" CornerRadius="9"
+                            <Border x:Name="insigniaVencidas" DockPanel.Dock="Right" Background="{StaticResource T_F_D92D20}" CornerRadius="9"
                                     MinWidth="18" Height="18" Padding="5,0" Visibility="Collapsed" VerticalAlignment="Center">
-                                <TextBlock x:Name="lblVencidas" FontSize="11" FontWeight="Bold" Foreground="White"
+                                <TextBlock x:Name="lblVencidas" FontSize="11" FontWeight="Bold" Foreground="{StaticResource T_T_FFFFFF}"
                                            HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
                             <TextBlock Text="Cuentas" VerticalAlignment="Center"/>
@@ -137,7 +137,7 @@
 
         <!-- ============ CONTENIDO ============ -->
         <DockPanel Grid.Column="1">
-         <Border x:Name="avisoActualizacion" DockPanel.Dock="Top" Background="#E7F5EF" Padding="18,10" Visibility="Collapsed">
+         <Border x:Name="avisoActualizacion" DockPanel.Dock="Top" Background="{StaticResource T_F_E7F5EF}" Padding="18,10" Visibility="Collapsed">
           <DockPanel>
            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
             <Button Content="Más tarde" Click="PosponerActualizacion_Click" Style="{StaticResource BotonSecundario}" Margin="0,0,8,0"/>

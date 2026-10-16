@@ -12,6 +12,60 @@
                     xmlns:c="clr-namespace:MisFinanzas.Controles"
                     xmlns:m="clr-namespace:MisFinanzas.Modulos">
 
+    <!-- Colores fijos de las pantallas, con su uso (F fondo/borde, T texto, A acento): Tema los convierte en Oscuro y Rosado -->
+    <SolidColorBrush x:Key="T_A_12B76A" Color="#12B76A"/>
+    <SolidColorBrush x:Key="T_A_98A2B3" Color="#98A2B3"/>
+    <SolidColorBrush x:Key="T_A_C8CFDA" Color="#C8CFDA"/>
+    <SolidColorBrush x:Key="T_A_D92D20" Color="#D92D20"/>
+    <SolidColorBrush x:Key="T_A_F04438" Color="#F04438"/>
+    <SolidColorBrush x:Key="T_A_F79009" Color="#F79009"/>
+    <SolidColorBrush x:Key="T_A_FFFFFF" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="T_F_0F1B2D" Color="#0F1B2D"/>
+    <SolidColorBrush x:Key="T_F_1A2A40" Color="#1A2A40"/>
+    <SolidColorBrush x:Key="T_F_27AE60" Color="#27AE60"/>
+    <SolidColorBrush x:Key="T_F_2A3A52" Color="#2A3A52"/>
+    <SolidColorBrush x:Key="T_F_2D3748" Color="#2D3748"/>
+    <SolidColorBrush x:Key="T_F_3A4A61" Color="#3A4A61"/>
+    <SolidColorBrush x:Key="T_F_475467" Color="#475467"/>
+    <SolidColorBrush x:Key="T_F_75E0A7" Color="#75E0A7"/>
+    <SolidColorBrush x:Key="T_F_98A2B3" Color="#98A2B3"/>
+    <SolidColorBrush x:Key="T_F_9AA4B2" Color="#9AA4B2"/>
+    <SolidColorBrush x:Key="T_F_ABEFC6" Color="#ABEFC6"/>
+    <SolidColorBrush x:Key="T_F_AEB8C6" Color="#AEB8C6"/>
+    <SolidColorBrush x:Key="T_F_B54708" Color="#B54708"/>
+    <SolidColorBrush x:Key="T_F_B9C2CF" Color="#B9C2CF"/>
+    <SolidColorBrush x:Key="T_F_C9D7F8" Color="#C9D7F8"/>
+    <SolidColorBrush x:Key="T_F_D0D5DD" Color="#D0D5DD"/>
+    <SolidColorBrush x:Key="T_F_D92D20" Color="#D92D20"/>
+    <SolidColorBrush x:Key="T_F_E7F5EF" Color="#E7F5EF"/>
+    <SolidColorBrush x:Key="T_F_ECE6FD" Color="#ECE6FD"/>
+    <SolidColorBrush x:Key="T_F_EEF1F5" Color="#EEF1F5"/>
+    <SolidColorBrush x:Key="T_F_F04438" Color="#F04438"/>
+    <SolidColorBrush x:Key="T_F_F79009" Color="#F79009"/>
+    <SolidColorBrush x:Key="T_F_FEDF89" Color="#FEDF89"/>
+    <SolidColorBrush x:Key="T_F_FEE4E2" Color="#FEE4E2"/>
+    <SolidColorBrush x:Key="T_F_FEF6E7" Color="#FEF6E7"/>
+    <SolidColorBrush x:Key="T_F_FFD43B" Color="#FFD43B"/>
+    <SolidColorBrush x:Key="T_F_FFF8F7" Color="#FFF8F7"/>
+    <SolidColorBrush x:Key="T_F_FFFAEB" Color="#FFFAEB"/>
+    <SolidColorBrush x:Key="T_F_FFFFFF" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="T_T_067647" Color="#067647"/>
+    <SolidColorBrush x:Key="T_T_075E46" Color="#075E46"/>
+    <SolidColorBrush x:Key="T_T_0F1B2D" Color="#0F1B2D"/>
+    <SolidColorBrush x:Key="T_T_175CD3" Color="#175CD3"/>
+    <SolidColorBrush x:Key="T_T_1D4FB8" Color="#1D4FB8"/>
+    <SolidColorBrush x:Key="T_T_1E3A5F" Color="#1E3A5F"/>
+    <SolidColorBrush x:Key="T_T_6CE9A6" Color="#6CE9A6"/>
+    <SolidColorBrush x:Key="T_T_7A271A" Color="#7A271A"/>
+    <SolidColorBrush x:Key="T_T_93370D" Color="#93370D"/>
+    <SolidColorBrush x:Key="T_T_9AA6B6" Color="#9AA6B6"/>
+    <SolidColorBrush x:Key="T_T_A9C5FF" Color="#A9C5FF"/>
+    <SolidColorBrush x:Key="T_T_B42318" Color="#B42318"/>
+    <SolidColorBrush x:Key="T_T_B54708" Color="#B54708"/>
+    <SolidColorBrush x:Key="T_T_C4320A" Color="#C4320A"/>
+    <SolidColorBrush x:Key="T_T_F97066" Color="#F97066"/>
+    <SolidColorBrush x:Key="T_T_FFFFFF" Color="#FFFFFF"/>
+
     <!-- Convertidores de presentación -->
     <c:AnilloConverter x:Key="Anillo"/>
     <c:EstrellaConverter x:Key="Estrella"/>
@@ -128,8 +182,8 @@
     <!-- Opción "Nueva" al final de las listas de etiquetas (Modulos/Etiquetas.cs) -->
     <DataTemplate DataType="{x:Type m:NuevaEtiqueta}">
         <StackPanel Orientation="Horizontal">
-            <c:Icono Geometria="{StaticResource IcoEditar}" Tamano="13" Foreground="{StaticResource Azul}" Margin="0,0,8,0"/>
-            <TextBlock Text="Nueva" Foreground="{StaticResource Azul}" FontWeight="SemiBold"/>
+            <c:Icono Geometria="{StaticResource IcoEditar}" Tamano="13" Foreground="{DynamicResource Azul}" Margin="0,0,8,0"/>
+            <TextBlock Text="Nueva" Foreground="{DynamicResource Azul}" FontWeight="SemiBold"/>
         </StackPanel>
     </DataTemplate>
 
@@ -137,34 +191,34 @@
     <Style x:Key="TituloPagina" TargetType="TextBlock">
         <Setter Property="FontSize" Value="24"/>
         <Setter Property="FontWeight" Value="ExtraBold"/>
-        <Setter Property="Foreground" Value="{StaticResource Texto}"/>
+        <Setter Property="Foreground" Value="{DynamicResource Texto}"/>
     </Style>
     <Style x:Key="SubtituloPagina" TargetType="TextBlock">
         <Setter Property="FontSize" Value="13"/>
-        <Setter Property="Foreground" Value="{StaticResource Texto2}"/>
+        <Setter Property="Foreground" Value="{DynamicResource Texto2}"/>
         <Setter Property="Margin" Value="0,1,0,0"/>
     </Style>
     <!-- Título de tarjeta ("¿A dónde va tu ingreso?") -->
     <Style x:Key="TituloTarjeta" TargetType="TextBlock">
         <Setter Property="FontSize" Value="15"/>
         <Setter Property="FontWeight" Value="Bold"/>
-        <Setter Property="Foreground" Value="{StaticResource Texto}"/>
+        <Setter Property="Foreground" Value="{DynamicResource Texto}"/>
     </Style>
     <!-- Etiqueta de sección en mayúsculas ("SALDO QUE DEBES") -->
     <Style x:Key="EtiquetaSeccion" TargetType="TextBlock">
         <Setter Property="FontSize" Value="12"/>
         <Setter Property="FontWeight" Value="Bold"/>
-        <Setter Property="Foreground" Value="{StaticResource Texto2}"/>
+        <Setter Property="Foreground" Value="{DynamicResource Texto2}"/>
     </Style>
     <Style x:Key="TextoSecundario" TargetType="TextBlock">
         <Setter Property="FontSize" Value="12.5"/>
-        <Setter Property="Foreground" Value="{StaticResource Texto2}"/>
+        <Setter Property="Foreground" Value="{DynamicResource Texto2}"/>
     </Style>
     <!-- Cifra grande de un indicador -->
     <Style x:Key="CifraKpi" TargetType="TextBlock">
         <Setter Property="FontSize" Value="26"/>
         <Setter Property="FontWeight" Value="ExtraBold"/>
-        <Setter Property="Foreground" Value="{StaticResource Texto}"/>
+        <Setter Property="Foreground" Value="{DynamicResource Texto}"/>
         <Setter Property="Margin" Value="0,6,0,2"/>
     </Style>
 
@@ -172,14 +226,14 @@
     <Style x:Key="FieldLabel" TargetType="TextBlock">
         <Setter Property="FontSize" Value="12.5"/>
         <Setter Property="FontWeight" Value="Medium"/>
-        <Setter Property="Foreground" Value="{StaticResource Texto2}"/>
+        <Setter Property="Foreground" Value="{DynamicResource Texto2}"/>
         <Setter Property="Margin" Value="1,0,0,5"/>
     </Style>
     <!-- Label asociado a su campo (Target): lo anuncian los lectores de pantalla -->
     <Style x:Key="Etiqueta" TargetType="Label">
         <Setter Property="FontSize" Value="12.5"/>
         <Setter Property="FontWeight" Value="Medium"/>
-        <Setter Property="Foreground" Value="{StaticResource Texto2}"/>
+        <Setter Property="Foreground" Value="{DynamicResource Texto2}"/>
         <Setter Property="Padding" Value="1,0,0,5"/>
     </Style>
 
@@ -192,11 +246,11 @@
         <Setter Property="Height" Value="40"/>
         <Setter Property="Padding" Value="11,0"/>
         <Setter Property="FontSize" Value="13"/>
-        <Setter Property="Foreground" Value="{StaticResource Texto}"/>
+        <Setter Property="Foreground" Value="{DynamicResource Texto}"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
-        <Setter Property="BorderBrush" Value="{StaticResource BordeInput}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource BordeInput}"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="Background" Value="White"/>
+        <Setter Property="Background" Value="{DynamicResource T_F_FFFFFF}"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="TextBox">
@@ -206,7 +260,7 @@
                         <Grid>
                             <!-- Texto de ejemplo cuando el campo está vacío (c:Ui.Pista) -->
                             <TextBlock x:Name="pista" Text="{Binding (c:Ui.Pista), RelativeSource={RelativeSource TemplatedParent}}"
-                                       Foreground="{StaticResource GrisPista}" Margin="{TemplateBinding Padding}"
+                                       Foreground="{DynamicResource GrisPista}" Margin="{TemplateBinding Padding}"
                                        Padding="2,0,0,0" VerticalAlignment="Center" IsHitTestVisible="False"
                                        TextTrimming="CharacterEllipsis" Visibility="Collapsed"/>
                             <!-- Sin Margin: el TextBox ya aplica su Padding al texto -->
@@ -218,14 +272,14 @@
                             <Setter TargetName="pista" Property="Visibility" Value="Visible"/>
                         </Trigger>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="bd" Property="BorderBrush" Value="#AEB8C6"/>
+                            <Setter TargetName="bd" Property="BorderBrush" Value="{DynamicResource T_F_AEB8C6}"/>
                         </Trigger>
                         <Trigger Property="IsKeyboardFocused" Value="True">
-                            <Setter TargetName="bd" Property="BorderBrush" Value="{StaticResource Azul}"/>
+                            <Setter TargetName="bd" Property="BorderBrush" Value="{DynamicResource Azul}"/>
                             <Setter TargetName="bd" Property="BorderThickness" Value="1.5"/>
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
-                            <Setter TargetName="bd" Property="Background" Value="{StaticResource GrisSuave}"/>
+                            <Setter TargetName="bd" Property="Background" Value="{DynamicResource GrisSuave}"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -258,7 +312,7 @@
     <Style x:Key="ModernComboItem" TargetType="ComboBoxItem">
         <Setter Property="Padding" Value="10,7"/>
         <Setter Property="FontSize" Value="13"/>
-        <Setter Property="Foreground" Value="{StaticResource Texto}"/>
+        <Setter Property="Foreground" Value="{DynamicResource Texto}"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ComboBoxItem">
@@ -267,7 +321,7 @@
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsHighlighted" Value="True">
-                            <Setter TargetName="bd" Property="Background" Value="{StaticResource AzulSuave}"/>
+                            <Setter TargetName="bd" Property="Background" Value="{DynamicResource AzulSuave}"/>
                         </Trigger>
                         <Trigger Property="IsSelected" Value="True">
                             <Setter Property="FontWeight" Value="SemiBold"/>
@@ -279,22 +333,22 @@
     </Style>
 
     <ControlTemplate x:Key="ModernComboToggle" TargetType="ToggleButton">
-        <Border x:Name="bd" Background="White" BorderBrush="{StaticResource BordeInput}" BorderThickness="1" CornerRadius="9">
+        <Border x:Name="bd" Background="{DynamicResource T_F_FFFFFF}" BorderBrush="{DynamicResource BordeInput}" BorderThickness="1" CornerRadius="9">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="28"/>
                 </Grid.ColumnDefinitions>
-                <c:Icono Grid.Column="1" Geometria="{StaticResource IcoAbajo}" Tamano="14" Foreground="{StaticResource Texto2}"
+                <c:Icono Grid.Column="1" Geometria="{StaticResource IcoAbajo}" Tamano="14" Foreground="{DynamicResource Texto2}"
                          HorizontalAlignment="Left"/>
             </Grid>
         </Border>
         <ControlTemplate.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
-                <Setter TargetName="bd" Property="BorderBrush" Value="#AEB8C6"/>
+                <Setter TargetName="bd" Property="BorderBrush" Value="{DynamicResource T_F_AEB8C6}"/>
             </Trigger>
             <Trigger Property="IsChecked" Value="True">
-                <Setter TargetName="bd" Property="BorderBrush" Value="{StaticResource Azul}"/>
+                <Setter TargetName="bd" Property="BorderBrush" Value="{DynamicResource Azul}"/>
                 <Setter TargetName="bd" Property="BorderThickness" Value="1.5"/>
             </Trigger>
         </ControlTemplate.Triggers>
@@ -303,7 +357,7 @@
     <Style x:Key="ModernCombo" TargetType="ComboBox">
         <Setter Property="Height" Value="40"/>
         <Setter Property="FontSize" Value="13"/>
-        <Setter Property="Foreground" Value="{StaticResource Texto}"/>
+        <Setter Property="Foreground" Value="{DynamicResource Texto}"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
         <Setter Property="ItemContainerStyle" Value="{StaticResource ModernComboItem}"/>
         <Setter Property="Template">
@@ -315,7 +369,7 @@
                                       IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"/>
                         <!-- Texto de ejemplo cuando no hay nada elegido -->
                         <TextBlock x:Name="pista" Text="{Binding (c:Ui.Pista), RelativeSource={RelativeSource TemplatedParent}}"
-                                   Foreground="{StaticResource GrisPista}" Margin="12,0,30,0" VerticalAlignment="Center"
+                                   Foreground="{DynamicResource GrisPista}" Margin="12,0,30,0" VerticalAlignment="Center"
                                    IsHitTestVisible="False" Visibility="Collapsed" TextTrimming="CharacterEllipsis"/>
                         <ContentPresenter x:Name="ContentSite" IsHitTestVisible="False"
                                           Content="{TemplateBinding SelectionBoxItem}"
@@ -335,10 +389,10 @@
                         </TextBox>
                         <Popup x:Name="Popup" Placement="Bottom" AllowsTransparency="True"
                                IsOpen="{TemplateBinding IsDropDownOpen}" Focusable="False" PopupAnimation="Slide">
-                            <Border Background="White" CornerRadius="9" Margin="0,4,0,8"
+                            <Border Background="{DynamicResource T_F_FFFFFF}" CornerRadius="9" Margin="0,4,0,8"
                                     MinWidth="{TemplateBinding ActualWidth}"
                                     MaxHeight="{TemplateBinding MaxDropDownHeight}"
-                                    BorderBrush="{StaticResource Borde}" BorderThickness="1" Padding="0,4">
+                                    BorderBrush="{DynamicResource Borde}" BorderThickness="1" Padding="0,4">
                                 <Border.Effect>
                                     <DropShadowEffect BlurRadius="14" Direction="270" Opacity="0.12" ShadowDepth="3"/>
                                 </Border.Effect>
@@ -365,7 +419,7 @@
 
     <!-- ==================== FECHA ==================== -->
     <Style x:Key="CalendarButtonStyle" TargetType="Button">
-        <Setter Property="Foreground" Value="{StaticResource Texto2}"/>
+        <Setter Property="Foreground" Value="{DynamicResource Texto2}"/>
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="Focusable" Value="False"/>
@@ -377,7 +431,7 @@
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="bg" Property="Background" Value="{StaticResource GrisSuave}"/>
+                            <Setter TargetName="bg" Property="Background" Value="{DynamicResource GrisSuave}"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -386,7 +440,7 @@
     </Style>
 
     <Style x:Key="DatePickerTextBoxStyle" TargetType="DatePickerTextBox">
-        <Setter Property="Foreground" Value="{StaticResource Texto}"/>
+        <Setter Property="Foreground" Value="{DynamicResource Texto}"/>
         <Setter Property="FontSize" Value="13"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
         <Setter Property="Template">
@@ -402,8 +456,8 @@
 
     <Style x:Key="ModernDatePicker" TargetType="DatePicker">
         <Setter Property="Height" Value="40"/>
-        <Setter Property="Background" Value="White"/>
-        <Setter Property="BorderBrush" Value="{StaticResource BordeInput}"/>
+        <Setter Property="Background" Value="{DynamicResource T_F_FFFFFF}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource BordeInput}"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="Template">
             <Setter.Value>
@@ -416,7 +470,7 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock x:Name="pista" Text="dd/mm/aaaa" Foreground="{StaticResource GrisPista}" Margin="13,0,0,0"
+                            <TextBlock x:Name="pista" Text="dd/mm/aaaa" Foreground="{DynamicResource GrisPista}" Margin="13,0,0,0"
                                        VerticalAlignment="Center" IsHitTestVisible="False" Visibility="Collapsed"/>
                             <DatePickerTextBox x:Name="PART_TextBox" Grid.Column="0"
                                                Style="{StaticResource DatePickerTextBoxStyle}"
@@ -436,11 +490,11 @@
                             <Setter TargetName="pista" Property="Visibility" Value="Visible"/>
                         </MultiTrigger>
                         <Trigger Property="IsKeyboardFocusWithin" Value="True">
-                            <Setter TargetName="OuterBorder" Property="BorderBrush" Value="{StaticResource Azul}"/>
+                            <Setter TargetName="OuterBorder" Property="BorderBrush" Value="{DynamicResource Azul}"/>
                             <Setter TargetName="OuterBorder" Property="BorderThickness" Value="1.5"/>
                         </Trigger>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="OuterBorder" Property="BorderBrush" Value="#AEB8C6"/>
+                            <Setter TargetName="OuterBorder" Property="BorderBrush" Value="{DynamicResource T_F_AEB8C6}"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -455,8 +509,8 @@
         <Setter Property="Padding" Value="16,0"/>
         <Setter Property="FontSize" Value="13"/>
         <Setter Property="FontWeight" Value="Bold"/>
-        <Setter Property="Foreground" Value="White"/>
-        <Setter Property="Background" Value="{StaticResource Verde}"/>
+        <Setter Property="Foreground" Value="{DynamicResource T_T_FFFFFF}"/>
+        <Setter Property="Background" Value="{DynamicResource Verde}"/>
         <Setter Property="BorderBrush" Value="Transparent"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="Cursor" Value="Hand"/>
@@ -482,7 +536,7 @@
                             <Setter TargetName="bd" Property="Opacity" Value="0.78"/>
                         </Trigger>
                         <Trigger Property="IsKeyboardFocused" Value="True">
-                            <Setter TargetName="bd" Property="BorderBrush" Value="{StaticResource Texto}"/>
+                            <Setter TargetName="bd" Property="BorderBrush" Value="{DynamicResource Texto}"/>
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter TargetName="bd" Property="Opacity" Value="0.45"/>
@@ -494,33 +548,33 @@
     </Style>
     <Style x:Key="BotonVerde" TargetType="Button" BasedOn="{StaticResource Boton}"/>
     <Style x:Key="BotonAzul" TargetType="Button" BasedOn="{StaticResource Boton}">
-        <Setter Property="Background" Value="{StaticResource Azul}"/>
+        <Setter Property="Background" Value="{DynamicResource Azul}"/>
     </Style>
     <Style x:Key="BotonMorado" TargetType="Button" BasedOn="{StaticResource Boton}">
-        <Setter Property="Background" Value="{StaticResource Morado}"/>
+        <Setter Property="Background" Value="{DynamicResource Morado}"/>
     </Style>
     <Style x:Key="BotonOscuro" TargetType="Button" BasedOn="{StaticResource Boton}">
-        <Setter Property="Background" Value="{StaticResource Oscuro}"/>
+        <Setter Property="Background" Value="{DynamicResource Oscuro}"/>
     </Style>
     <!-- Secundario: fondo blanco con borde -->
     <Style x:Key="BotonSecundario" TargetType="Button" BasedOn="{StaticResource Boton}">
-        <Setter Property="Background" Value="White"/>
-        <Setter Property="Foreground" Value="{StaticResource Texto}"/>
-        <Setter Property="BorderBrush" Value="{StaticResource BordeInput}"/>
+        <Setter Property="Background" Value="{DynamicResource T_F_FFFFFF}"/>
+        <Setter Property="Foreground" Value="{DynamicResource Texto}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource BordeInput}"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
     </Style>
     <Style x:Key="BotonPeligro" TargetType="Button" BasedOn="{StaticResource BotonSecundario}">
-        <Setter Property="Foreground" Value="{StaticResource Rojo}"/>
-        <Setter Property="BorderBrush" Value="{StaticResource RojoBorde}"/>
+        <Setter Property="Foreground" Value="{DynamicResource Rojo}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource RojoBorde}"/>
     </Style>
 
     <!-- Botón solo de ícono 32×32 (siempre con AutomationProperties.Name) -->
     <Style x:Key="BotonIcono" TargetType="Button">
         <Setter Property="Width" Value="32"/>
         <Setter Property="Height" Value="32"/>
-        <Setter Property="Foreground" Value="{StaticResource Azul}"/>
-        <Setter Property="Background" Value="White"/>
-        <Setter Property="BorderBrush" Value="{StaticResource Borde}"/>
+        <Setter Property="Foreground" Value="{DynamicResource Azul}"/>
+        <Setter Property="Background" Value="{DynamicResource T_F_FFFFFF}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource Borde}"/>
         <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="Template">
             <Setter.Value>
@@ -532,10 +586,10 @@
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="bd" Property="Background" Value="{StaticResource GrisSuave}"/>
+                            <Setter TargetName="bd" Property="Background" Value="{DynamicResource GrisSuave}"/>
                         </Trigger>
                         <Trigger Property="IsKeyboardFocused" Value="True">
-                            <Setter TargetName="bd" Property="BorderBrush" Value="{StaticResource Texto}"/>
+                            <Setter TargetName="bd" Property="BorderBrush" Value="{DynamicResource Texto}"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -543,13 +597,13 @@
         </Setter>
     </Style>
     <Style x:Key="BotonIconoPeligro" TargetType="Button" BasedOn="{StaticResource BotonIcono}">
-        <Setter Property="Foreground" Value="{StaticResource Rojo}"/>
-        <Setter Property="BorderBrush" Value="{StaticResource RojoBorde}"/>
+        <Setter Property="Foreground" Value="{DynamicResource Rojo}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource RojoBorde}"/>
     </Style>
 
     <!-- Enlace de texto ("Ver cuentas") -->
     <Style x:Key="BotonEnlace" TargetType="Button">
-        <Setter Property="Foreground" Value="{StaticResource Azul}"/>
+        <Setter Property="Foreground" Value="{DynamicResource Azul}"/>
         <Setter Property="FontSize" Value="13"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
         <Setter Property="Cursor" Value="Hand"/>
@@ -577,7 +631,7 @@
     <Style x:Key="RoundIconButton" TargetType="Button">
         <Setter Property="Width" Value="32"/>
         <Setter Property="Height" Value="32"/>
-        <Setter Property="Foreground" Value="White"/>
+        <Setter Property="Foreground" Value="{DynamicResource T_T_FFFFFF}"/>
         <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="Template">
             <Setter.Value>
@@ -599,7 +653,7 @@
     <Style x:Key="BotonFlecha" TargetType="Button">
         <Setter Property="Width" Value="32"/>
         <Setter Property="Height" Value="32"/>
-        <Setter Property="Foreground" Value="{StaticResource Texto}"/>
+        <Setter Property="Foreground" Value="{DynamicResource Texto}"/>
         <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="Template">
             <Setter.Value>
@@ -610,7 +664,7 @@
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="bd" Property="Background" Value="{StaticResource GrisSuave}"/>
+                            <Setter TargetName="bd" Property="Background" Value="{DynamicResource GrisSuave}"/>
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter TargetName="bd" Property="Opacity" Value="0.3"/>
@@ -624,8 +678,8 @@
     <Style x:Key="BotonMesActual" TargetType="Button" BasedOn="{StaticResource BotonSecundario}">
         <Setter Property="Height" Value="46"/>
         <Setter Property="Padding" Value="14,0"/>
-        <Setter Property="BorderBrush" Value="{StaticResource Borde}"/>
-        <Setter Property="Foreground" Value="{StaticResource Azul}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource Borde}"/>
+        <Setter Property="Foreground" Value="{DynamicResource Azul}"/>
         <Setter Property="c:Ui.Icono" Value="{StaticResource IcoCalendario}"/>
         <Setter Property="Content" Value="Mes actual"/>
         <Setter Property="ToolTip" Value="Volver al mes en curso"/>
@@ -635,8 +689,8 @@
     </Style>
 
     <Style x:Key="CapsulaMes" TargetType="Border">
-        <Setter Property="Background" Value="White"/>
-        <Setter Property="BorderBrush" Value="{StaticResource Borde}"/>
+        <Setter Property="Background" Value="{DynamicResource T_F_FFFFFF}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource Borde}"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="CornerRadius" Value="12"/>
         <Setter Property="Padding" Value="6"/>
@@ -645,19 +699,19 @@
 
     <!-- ==================== TARJETAS ==================== -->
     <Style x:Key="Card" TargetType="Border">
-        <Setter Property="Background" Value="White"/>
-        <Setter Property="BorderBrush" Value="{StaticResource Borde}"/>
+        <Setter Property="Background" Value="{DynamicResource T_F_FFFFFF}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource Borde}"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="CornerRadius" Value="14"/>
         <Setter Property="Padding" Value="20"/>
     </Style>
     <Style x:Key="TarjetaOscura" TargetType="Border" BasedOn="{StaticResource Card}">
-        <Setter Property="Background" Value="{StaticResource Oscuro}"/>
-        <Setter Property="BorderBrush" Value="{StaticResource Oscuro}"/>
+        <Setter Property="Background" Value="{DynamicResource Oscuro}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource Oscuro}"/>
     </Style>
     <!-- Recuadro gris dentro de una tarjeta (indicadores del detalle) -->
     <Style x:Key="Recuadro" TargetType="Border">
-        <Setter Property="Background" Value="{StaticResource GrisSuave}"/>
+        <Setter Property="Background" Value="{DynamicResource GrisSuave}"/>
         <Setter Property="CornerRadius" Value="10"/>
         <Setter Property="Padding" Value="13,10"/>
     </Style>
@@ -668,7 +722,7 @@
             <Setter.Value>
                 <ControlTemplate TargetType="ContentControl">
                     <Grid>
-                        <Rectangle RadiusX="14" RadiusY="14" Stroke="#C8CFDA" StrokeThickness="1.2" StrokeDashArray="4 3"/>
+                        <Rectangle RadiusX="14" RadiusY="14" Stroke="{DynamicResource T_A_C8CFDA}" StrokeThickness="1.2" StrokeDashArray="4 3"/>
                         <ContentPresenter Margin="20"/>
                     </Grid>
                 </ControlTemplate>
@@ -694,8 +748,8 @@
         <Setter Property="Height" Value="8"/>
         <Setter Property="Minimum" Value="0"/>
         <Setter Property="Maximum" Value="1"/>
-        <Setter Property="Foreground" Value="{StaticResource Morado}"/>
-        <Setter Property="Background" Value="#EEF1F5"/>
+        <Setter Property="Foreground" Value="{DynamicResource Morado}"/>
+        <Setter Property="Background" Value="{DynamicResource T_F_EEF1F5}"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ProgressBar">
@@ -712,23 +766,23 @@
     <Style x:Key="Pestana" TargetType="RadioButton">
         <Setter Property="FontSize" Value="13.5"/>
         <Setter Property="FontWeight" Value="Medium"/>
-        <Setter Property="Foreground" Value="{StaticResource Texto2}"/>
+        <Setter Property="Foreground" Value="{DynamicResource Texto2}"/>
         <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="RadioButton">
                     <Grid Background="Transparent">
                         <ContentPresenter Margin="14,10,14,12" HorizontalAlignment="Center"/>
-                        <Border x:Name="linea" Height="2" VerticalAlignment="Bottom" Background="{StaticResource Azul}" Visibility="Hidden"/>
+                        <Border x:Name="linea" Height="2" VerticalAlignment="Bottom" Background="{DynamicResource Azul}" Visibility="Hidden"/>
                     </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsChecked" Value="True">
                             <Setter TargetName="linea" Property="Visibility" Value="Visible"/>
-                            <Setter Property="Foreground" Value="{StaticResource Azul}"/>
+                            <Setter Property="Foreground" Value="{DynamicResource Azul}"/>
                             <Setter Property="FontWeight" Value="SemiBold"/>
                         </Trigger>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="Foreground" Value="{StaticResource Texto}"/>
+                            <Setter Property="Foreground" Value="{DynamicResource Texto}"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -743,16 +797,16 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="CheckBox">
-                    <Border x:Name="pista" Width="38" Height="22" CornerRadius="11" Background="#D0D5DD" BorderBrush="Transparent" BorderThickness="1.5">
-                        <Ellipse x:Name="perilla" Width="16" Height="16" Fill="White" HorizontalAlignment="Left" Margin="2,0"/>
+                    <Border x:Name="pista" Width="38" Height="22" CornerRadius="11" Background="{DynamicResource T_F_D0D5DD}" BorderBrush="Transparent" BorderThickness="1.5">
+                        <Ellipse x:Name="perilla" Width="16" Height="16" Fill="{DynamicResource T_A_FFFFFF}" HorizontalAlignment="Left" Margin="2,0"/>
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsChecked" Value="True">
-                            <Setter TargetName="pista" Property="Background" Value="{StaticResource Verde}"/>
+                            <Setter TargetName="pista" Property="Background" Value="{DynamicResource Verde}"/>
                             <Setter TargetName="perilla" Property="HorizontalAlignment" Value="Right"/>
                         </Trigger>
                         <Trigger Property="IsKeyboardFocused" Value="True">
-                            <Setter TargetName="pista" Property="BorderBrush" Value="{StaticResource Azul}"/>
+                            <Setter TargetName="pista" Property="BorderBrush" Value="{DynamicResource Azul}"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -766,21 +820,21 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="CheckBox">
-                    <Border x:Name="box" Width="19" Height="19" CornerRadius="5" Background="White"
-                            BorderBrush="#9AA4B2" BorderThickness="1.5">
+                    <Border x:Name="box" Width="19" Height="19" CornerRadius="5" Background="{DynamicResource T_F_FFFFFF}"
+                            BorderBrush="{DynamicResource T_F_9AA4B2}" BorderThickness="1.5">
                         <c:Icono x:Name="check" Geometria="{StaticResource IcoCheck}" Tamano="13" Grosor="3"
-                                 Foreground="White" HorizontalAlignment="Center" Visibility="Hidden"/>
+                                 Foreground="{DynamicResource T_T_FFFFFF}" HorizontalAlignment="Center" Visibility="Hidden"/>
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="box" Property="BorderBrush" Value="{StaticResource Verde}"/>
+                            <Setter TargetName="box" Property="BorderBrush" Value="{DynamicResource Verde}"/>
                         </Trigger>
                         <Trigger Property="IsKeyboardFocused" Value="True">
-                            <Setter TargetName="box" Property="BorderBrush" Value="{StaticResource Texto}"/>
+                            <Setter TargetName="box" Property="BorderBrush" Value="{DynamicResource Texto}"/>
                         </Trigger>
                         <Trigger Property="IsChecked" Value="True">
-                            <Setter TargetName="box" Property="Background" Value="{StaticResource Verde}"/>
-                            <Setter TargetName="box" Property="BorderBrush" Value="{StaticResource Verde}"/>
+                            <Setter TargetName="box" Property="Background" Value="{DynamicResource Verde}"/>
+                            <Setter TargetName="box" Property="BorderBrush" Value="{DynamicResource Verde}"/>
                             <Setter TargetName="check" Property="Visibility" Value="Visible"/>
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
@@ -796,11 +850,11 @@
     <Style x:Key="EncabezadoTabla" TargetType="TextBlock">
         <Setter Property="FontSize" Value="12.5"/>
         <Setter Property="FontWeight" Value="Medium"/>
-        <Setter Property="Foreground" Value="{StaticResource Texto2}"/>
+        <Setter Property="Foreground" Value="{DynamicResource Texto2}"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
     </Style>
     <Style x:Key="LineaTabla" TargetType="Border">
-        <Setter Property="BorderBrush" Value="{StaticResource Borde}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource Borde}"/>
         <Setter Property="BorderThickness" Value="0,0,0,1"/>
     </Style>
 </ResourceDictionary>

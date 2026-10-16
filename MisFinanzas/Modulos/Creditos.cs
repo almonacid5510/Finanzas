@@ -176,10 +176,10 @@ namespace MisFinanzas.Modulos
         private EstadoPago EstadoCuota => EstadoPago.Evaluar((Pagado && MesPagado == Periodo.MesActual) || Saldado, VencimientoEn(DateTime.Today), DateTime.Today);
         [NotMapped] public string AccionPago => Pagado ? $"Deshacer pago de {NombreCustom}" : $"Marcar cuota de {NombreCustom} como pagada";
         [NotMapped] public string EstadoTexto => EsTarjeta ? "Tarjeta" : Saldado ? "Saldado" : EstadoCuota.Texto;
-        [NotMapped] public string EstadoFondo => EsTarjeta ? "#EAF0FD" : EstadoCuota.Fondo;
-        [NotMapped] public string EstadoColor => EsTarjeta ? "#1D4FB8" : EstadoCuota.Color;
-        [NotMapped] public string FondoFila => EsTarjeta ? "#FFFFFF" : EstadoCuota.FondoFila;
-        [NotMapped] public string Acento => EsTarjeta ? "#D0D5DD" : EstadoCuota.Acento;
+        [NotMapped] public string EstadoFondo => EsTarjeta ? MisFinanzas.Tema.Fondo("#EAF0FD") : EstadoCuota.Fondo;
+        [NotMapped] public string EstadoColor => EsTarjeta ? MisFinanzas.Tema.Texto("#1D4FB8") : EstadoCuota.Color;
+        [NotMapped] public string FondoFila => EsTarjeta ? MisFinanzas.Tema.Fondo("#FFFFFF") : EstadoCuota.FondoFila;
+        [NotMapped] public string Acento => EsTarjeta ? MisFinanzas.Tema.Acento("#D0D5DD") : EstadoCuota.Acento;
         [NotMapped] public bool PuedePagar => !Pagado && !Saldado && CuotaMensual > 0;
         // La casilla de Cuentas sirve para pagar o para deshacer el pago de este mes
         [NotMapped] public bool PuedeMarcar => Pagado || PuedePagar;

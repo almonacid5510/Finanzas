@@ -50,11 +50,11 @@
                     <StackPanel x:Name="pnlLecturaSalario">
                         <DockPanel>
                             <Button DockPanel.Dock="Right" Click="BtnActivarEdicion_Click" Style="{StaticResource BotonIcono}"
-                                    c:Ui.Icono="{StaticResource IcoEditar}" Background="Transparent" BorderBrush="#3A4A61"
+                                    c:Ui.Icono="{StaticResource IcoEditar}" Background="Transparent" BorderBrush="{StaticResource T_F_3A4A61}"
                                     Foreground="{StaticResource TextoMenu}" AutomationProperties.Name="Editar en Tu nómina" ToolTip="Editar en Tu nómina (Cuenta)"/>
                             <TextBlock Text="SALARIO MENSUAL" Style="{StaticResource EtiquetaSeccion}" Foreground="{StaticResource TextoMenu}" VerticalAlignment="Center"/>
                         </DockPanel>
-                        <TextBlock x:Name="lblIngresoTotal" FontSize="30" FontWeight="ExtraBold" Foreground="White" Margin="0,6,0,2"/>
+                        <TextBlock x:Name="lblIngresoTotal" FontSize="30" FontWeight="ExtraBold" Foreground="{StaticResource T_T_FFFFFF}" Margin="0,6,0,2"/>
                         <TextBlock Text="Base de tu presupuesto mensual" Style="{StaticResource TextoSecundario}" Foreground="{StaticResource TextoMenu}"/>
                     </StackPanel>
                 </Grid>
@@ -281,7 +281,7 @@
 
     <!-- ===== CONFIRMACIÓN DE ELIMINACIÓN ===== -->
     <Grid x:Name="OverlayConfirm" Background="#660F1B2D" Visibility="Collapsed" Panel.ZIndex="100">
-        <Border Background="White" CornerRadius="16" Width="400" Padding="26" HorizontalAlignment="Center" VerticalAlignment="Center">
+        <Border Background="{StaticResource T_F_FFFFFF}" CornerRadius="16" Width="400" Padding="26" HorizontalAlignment="Center" VerticalAlignment="Center">
             <StackPanel>
                 <Border Width="48" Height="48" Background="{StaticResource RojoSuave}" CornerRadius="12" HorizontalAlignment="Left" Margin="0,0,0,14">
                     <c:Icono Geometria="{StaticResource IcoEliminar}" Tamano="20" Foreground="{StaticResource Rojo}" HorizontalAlignment="Center"/>
@@ -299,10 +299,10 @@
 
     <!-- ===== EL ABONO SUPERA LA META ===== -->
     <Grid x:Name="OverlayExcede" Background="#660F1B2D" Visibility="Collapsed" Panel.ZIndex="100">
-        <Border Background="White" CornerRadius="16" Width="440" Padding="26" HorizontalAlignment="Center" VerticalAlignment="Center">
+        <Border Background="{StaticResource T_F_FFFFFF}" CornerRadius="16" Width="440" Padding="26" HorizontalAlignment="Center" VerticalAlignment="Center">
             <StackPanel>
-                <Border Width="48" Height="48" Background="#FEF6E7" CornerRadius="12" HorizontalAlignment="Left" Margin="0,0,0,14">
-                    <c:Icono Geometria="{StaticResource IcoAlerta}" Tamano="20" Foreground="#B54708" HorizontalAlignment="Center"/>
+                <Border Width="48" Height="48" Background="{StaticResource T_F_FEF6E7}" CornerRadius="12" HorizontalAlignment="Left" Margin="0,0,0,14">
+                    <c:Icono Geometria="{StaticResource IcoAlerta}" Tamano="20" Foreground="{StaticResource T_T_B54708}" HorizontalAlignment="Center"/>
                 </Border>
                 <TextBlock Text="Este abono supera la meta" FontSize="18" FontWeight="Bold"/>
                 <TextBlock x:Name="txtExcedeMsg" FontSize="13.5" Foreground="{StaticResource Texto2}" TextWrapping="Wrap" Margin="0,6,0,20"/>
@@ -317,7 +317,7 @@
 
     <!-- ===== EDITAR META (y corregir sus abonos) ===== -->
     <Grid x:Name="OverlayEditarMeta" Background="#660F1B2D" Visibility="Collapsed" Panel.ZIndex="100">
-        <Border Background="White" CornerRadius="16" Width="480" Padding="26" HorizontalAlignment="Center" VerticalAlignment="Center">
+        <Border Background="{StaticResource T_F_FFFFFF}" CornerRadius="16" Width="480" Padding="26" HorizontalAlignment="Center" VerticalAlignment="Center">
             <StackPanel>
                 <TextBlock Text="Editar meta" FontSize="18" FontWeight="Bold" Margin="0,0,0,14"/>
                 <Label Content="Nombre de la meta" Target="{Binding ElementName=txtEditNombreMeta}" Style="{StaticResource Etiqueta}"/>

@@ -76,13 +76,13 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border x:Name="bd" Background="White" BorderBrush="{StaticResource Borde}" BorderThickness="1"
+                        <Border x:Name="bd" Background="{StaticResource T_F_FFFFFF}" BorderBrush="{StaticResource Borde}" BorderThickness="1"
                                 CornerRadius="14" Padding="17,14">
                             <ContentPresenter/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="bd" Property="BorderBrush" Value="#B9C2CF"/>
+                                <Setter TargetName="bd" Property="BorderBrush" Value="{StaticResource T_F_B9C2CF}"/>
                             </Trigger>
                             <DataTrigger Binding="{Binding VerDetalle}" Value="True">
                                 <Setter TargetName="bd" Property="BorderBrush" Value="{StaticResource Morado}"/>
@@ -258,7 +258,7 @@
                                 <Run Text="Pagar cuota ·"/> <Run Text="{Binding NombreMesActual, Mode=OneWay}"/>
                             </TextBlock>
                         </Button>
-                        <Border Background="White" BorderBrush="#ABEFC6" BorderThickness="1" CornerRadius="9" Padding="12,0" Height="40" Margin="0,0,14,0"
+                        <Border Background="{StaticResource T_F_FFFFFF}" BorderBrush="{StaticResource T_F_ABEFC6}" BorderThickness="1" CornerRadius="9" Padding="12,0" Height="40" Margin="0,0,14,0"
                                 Style="{StaticResource SiPagado}">
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                 <c:Icono Geometria="{StaticResource IcoCheck}" Tamano="14" Grosor="2.5" Foreground="{StaticResource Verde}" Margin="0,0,7,0"/>
@@ -691,7 +691,7 @@
 
     <!-- ===== CONFIRMACIÓN DE ELIMINACIÓN ===== -->
     <Grid x:Name="OverlayConfirm" Background="#660F1B2D" Visibility="Collapsed" Panel.ZIndex="100">
-        <Border Background="White" CornerRadius="16" Width="400" Padding="26" HorizontalAlignment="Center" VerticalAlignment="Center">
+        <Border Background="{StaticResource T_F_FFFFFF}" CornerRadius="16" Width="400" Padding="26" HorizontalAlignment="Center" VerticalAlignment="Center">
             <StackPanel>
                 <Border Width="48" Height="48" Background="{StaticResource RojoSuave}" CornerRadius="12" HorizontalAlignment="Left" Margin="0,0,0,14">
                     <c:Icono Geometria="{StaticResource IcoEliminar}" Tamano="20" Foreground="{StaticResource Rojo}" HorizontalAlignment="Center"/>

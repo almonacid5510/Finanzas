@@ -46,6 +46,8 @@ namespace MisFinanzas
 
         protected override void OnStartup(StartupEventArgs e)
         {
+            // El tema elegido en Cuenta, antes de crear la ventana (las pantallas toman sus colores al cargar)
+            Tema.Aplicar(Resources, MisFinanzas.Modulos.Preferencias.Actual.Tema);
             base.OnStartup(e);
         }
     }

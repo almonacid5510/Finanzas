@@ -260,12 +260,13 @@ namespace MisFinanzas.Modulos
             }
         }
 
-        private static SolidColorBrush Pincel(string hex) => (SolidColorBrush)new BrushConverter().ConvertFromString(hex)!;
+        // Color de texto según el tema (los fondos usan Tema.Fondo)
+        private static SolidColorBrush Pincel(string hex) => (SolidColorBrush)new BrushConverter().ConvertFromString(MisFinanzas.Tema.Texto(hex))!;
 
         private void MostrarSalud(decimal balanceNeto)
         {
             bool sano = balanceNeto >= 0;
-            cardSaludFinanciera.Background = Pincel(sano ? "#E7F5EF" : "#FEF3F2");
+            cardSaludFinanciera.Background = MisFinanzas.Tema.Pincel(MisFinanzas.Tema.Fondo(sano ? "#E7F5EF" : "#FEF3F2"));
             var color = Pincel(sano ? "#075E46" : "#B42318");
             icoSalud.Geometria = (Geometry)FindResource(sano ? "IcoCheck" : "IcoAlerta");
             icoSalud.Foreground = color;
@@ -613,8 +614,9 @@ namespace MisFinanzas.Modulos
         public decimal Monto { get; set; }
         public double Porcentaje { get; set; }
         public string PorcentajeTexto => Porcentaje.ToString("P0");
-        public string Color { get; set; } = "#8A94A3";
-        public string ColorMonto { get; set; } = "#0F1B2D";
+        private string _color = "#8A94A3", _colorMonto = "#0F1B2D";
+        public string Color { get => MisFinanzas.Tema.Acento(_color); set => _color = value; }
+        public string ColorMonto { get => MisFinanzas.Tema.Texto(_colorMonto); set => _colorMonto = value; }
         public string? Detalle { get; set; } // texto extra del tooltip (p. ej. cuándo y cuánto se abonó a una meta)
         public string ToolTipFila => Detalle is null ? $"{Nombre}: {NumeroHelper.Moneda(Monto)}" : $"{Nombre}: {NumeroHelper.Moneda(Monto)}\n{Detalle}";
     }
@@ -626,11 +628,12 @@ namespace MisFinanzas.Modulos
         public string Titulo { get; set; } = string.Empty;
         public string Detalle { get; set; } = string.Empty;
         public decimal Monto { get; set; }
-        public string Fondo { get; set; } = "#FFFFFF";
-        public string Borde { get; set; } = "#E3E7EE";
-        public string ColorDia { get; set; } = "#0F1B2D";
-        public string ColorTitulo { get; set; } = "#0F1B2D";
-        public string ColorDetalle { get; set; } = "#5B6676";
+        private string _fondo = "#FFFFFF", _borde = "#E3E7EE", _colorDia = "#0F1B2D", _colorTitulo = "#0F1B2D", _colorDetalle = "#5B6676";
+        public string Fondo { get => MisFinanzas.Tema.Fondo(_fondo); set => _fondo = value; }
+        public string Borde { get => MisFinanzas.Tema.Fondo(_borde); set => _borde = value; }
+        public string ColorDia { get => MisFinanzas.Tema.Texto(_colorDia); set => _colorDia = value; }
+        public string ColorTitulo { get => MisFinanzas.Tema.Texto(_colorTitulo); set => _colorTitulo = value; }
+        public string ColorDetalle { get => MisFinanzas.Tema.Texto(_colorDetalle); set => _colorDetalle = value; }
         public bool EsCredito { get; set; } // cuota de crédito: siempre se muestra
     }
 
@@ -640,7 +643,8 @@ namespace MisFinanzas.Modulos
         public string Nombre { get; set; } = string.Empty;
         public decimal Total { get; set; }
         public decimal Anterior { get; set; }
-        public string ColorBarra { get; set; } = "#8A94A3";
+        private string _colorBarra = "#8A94A3";
+        public string ColorBarra { get => MisFinanzas.Tema.Acento(_colorBarra); set => _colorBarra = value; }
         private decimal Cambio => Total - Anterior;
 
         // ▲ más gasto (rojo), ▼ menos gasto (verde), Nuevo (no había el mes anterior), Igual
@@ -648,7 +652,7 @@ namespace MisFinanzas.Modulos
                                    : Total == 0 ? "Ya no"
                                    : Cambio == 0 ? "Igual"
                                    : $"{(Cambio > 0 ? "▲" : "▼")} {NumeroHelper.Moneda(Math.Abs(Cambio))}";
-        public string FondoCambio => Anterior == 0 ? "#EAF0FD" : Cambio > 0 ? "#FEF3F2" : Cambio < 0 ? "#E7F5EF" : "#EEF1F5";
-        public string ColorCambio => Anterior == 0 ? "#1D4FB8" : Cambio > 0 ? "#B42318" : Cambio < 0 ? "#075E46" : "#4B5565";
+        public string FondoCambio => MisFinanzas.Tema.Fondo(Anterior == 0 ? "#EAF0FD" : Cambio > 0 ? "#FEF3F2" : Cambio < 0 ? "#E7F5EF" : "#EEF1F5");
+        public string ColorCambio => MisFinanzas.Tema.Texto(Anterior == 0 ? "#1D4FB8" : Cambio > 0 ? "#B42318" : Cambio < 0 ? "#075E46" : "#4B5565");
     }
 }

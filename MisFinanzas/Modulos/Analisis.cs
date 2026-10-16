@@ -20,7 +20,7 @@ namespace MisFinanzas.Modulos
         public decimal Pagado { get; set; }
         public decimal Pendiente { get; set; }
         public decimal Balance => Ingresos - Gastos;
-        public string ColorBalance => Balance < 0 ? "#C53030" : "#2F855A";
+        public string ColorBalance => MisFinanzas.Tema.Texto(Balance < 0 ? "#C53030" : "#2F855A");
         public double Proporcion { get; set; }   // 0..1 respecto al mes con más gastos (para la barra)
     }
 
@@ -51,7 +51,8 @@ namespace MisFinanzas.Modulos
         public decimal Proyeccion12 { get; set; }
         public DateTime? ProximoVence { get; set; }
         public string Tendencia { get; set; } = string.Empty;
-        public string ColorTendencia { get; set; } = "#718096";
+        private string _colorTendencia = "#718096";
+        public string ColorTendencia { get => MisFinanzas.Tema.Texto(_colorTendencia); set => _colorTendencia = value; }
 
         // --- Tabla de la pestaña de proyección ---
         /// <summary>Cuota de un crédito: monto fijo según su plan de pagos.</summary>
@@ -70,8 +71,9 @@ namespace MisFinanzas.Modulos
             get
             {
                 int n = Math.Min(MesesConDatos, 6);
-                var color = n <= 2 ? "#F79009" : n <= 5 ? "#2E90FA" : "#12B76A";
-                return Enumerable.Range(0, 6).Select(i => i < n ? color : "#E4E7EC").ToList();
+                var color = MisFinanzas.Tema.Acento(n <= 2 ? "#F79009" : n <= 5 ? "#2E90FA" : "#12B76A");
+                var vacio = MisFinanzas.Tema.Fondo("#E4E7EC");
+                return Enumerable.Range(0, 6).Select(i => i < n ? color : vacio).ToList();
             }
         }
         public string CalculadoCon => MesesConDatos switch
@@ -80,7 +82,7 @@ namespace MisFinanzas.Modulos
             1 => "1 pago real",
             _ => $"{Math.Min(MesesConDatos, 6)} pagos reales"
         };
-        public string ColorCalculadoCon => MesesConDatos == 0 ? "#98A2B3" : "#344054";
+        public string ColorCalculadoCon => MisFinanzas.Tema.Texto(MesesConDatos == 0 ? "#98A2B3" : "#344054");
     }
 
     /// <summary>Lo que se espera ingresar y gastar en un mes futuro.</summary>
@@ -93,7 +95,7 @@ namespace MisFinanzas.Modulos
         public decimal Creditos { get; set; }
         public decimal TotalGastos => Gastos + Creditos;
         public decimal Balance => Ingresos - TotalGastos;
-        public string ColorBalance => Balance < 0 ? "#C53030" : "#2F855A";
+        public string ColorBalance => MisFinanzas.Tema.Texto(Balance < 0 ? "#C53030" : "#2F855A");
     }
 
     /// <summary>Barra del gráfico de los próximos meses: gastos y cuotas de créditos apiladas.</summary>

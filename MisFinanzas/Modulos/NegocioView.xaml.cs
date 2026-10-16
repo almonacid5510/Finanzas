@@ -229,7 +229,7 @@ namespace MisFinanzas.Modulos
                 barraDistribucion.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength((double)partes[i].Monto, GridUnitType.Star) });
                 var parte = new Border
                 {
-                    Background = (System.Windows.Media.Brush)new System.Windows.Media.BrushConverter().ConvertFromString(partes[i].Color)!,
+                    Background = MisFinanzas.Tema.Pincel(MisFinanzas.Tema.Acento(partes[i].Color)),
                     CornerRadius = new CornerRadius(i == 0 ? 5 : 0, i == partes.Count - 1 ? 5 : 0, i == partes.Count - 1 ? 5 : 0, i == 0 ? 5 : 0),
                     Margin = new Thickness(0, 0, i == partes.Count - 1 ? 0 : 2, 0),
                     ToolTip = $"{partes[i].Nombre}: {partes[i].Monto:C0}"

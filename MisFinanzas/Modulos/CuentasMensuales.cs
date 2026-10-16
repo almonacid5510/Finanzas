@@ -120,7 +120,7 @@ namespace MisFinanzas.Modulos
         public string EstadoColor => Estado.Color;
         public string FondoFila => Estado.FondoFila;
         public string Acento => Estado.Acento;
-        public string ColorFecha => Vencida ? "#B42318" : "#0F1B2D";
+        public string ColorFecha => MisFinanzas.Tema.Texto(Vencida ? "#B42318" : "#0F1B2D");
 
         /// <summary>Mes del vencimiento en corto y mayúsculas ("OCT").</summary>
         public string MesCortoVence => Vence.ToString("MMM").TrimEnd('.').ToUpperInvariant();

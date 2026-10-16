@@ -23,11 +23,11 @@
     </ItemsControl>
    </StackPanel>
    <!-- El cambio aún no llega al celular -->
-   <Border x:Name="avisoPendiente" Background="#FFFAEB" BorderBrush="#FEDF89" BorderThickness="1" CornerRadius="10" Padding="12,8" Margin="0,14,0,0" Visibility="Collapsed">
+   <Border x:Name="avisoPendiente" Background="{StaticResource T_F_FFFAEB}" BorderBrush="{StaticResource T_F_FEDF89}" BorderThickness="1" CornerRadius="10" Padding="12,8" Margin="0,14,0,0" Visibility="Collapsed">
     <DockPanel>
      <Button x:Name="btnEnviarCelular" DockPanel.Dock="Right" Content="Enviar al celular" Click="EnviarCelular_Click" Style="{StaticResource Boton}"
-             Background="#B54708" Height="32" Padding="12,0" FontSize="12.5"/>
-     <TextBlock Text="Tu celular aún no tiene este cambio." FontSize="12.5" FontWeight="SemiBold" Foreground="#93370D" VerticalAlignment="Center" TextWrapping="Wrap"/>
+             Background="{StaticResource T_F_B54708}" Height="32" Padding="12,0" FontSize="12.5"/>
+     <TextBlock Text="Tu celular aún no tiene este cambio." FontSize="12.5" FontWeight="SemiBold" Foreground="{StaticResource T_T_93370D}" VerticalAlignment="Center" TextWrapping="Wrap"/>
     </DockPanel>
    </Border>
    <!-- El celular ya tiene la nómina -->
@@ -77,7 +77,7 @@
    </DockPanel></DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
    </StackPanel>
    <!-- Solo ocupa espacio cuando hay un error -->
-   <TextBlock x:Name="error" Foreground="#B42318" TextWrapping="Wrap" Margin="0,8,0,0">
+   <TextBlock x:Name="error" Foreground="{StaticResource T_T_B42318}" TextWrapping="Wrap" Margin="0,8,0,0">
     <TextBlock.Style>
      <Style TargetType="TextBlock">
       <Style.Triggers><Trigger Property="Text" Value=""><Setter Property="Visibility" Value="Collapsed"/></Trigger></Style.Triggers>

@@ -26,13 +26,13 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border x:Name="bd" Background="White" BorderBrush="{StaticResource Borde}" BorderThickness="1"
+                        <Border x:Name="bd" Background="{StaticResource T_F_FFFFFF}" BorderBrush="{StaticResource Borde}" BorderThickness="1"
                                 CornerRadius="14" Padding="18,14">
                             <ContentPresenter/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="bd" Property="BorderBrush" Value="#B9C2CF"/>
+                                <Setter TargetName="bd" Property="BorderBrush" Value="{StaticResource T_F_B9C2CF}"/>
                             </Trigger>
                             <Trigger Property="IsKeyboardFocused" Value="True">
                                 <Setter TargetName="bd" Property="BorderBrush" Value="{StaticResource Texto}"/>
@@ -86,7 +86,7 @@
         <Border x:Name="bannerVencidos" Background="{StaticResource RojoSuave}" BorderBrush="{StaticResource RojoBorde}"
                 BorderThickness="1" CornerRadius="12" Padding="14,9" Margin="0,0,0,14" Visibility="Collapsed">
             <DockPanel>
-                <Border DockPanel.Dock="Left" Width="32" Height="32" CornerRadius="8" Background="#FEE4E2" Margin="0,0,12,0">
+                <Border DockPanel.Dock="Left" Width="32" Height="32" CornerRadius="8" Background="{StaticResource T_F_FEE4E2}" Margin="0,0,12,0">
                     <c:Icono Geometria="{StaticResource IcoAlerta}" Tamano="16" Foreground="{StaticResource Rojo}" HorizontalAlignment="Center"/>
                 </Border>
                 <Button x:Name="btnMarcarPagado" DockPanel.Dock="Right" Style="{StaticResource BotonVerde}" Height="36"
@@ -94,7 +94,7 @@
                 <Button x:Name="lnkVencidos" DockPanel.Dock="Right" Style="{StaticResource BotonSecundario}" Content="Ver cuentas" Margin="0,0,10,0"
                         c:Ui.Icono="{StaticResource IcoCuentas}" Height="36" Padding="12,0"
                         VerticalAlignment="Center" Click="LnkVencidos_Click"/>
-                <TextBlock x:Name="lblVencidos" FontSize="13.5" Foreground="#7A271A" VerticalAlignment="Center"
+                <TextBlock x:Name="lblVencidos" FontSize="13.5" Foreground="{StaticResource T_T_7A271A}" VerticalAlignment="Center"
                            TextTrimming="CharacterEllipsis"/>
             </DockPanel>
         </Border>
@@ -129,10 +129,10 @@
                 <!-- Misma disposición que las demás: el "% libre" ocupa el lugar del ícono -->
                 <Grid>
                     <TextBlock x:Name="lblPorcentajeLibre" Height="30" Padding="0,7,0,0" HorizontalAlignment="Right" VerticalAlignment="Top"
-                               FontSize="12.5" FontWeight="Bold" Foreground="#6CE9A6"/>
+                               FontSize="12.5" FontWeight="Bold" Foreground="{StaticResource T_T_6CE9A6}"/>
                     <StackPanel>
                         <TextBlock Text="DISPONIBLE" Style="{StaticResource EtiquetaSeccion}" Foreground="{StaticResource TextoMenu}" Margin="0,7,0,0"/>
-                        <TextBlock x:Name="lblDashBalance" Style="{StaticResource CifraKpi}" Foreground="White" Margin="0,16,0,2"/>
+                        <TextBlock x:Name="lblDashBalance" Style="{StaticResource CifraKpi}" Foreground="{StaticResource T_T_FFFFFF}" Margin="0,16,0,2"/>
                         <TextBlock x:Name="lblDashBalanceDetalle" Text="Recibido menos pagado" Style="{StaticResource TextoSecundario}" Foreground="{StaticResource TextoMenu}"
                                    TextWrapping="Wrap"/>
                         <!-- Solo informa: lo pendiente no se descuenta del disponible hasta pagarlo -->
@@ -165,7 +165,7 @@
                     <DockPanel Margin="0,0,0,12">
                         <Button DockPanel.Dock="Right" Content="Ver todo" Click="BtnVerCuentas_Click" Style="{StaticResource BotonSecundario}"
                                 c:Ui.Icono="{StaticResource IcoCuentas}" Height="30" Padding="10,0" FontSize="12.5" VerticalAlignment="Center" Margin="0,-6,0,-6"
-                                Background="{StaticResource AzulSuave}" Foreground="{StaticResource Azul}" BorderBrush="#C9D7F8"
+                                Background="{StaticResource AzulSuave}" Foreground="{StaticResource Azul}" BorderBrush="{StaticResource T_F_C9D7F8}"
                                 AutomationProperties.Name="Ver todas las cuentas" ToolTip="Ir a Cuentas del mes"/>
                         <TextBlock Text="Por pagar este mes" Style="{StaticResource TituloTarjeta}"/>
                     </DockPanel>

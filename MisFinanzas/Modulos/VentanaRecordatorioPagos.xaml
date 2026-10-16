@@ -13,7 +13,7 @@
         FontFamily="{StaticResource FuenteApp}" FontSize="13" Foreground="{StaticResource Texto}"
         Typography.NumeralAlignment="Tabular">
 
-    <Border Background="White" CornerRadius="20" Margin="24" Padding="26,24" MouseLeftButtonDown="Marco_MouseLeftButtonDown">
+    <Border Background="{StaticResource T_F_FFFFFF}" CornerRadius="20" Margin="24" Padding="26,24" MouseLeftButtonDown="Marco_MouseLeftButtonDown">
         <Border.Effect>
             <DropShadowEffect BlurRadius="30" Direction="270" Opacity="0.25" ShadowDepth="8"/>
         </Border.Effect>
@@ -23,7 +23,7 @@
                 <Button DockPanel.Dock="Right" Click="BtnCerrar_Click" Style="{StaticResource BotonIcono}" c:Ui.Icono="{StaticResource IcoX}"
                         Width="38" Height="38" Background="{StaticResource GrisSuave}" BorderBrush="Transparent" Foreground="{StaticResource Texto2}"
                         VerticalAlignment="Top" IsCancel="True" AutomationProperties.Name="Cerrar" ToolTip="Cerrar"/>
-                <Border DockPanel.Dock="Left" Width="46" Height="46" CornerRadius="12" Background="#FEE4E2" Margin="0,0,16,0" VerticalAlignment="Top">
+                <Border DockPanel.Dock="Left" Width="46" Height="46" CornerRadius="12" Background="{StaticResource T_F_FEE4E2}" Margin="0,0,16,0" VerticalAlignment="Top">
                     <c:Icono Geometria="{StaticResource IcoAlerta}" Tamano="22" Foreground="{StaticResource Rojo}" HorizontalAlignment="Center"/>
                 </Border>
                 <StackPanel VerticalAlignment="Center">
@@ -37,7 +37,7 @@
                 <ItemsControl x:Name="icCuentasPendientes">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <Border Background="#FFF8F7" BorderBrush="{StaticResource RojoBorde}" BorderThickness="1" CornerRadius="12" Padding="16,12" Margin="0,0,0,10">
+                            <Border Background="{StaticResource T_F_FFF8F7}" BorderBrush="{StaticResource RojoBorde}" BorderThickness="1" CornerRadius="12" Padding="16,12" Margin="0,0,0,10">
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="46"/>

@@ -8,17 +8,17 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              IsHitTestVisible="False">
     <Border x:Name="Root" VerticalAlignment="Bottom" HorizontalAlignment="Center"
-            Margin="0,0,0,30" Background="#2D3748" CornerRadius="10" Padding="18,12"
+            Margin="0,0,0,30" Background="{StaticResource T_F_2D3748}" CornerRadius="10" Padding="18,12"
             Opacity="0" Visibility="Collapsed">
         <Border.Effect>
             <DropShadowEffect BlurRadius="18" Direction="270" Opacity="0.25" ShadowDepth="3"/>
         </Border.Effect>
         <StackPanel Orientation="Horizontal">
-            <Border x:Name="IconWrap" Width="22" Height="22" Background="#27AE60" CornerRadius="11" Margin="0,0,10,0">
-                <TextBlock x:Name="Icono" Text="&#xE73E;" FontFamily="Segoe MDL2 Assets" FontSize="12" Foreground="White"
+            <Border x:Name="IconWrap" Width="22" Height="22" Background="{StaticResource T_F_27AE60}" CornerRadius="11" Margin="0,0,10,0">
+                <TextBlock x:Name="Icono" Text="&#xE73E;" FontFamily="Segoe MDL2 Assets" FontSize="12" Foreground="{StaticResource T_T_FFFFFF}"
                            HorizontalAlignment="Center" VerticalAlignment="Center"/>
             </Border>
-            <TextBlock x:Name="Mensaje" Text="" Foreground="White" FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center"/>
+            <TextBlock x:Name="Mensaje" Text="" Foreground="{StaticResource T_T_FFFFFF}" FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center"/>
         </StackPanel>
     </Border>
 </UserControl>

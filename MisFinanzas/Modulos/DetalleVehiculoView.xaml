@@ -26,7 +26,7 @@
         <c:GrillaAdaptable Columnas="3" AnchoMinimo="160" Espacio="10" Margin="0,0,0,14">
             <Border Style="{StaticResource Recuadro}" Background="{StaticResource AzulSuave}">
                 <StackPanel>
-                    <TextBlock Text="INVERSIÓN TOTAL" Style="{StaticResource EtiquetaSeccion}" FontSize="11.5" Foreground="#1D4FB8"/>
+                    <TextBlock Text="INVERSIÓN TOTAL" Style="{StaticResource EtiquetaSeccion}" FontSize="11.5" Foreground="{StaticResource T_T_1D4FB8}"/>
                     <TextBlock Text="{Binding TotalInvertido, StringFormat='{}{0:$&#160;#,##0;-$&#160;#,##0}'}" FontSize="22" FontWeight="ExtraBold" Foreground="{StaticResource Azul}" Margin="0,2,0,0"/>
                 </StackPanel>
             </Border>

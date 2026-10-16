@@ -13,7 +13,7 @@
         WindowStartupLocation="CenterOwner" ShowInTaskbar="False"
         FontFamily="{StaticResource FuenteApp}" FontSize="13" Foreground="{StaticResource Texto}">
 
-    <Border Background="White" CornerRadius="18" Margin="24" Padding="24,22" MouseLeftButtonDown="Marco_MouseLeftButtonDown">
+    <Border Background="{StaticResource T_F_FFFFFF}" CornerRadius="18" Margin="24" Padding="24,22" MouseLeftButtonDown="Marco_MouseLeftButtonDown">
         <Border.Effect>
             <DropShadowEffect BlurRadius="30" Direction="270" Opacity="0.25" ShadowDepth="8"/>
         </Border.Effect>

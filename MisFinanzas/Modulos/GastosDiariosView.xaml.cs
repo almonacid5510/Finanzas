@@ -109,7 +109,7 @@ namespace MisFinanzas.Modulos
                             .OrderByDescending(g => g.Total).FirstOrDefault();
             lblCategoriaTop.Text = total > 0 ? top.Nombre : "—";
             lblCategoriaTop.Foreground = (System.Windows.Media.Brush)new System.Windows.Media.BrushConverter()
-                .ConvertFromString(total > 0 ? Etiquetas.ColorTexto(top.Nombre) : "#0F1B2D")!;
+                .ConvertFromString(total > 0 ? Etiquetas.ColorTexto(top.Nombre) : MisFinanzas.Tema.Texto("#0F1B2D"))!;
             lblCategoriaTopDetalle.Text = total > 0 ? $"{NumeroHelper.Moneda(top.Total)} · {top.Total / total:P0} de lo gastado" : "Sin gastos este mes";
 
             var hormiga = gastos.Where(g => g.Monto <= TopeHormiga).ToList();
@@ -173,7 +173,7 @@ namespace MisFinanzas.Modulos
                 var tramo = new Border
                 {
                     CornerRadius = new CornerRadius(4),
-                    Background = (System.Windows.Media.Brush)new System.Windows.Media.BrushConverter().ConvertFromString(filas[i].Color)!,
+                    Background = MisFinanzas.Tema.Pincel(filas[i].Color),
                     Margin = new Thickness(0, 0, i < filas.Count - 1 ? 2 : 0, 0),
                     ToolTip = $"{filas[i].Nombre} · {filas[i].Proporcion:P0}"
                 };
