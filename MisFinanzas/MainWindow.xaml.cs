@@ -117,19 +117,22 @@ namespace MisFinanzas
             // Algo pagado desde el celular cambia los avisos de vencidos del menú
             SincronizacionCelular.AccionesAplicadas += _ => Dispatcher.BeginInvoke(VerificarVencimientosCuentas);
 
-            // La nube es la base principal: se revisa su marca de cambios cada 5 s con la ventana activa
-            // (cada minuto en segundo plano); 1 lectura por revisión, y solo se sincroniza si alguien escribió.
-            _relojMarca = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromSeconds(5) };
+            // La nube es la base principal: el PC la escucha en vivo (lo que otro dispositivo escribe llega al instante).
+            // Si la conexión en vivo se cae, se revisa la marca de cambios cada 10 s de respaldo (1 lectura por revisión).
+            SincronizacionCelular.CambioEnLaNube += () => Dispatcher.BeginInvoke(() => { _subirPronto?.Stop(); _subirPronto?.Start(); });
+            ContentRendered += (s, e) => SincronizacionCelular.IniciarEnVivo();
+            Closed += (s, e) => SincronizacionCelular.DetenerEnVivo();
+            _relojMarca = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromSeconds(10) };
             _relojMarca.Tick += async (s, e) =>
             {
-                if (!IsActive && DateTime.Now - _ultimaMarca < TimeSpan.FromMinutes(1)) return;
-                _ultimaMarca = DateTime.Now;
+                SincronizacionCelular.IniciarEnVivo(); // por si se conectó la cuenta después de abrir la app
+                if (SincronizacionCelular.EnVivo) return;
                 await SincronizacionCelular.RevisarMarcaAsync();
             };
             _relojMarca.Start();
 
-            // Lo guardado aquí se sube enseguida (se agrupan los cambios de 1,5 s)
-            _subirPronto = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromSeconds(1.5) };
+            // Lo guardado aquí (y lo avisado por la nube) se sincroniza casi enseguida (se agrupan los cambios de 0,4 s)
+            _subirPronto = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromSeconds(0.4) };
             _subirPronto.Tick += (s, e) => { _subirPronto.Stop(); RevisarCelular(); };
             AppDbContext.CambiosLocales += () => Dispatcher.BeginInvoke(() => { _subirPronto.Stop(); _subirPronto.Start(); });
 
@@ -138,7 +141,6 @@ namespace MisFinanzas
         }
 
         private System.Windows.Threading.DispatcherTimer? _relojMarca, _subirPronto;
-        private DateTime _ultimaMarca = DateTime.MinValue;
 
         private void DatosDeLaNube()
         {

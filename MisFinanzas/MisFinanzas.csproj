@@ -14,9 +14,9 @@
     <Authors>Juan Almonacid</Authors>
     <Company>Juan Almonacid</Company>
     <Copyright>© 2026 Juan Almonacid</Copyright>
-    <Version>1.9.3</Version>
-    <FileVersion>1.9.3.0</FileVersion>
-    <AssemblyVersion>1.9.3.0</AssemblyVersion>
+    <Version>1.9.4</Version>
+    <FileVersion>1.9.4.0</FileVersion>
+    <AssemblyVersion>1.9.4.0</AssemblyVersion>
     <ApplicationIcon>Recursos\app.ico</ApplicationIcon>
 
     <!-- Opciones de publicación (self-contained: no requiere .NET instalado) -->
@@ -34,6 +34,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Google.Cloud.Firestore.V1" Version="3.10.0" />
     <PackageReference Include="QRCoder" Version="1.6.0" />
     <PackageReference Include="Velopack" Version="1.2.161" />
     <PackageReference Include="Microsoft.Data.Sqlite" Version="8.0.0" />

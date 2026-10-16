@@ -155,6 +155,7 @@ namespace MisFinanzas.Modulos
                 return;
             }
             txtClave.Clear();
+            SincronizacionCelular.IniciarEnVivo();
             MostrarCelular();
             toast.Show("PC conectado. Escanea el código con tu celular para vincularlo.");
             await SincronizacionCelular.SincronizarAsync();

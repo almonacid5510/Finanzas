@@ -28,8 +28,8 @@
     }
   ],
   "appData": {
-    "version": "1.9.2",
-    "novedades": "# Mis Finanzas 1.9.2\r\n\r\n- PC: se retiran las casillas de selección de Cuentas del mes y los compromisos de crédito.\r\n- La columna Estado muestra un botón Marcar pagado con círculo.\r\n- Al pagar aparece una cápsula verde con check y Pagado; al pasar el cursor muestra Deshacer.\r\n- Deshacer revierte el pago del mes y actualiza los totales y el color según el vencimiento.\r\n- Se conservan los colores blanco, amarillo, rojo y verde y el historial por mes.\r\n"
+    "version": "1.9.4",
+    "novedades": "# Mis Finanzas 1.9.4\n\n- La nube es la base principal: cuentas, pagos, créditos, metas, vehículos y categorías viven allá. El celular está al día aunque el PC esté apagado, y el PC descarga todo al abrirlo.\n- Sincronización inmediata: el PC escucha la nube en vivo; lo que haces en el celular llega en un segundo y lo que guardas en el PC se sube al instante.\n- El celular calcula su propio Resumen con los mismos números del PC, y el botón Pagado guarda el pago directo en la nube.\n- El ahorro del mes del Dashboard ya cuenta los abonos desde que se abre la app.\n- Registro de errores de sincronización en %AppData%\\MisFinanzas\\sincronizacion.log.\n"
   },
   "navigationUrls": [
     "/**",

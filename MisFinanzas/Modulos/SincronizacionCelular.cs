@@ -92,6 +92,7 @@ namespace MisFinanzas.Modulos
 
         public static void Desconectar()
         {
+            DetenerEnVivo();
             _sesion = null;
             _token = null;
             UltimaSincronizacion = null;
@@ -123,7 +124,8 @@ namespace MisFinanzas.Modulos
         {
             var sesion = _sesion;
             if (!Configurado || sesion == null) return 0;
-            if (!await UnaALaVez.WaitAsync(0)) return 0; // ya hay una sincronización en curso
+            // Ya hay una sincronización en curso: se repite al terminar (para no perder un cambio que llegó mientras)
+            if (!await UnaALaVez.WaitAsync(0)) { _repetir = true; return 0; }
 
             try
             {
@@ -138,17 +140,7 @@ namespace MisFinanzas.Modulos
                     GuardarSesion(sesion);
                 }
 
-                try { await SincronizarNominaAsync(sesion.Uid, token); UltimoErrorNomina = null; }
-                catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Forbidden)
-                {
-                    // Una instalación puede actualizarse antes de publicar las reglas nuevas.
-                    // Conservar los cambios locales y permitir que los gastos sigan sincronizando.
-                    UltimoErrorNomina = "La nómina está guardada en este PC; falta actualizar las reglas del celular para sincronizarla.";
-                }
-                var acciones = await AplicarAccionesAsync(sesion.Uid, token);
-                await EnviarCambiosAsync(sesion.Uid, token);
-
-                // La nube como base principal: baja lo que cambió allá y sube lo de aquí (la primera vez, todo)
+                // Primero la réplica (cuentas, pagos, créditos…): es lo que cambia la pantalla del otro dispositivo
                 try
                 {
                     if (await ReplicarAsync(sesion.Uid, token, primeraVez: !sesion.ReplicaSubida)) DatosNubeActualizados?.Invoke();
@@ -161,6 +153,16 @@ namespace MisFinanzas.Modulos
                     UltimoErrorNube = "Faltan publicar las reglas de la nube para guardar todos tus datos allá.";
                     Anotar(ex);
                 }
+
+                try { await SincronizarNominaAsync(sesion.Uid, token); UltimoErrorNomina = null; }
+                catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Forbidden)
+                {
+                    // Una instalación puede actualizarse antes de publicar las reglas nuevas.
+                    // Conservar los cambios locales y permitir que los gastos sigan sincronizando.
+                    UltimoErrorNomina = "La nómina está guardada en este PC; falta actualizar las reglas del celular para sincronizarla.";
+                }
+                var acciones = await AplicarAccionesAsync(sesion.Uid, token);
+                await EnviarCambiosAsync(sesion.Uid, token);
 
                 var pendientes = await PendientesAsync(sesion.Uid, token);
                 int nuevos = GuardarEnBD(pendientes);
@@ -184,8 +186,14 @@ namespace MisFinanzas.Modulos
             catch (HttpRequestException ex) { UltimoError = ex.StatusCode is System.Net.HttpStatusCode c ? $"La nube respondió {(int)c}" : "Sin conexión a internet"; Anotar(ex); return 0; }
             catch (TaskCanceledException ex) { UltimoError = "El servidor no respondió"; Anotar(ex); return 0; }
             catch (Exception ex) { UltimoError = ex.Message; Anotar(ex); return 0; }
-            finally { UnaALaVez.Release(); }
+            finally
+            {
+                UnaALaVez.Release();
+                if (_repetir) { _repetir = false; _ = SincronizarAsync(); }
+            }
         }
+
+        private static volatile bool _repetir;
 
         // Registro de errores de sincronización (%AppData%\MisFinanzas\sincronizacion.log, se recorta solo)
         private static readonly string RutaRegistro =

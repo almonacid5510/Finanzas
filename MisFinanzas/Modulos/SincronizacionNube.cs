@@ -92,10 +92,16 @@ namespace MisFinanzas.Modulos
             // Lo borrado aquí y aún sin subir no se revive con una versión vieja de la nube
             var borradosLocales = db.CambiosReplica.Where(c => c.Borrado).Select(c => c.Uid).ToHashSet();
 
-            foreach (var tabla in ReplicaNube.Tablas)
+            // Las colecciones se consultan a la vez (lo que cambió en cada una); se aplican en orden de referencias
+            DateTime Desde(ReplicaNube.Tabla t) => estados.TryGetValue(t.Coleccion, out var e) ? e.HastaUtc : DateTime.MinValue;
+            var consultas = ReplicaNube.Tablas.Select(t => ConsultarDesdeAsync(uid, token, t.Coleccion, Desde(t), cliente)).ToList();
+            await Task.WhenAll(consultas);
+
+            for (int n = 0; n < ReplicaNube.Tablas.Length; n++)
             {
-                var desde = estados.TryGetValue(tabla.Coleccion, out var e) ? e.HastaUtc : DateTime.MinValue;
-                var documentos = await ConsultarDesdeAsync(uid, token, tabla.Coleccion, desde, cliente);
+                var tabla = ReplicaNube.Tablas[n];
+                var desde = Desde(tabla);
+                var documentos = consultas[n].Result;
                 if (documentos.Count == 0) continue;
 
                 var locales = ReplicaNube.PorUid(db, tabla);
