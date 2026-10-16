@@ -27,8 +27,67 @@
   --naranja-borde: #FAD7A0;
   --ambar: #F5A524;
   --morado: #6941C6;
+  --azul-suave: #EAF0FD;
+  --morado-suave: #F4F3FF;
+  --oscuro-caja: #1B2A40;
   --alto-nav: 58px;
   color-scheme: light;
+}
+
+/* Tema oscuro: fondos oscuros y textos claros; verdes, rojos y naranjas más vivos para que se lean */
+:root[data-tema="oscuro"] {
+  --fondo: #0B1220;
+  --tarjeta: #141C2B;
+  --borde: #263248;
+  --borde-input: #34425B;
+  --gris-suave: #1A2335;
+  --gris-segmento: #243047;
+  --texto: #E6EAF2;
+  --texto2: #9CA8BA;
+  --pista: #6B7789;
+  --oscuro: #1A2740;
+  --oscuro-borde: #2E3E5A;
+  --oscuro-caja: #22324F;
+  --texto-menu: #A9B4C6;
+  --verde: #12A06F;
+  --verde-texto: #6CE9A6;
+  --verde-suave: #0F2E24;
+  --verde-claro: #6CE9A6;
+  --azul: #4C84FF;
+  --azul-claro: #A9C5FF;
+  --azul-suave: #172443;
+  --rojo: #F97066;
+  --rojo-suave: #3B1714;
+  --rojo-borde: #7A271A;
+  --naranja: #F79009;
+  --naranja-texto: #FEC84B;
+  --naranja-suave: #3A2A10;
+  --naranja-borde: #7A4A10;
+  --morado: #A48AFB;
+  --morado-suave: #241B40;
+  color-scheme: dark;
+}
+
+/* Tema rosado (suave): fondos blanco y rosa muy claro, acentos en rosa; pagado/vencido conservan su verde y rojo */
+:root[data-tema="rosado"] {
+  --fondo: #FFF4F8;
+  --tarjeta: #FFFFFF;
+  --borde: #F5D9E6;
+  --borde-input: #EBC3D7;
+  --gris-suave: #FFF0F6;
+  --gris-segmento: #FCE4EF;
+  --texto: #3B1530;
+  --texto2: #8A5A78;
+  --pista: #C291AD;
+  --oscuro: #7A1F5C;
+  --oscuro-borde: #9B3A7A;
+  --oscuro-caja: #8C2B6B;
+  --texto-menu: #F7CDE4;
+  --azul: #D6338A;
+  --azul-claro: #FFB3DA;
+  --azul-suave: #FFE3F1;
+  --morado: #B5338A;
+  --morado-suave: #FCE7F3;
 }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }

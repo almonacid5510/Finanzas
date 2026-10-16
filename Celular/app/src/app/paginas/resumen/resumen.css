@@ -20,7 +20,7 @@
 .estado { margin: 0 0 14px; font-size: 13.5px; color: var(--verde-claro); }
 .estado.negativa { color: #F97066; }
 .cajitas { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.cajitas div { background: #1B2A40; border: 1px solid #26374F; border-radius: 12px; padding: 10px 12px; min-width: 0; }
+.cajitas div { background: var(--oscuro-caja); border: 1px solid var(--oscuro-borde); border-radius: 12px; padding: 10px 12px; min-width: 0; }
 .cajitas span { display: block; color: var(--texto-menu); font-size: 12.5px; }
 .cajitas strong { display: block; font-size: 17px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .verde-claro { color: var(--verde-claro); }
@@ -39,7 +39,7 @@
 .barra { height: 10px; border-radius: 5px; background: #24324A; overflow: hidden; }
 .barra span { display: block; height: 100%; border-radius: 5px; background: #F0A04B; }
 .barra span.excedida { background: #F97066; }
-.pie { margin-top: 14px; padding-top: 12px; border-top: 1px solid #26374F; color: var(--texto-menu); font-size: 13.5px; }
+.pie { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--oscuro-borde); color: var(--texto-menu); font-size: 13.5px; }
 .pie b { color: #fff; }
 
 /* Vencidas */
@@ -116,9 +116,9 @@
 .cobro { border-top: 1px solid var(--borde); padding: 12px 0; }
 .cobro div { flex: 1; min-width: 120px; }
 .cobro small { display: block; }
-.cobro button { border: 0; background: transparent; font-size: 24px; padding: 8px; color: #b42318; }
-.cobros [role=alert] { color: #b42318; }
+.cobro button { border: 0; background: transparent; font-size: 24px; padding: 8px; color: var(--rojo); }
+.cobros [role=alert] { color: var(--rojo); }
 
-.cobros select { box-sizing: border-box; width: 100%; padding: 12px; border-radius: 9px; border: 1px solid var(--borde-input, #ccd0d5); font: inherit; background: white; }
+.cobros select { box-sizing: border-box; width: 100%; padding: 12px; border-radius: 9px; border: 1px solid var(--borde-input, #ccd0d5); font: inherit; background: var(--tarjeta); color: inherit; }
 .cobros label[hidden] { display: none; }
 .cobro button.agregar-cobro { background: var(--verde, #087f5b); color: white; font-size: 13px; }

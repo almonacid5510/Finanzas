@@ -10,9 +10,17 @@
 .cobro { border-top: 1px solid var(--borde); padding: 12px 0; }
 .cobro div { flex: 1; min-width: 120px; }
 .cobro small { display: block; }
-.cobro button { border: 0; background: transparent; font-size: 24px; padding: 8px; color: #b42318; }
-.cobros [role=alert] { color: #b42318; }
+.cobro button { border: 0; background: transparent; font-size: 24px; padding: 8px; color: var(--rojo); }
+.cobros [role=alert] { color: var(--rojo); }
 
-.cobros select { box-sizing: border-box; width: 100%; padding: 12px; border-radius: 9px; border: 1px solid var(--borde-input, #ccd0d5); font: inherit; background: white; }
+.cobros select { box-sizing: border-box; width: 100%; padding: 12px; border-radius: 9px; border: 1px solid var(--borde-input, #ccd0d5); font: inherit; background: var(--tarjeta); color: inherit; }
 .cobros label[hidden] { display: none; }
 .cobro button.agregar-cobro { background: var(--verde, #087f5b); color: white; font-size: 13px; }
+/* Tema de colores */
+.temas { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 10px; }
+.tema { display: grid; justify-items: center; gap: 8px; padding: 12px 6px; border-radius: 14px; border: 1.5px solid var(--borde-input);
+  background: var(--tarjeta); color: var(--texto); font-weight: 700; font-size: 14px; }
+.tema[aria-checked="true"] { border-color: var(--azul); box-shadow: 0 0 0 2px var(--azul-suave); }
+.muestra { width: 54px; height: 38px; border-radius: 10px; border: 1px solid var(--borde); display: flex; align-items: flex-end; gap: 4px; padding: 6px; box-sizing: border-box; }
+.muestra i { display: block; height: 12px; border-radius: 4px; flex: 1; }
+.muestra i:last-child { flex: 0 0 12px; border-radius: 6px; }

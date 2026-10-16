@@ -23,6 +23,19 @@
         </form>
       }
     </section>
+  <section class="tarjeta bloque">
+    <h2>Tema</h2>
+    <div class="temas" role="radiogroup" aria-label="Tema de colores">
+      @for (t of temas; track t.id) {
+        <button type="button" class="tema" role="radio" [attr.aria-checked]="tema.tema() === t.id" (click)="tema.elegir(t.id)">
+          <span class="muestra" [style.background]="t.muestra[0]">
+            <i [style.background]="t.muestra[1]"></i><i [style.background]="t.muestra[2]"></i>
+          </span>
+          {{ t.nombre }}
+        </button>
+      }
+    </div>
+  </section>
   <section class="tarjeta bloque cobros">
     <h2>Actualizaciones</h2><p>Versión instalada: {{ actualizaciones.versionInstalada }}</p>
     <p role="status">{{ actualizaciones.mensaje() }}</p>

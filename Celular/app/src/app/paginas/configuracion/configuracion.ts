@@ -5,6 +5,7 @@ import { ResumenService } from '../../nucleo/resumen.service';
 import { ToastService } from '../../nucleo/toast.service';
 import { FRECUENCIAS_NOMINA, PlanNomina, montoDelPago } from '../../nucleo/nomina';
 import { aISO, pesos, soloDigitos } from '../../nucleo/formato';
+import { TEMAS, TemaService } from '../../nucleo/tema.service';
 
 @Component({
   selector: 'app-configuracion',
@@ -19,6 +20,8 @@ export class Configuracion {
   private readonly camposPendientes = signal<CamposFormulario | null>(null);
   protected readonly actualizaciones = inject(ActualizacionesService);
   protected readonly servicio = inject(ResumenService);
+  protected readonly tema = inject(TemaService);
+  protected readonly temas = TEMAS;
   private readonly toast = inject(ToastService);
   protected readonly frecuenciasNomina = FRECUENCIAS_NOMINA;
   protected readonly diasDelMes = Array.from({length: 31}, (_, i) => i + 1);

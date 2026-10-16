@@ -13,10 +13,9 @@ import { SesionService } from './nucleo/sesion.service';
 import { ToastService } from './nucleo/toast.service';
 import { AvisoActualizacion } from './compartido/aviso-actualizacion/aviso-actualizacion';
 import { RecordatorioNomina } from './compartido/recordatorio-nomina/recordatorio-nomina';
+import { TemaService } from './nucleo/tema.service';
 import { Cuenta } from './paginas/cuenta/cuenta';
 
-const OSCURO = '#0F1B2D';
-const CLARO = '#F2F4F7';
 
 @Component({
   selector: 'app-root',
@@ -47,6 +46,7 @@ export class App {
   protected readonly sesion = inject(SesionService);
   protected readonly toast = inject(ToastService);
   private readonly router = inject(Router);
+  private readonly tema = inject(TemaService);
 
   private readonly url = toSignal(
     this.router.events.pipe(filter((e) => e instanceof NavigationEnd), map((e) => e.urlAfterRedirects)),
@@ -58,7 +58,9 @@ export class App {
     // oscuro donde hay encabezado oscuro (Registrar y la cuenta), claro en Gastos y Resumen.
     effect(() => {
       const conEncabezadoOscuro = !this.sesion.usuario() || this.url().split('?')[0] === '/';
-      const color = conEncabezadoOscuro ? OSCURO : CLARO;
+      this.tema.tema(); // cambia también al elegir otro tema
+      const estilo = getComputedStyle(document.documentElement);
+      const color = estilo.getPropertyValue(conEncabezadoOscuro ? '--oscuro' : '--fondo').trim();
       document.documentElement.style.backgroundColor = color;
       document.querySelector('meta[name="theme-color"]')?.setAttribute('content', color);
     });

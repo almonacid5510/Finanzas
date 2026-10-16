@@ -105,7 +105,7 @@
   color: var(--texto); border-radius: 12px; padding: 9px 13px; font-weight: 700; font-size: 14.5px;
 }
 .chip-vehiculo small { color: var(--texto2); font-weight: 600; font-size: 12px; background: #FFD43B; color: #0F1B2D; border-radius: 4px; padding: 0 5px; }
-.chip-vehiculo[aria-checked="true"] { border-color: var(--azul); background: #EAF0FD; color: var(--azul); }
+.chip-vehiculo[aria-checked="true"] { border-color: var(--azul); background: var(--azul-suave); color: var(--azul); }
 /* ¿Cómo pagaste? */
 .chips-pago { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 /* Mismo alto y ancho para todas las opciones: ícono o logo + nombre + detalle */
@@ -119,14 +119,14 @@
 .icono-efectivo { width: 38px; height: 26px; border-radius: 5px; flex: none; display: grid !important; place-items: center;
   background: var(--verde-suave); color: var(--verde-texto); }
 .chip-pago small { color: var(--texto2); font-size: 12px; font-weight: 600; }
-.chip-pago[aria-checked="true"] { border-color: var(--morado); background: #F4F3FF; color: var(--morado); }
+.chip-pago[aria-checked="true"] { border-color: var(--morado); background: var(--morado-suave); color: var(--morado); }
 .chips-cuotas { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding: 1px; }
 .chips-cuotas::-webkit-scrollbar { display: none; }
 .chip-cuota {
   flex: none; min-width: 46px; height: 40px; border-radius: 12px; border: 1.5px solid var(--borde-input); background: var(--tarjeta);
   color: var(--texto); font-weight: 800; font-size: 15px;
 }
-.chip-cuota[aria-checked="true"] { border-color: var(--morado); background: #F4F3FF; color: var(--morado); }
+.chip-cuota[aria-checked="true"] { border-color: var(--morado); background: var(--morado-suave); color: var(--morado); }
 .detalle-cuotas { margin: 8px 0 0; color: var(--texto2); font-size: 13.5px; }
 .falta-vehiculo { color: var(--naranja); font-size: 13.5px; font-weight: 600; margin: 8px 2px 0; }
 
